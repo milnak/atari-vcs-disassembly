@@ -24,13 +24,13 @@ Or, to:
 ```PowerShell
 mkdir '..\out'
 cd '..\out'
+
 Get-ChildItem -File -LiteralPath ..\atari-vcs-disassembly\ -Filter '*.asm' `
 | ForEach-Object {
     $basename = $_.BaseName
     ..\dasm\dasm.exe $_ -f3 -I'..\dasm\machines\atari2600' -I'..\atari-vcs-disassembly\tools\Dennis Debro Build' -o"$basename.a26" -l"$basename.lst" -s"$basename.sym" | Out-File -LiteralPath "$basename.out"
     if ($LastExitCode -ne 0) {
         Remove-Item -LiteralPath "$basename.a26"
-        Write-Warning $_
         Get-Content -LiteralPath "$basename.out"
     }
 }
