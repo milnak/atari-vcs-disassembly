@@ -2,7 +2,9 @@
 ; * Star Voyager (aka Stella Wars) by Bob Smith *
 ; ***********************************************
 
-    include vcs.h
+       processor 6502
+
+       include vcs.h
 
        ORG $1000
 
@@ -124,7 +126,7 @@ L10AF: BIT    $0285   ;4
        NOP            ;
 L10CA: DEY            ;
        BPL    L10CA   ;
-       STA    RESBL   ; 
+       STA    RESBL   ;
 
        STA    WSYNC   ;
        STA    HMOVE   ;
@@ -168,7 +170,7 @@ L1110: DEY            ;2
        BPL    L1110   ;2
        STA    RESBL   ;3
 
-Nextline 
+Nextline
        STA    WSYNC   ;3
 L1117: STX    HMOVE   ;3
        LDY    $83     ;3
@@ -182,7 +184,7 @@ L1126: STA    GRP1    ;3
        STY    $83     ;3
 
 ; Do the crosshair
-       LDA    #$00    ; 
+       LDA    #$00    ;
        CPX    #$28    ; Reached line $28?
        BNE    L1132   ; N: Skip
        LDA    #$40    ; Y: Draw Crosshair
@@ -224,7 +226,7 @@ L115B: STA    ENABL   ;3
        INX            ;2
 L1178: LDA    #$00    ;2
        CPX    #$4F    ;2
-       BCC    Nextline 
+       BCC    Nextline
        STA    WSYNC   ;3
        BEQ    L11AE   ;2
 L1182: LDA    $98     ;3

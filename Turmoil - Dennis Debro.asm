@@ -37,14 +37,14 @@ TIA_BASE_READ_ADDRESS = $30         ; set the read address base so this runs on
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -61,7 +61,7 @@ TIA_BASE_READ_ADDRESS = $30         ; set the read address base so this runs on
    ENDIF
 
    LIST ON
-   
+
 ;===============================================================================
 ; A S S E M B L E R - S W I T C H E S
 ;===============================================================================
@@ -208,8 +208,8 @@ INIT_ARROW_SPAWN_SOUND_INDEX = 30
    MAC SLEEP_3
       bit $FF
    ENDM
-   
-   MAC SLEEP_7 
+
+   MAC SLEEP_7
       rol ROM_BASE,x
    ENDM
 
@@ -329,7 +329,7 @@ tmpPlayLevelIndex       = ghostShipSoundIndex
 ghostShipSpawnTimer     ds 1        ; timer to spawn Ghost Ship for non-movement
 
    echo "***",(* - $80 - 4)d, "BYTES OF RAM USED", ($100 - * + 4)d, "BYTES FREE"
-   
+
 ;===============================================================================
 ; R O M - C O D E
 ;===============================================================================
@@ -444,7 +444,7 @@ VerticalBlank
    adc #16                          ; increment color value
    sta laneColor                    ; set new lane color value
    jmp DisplayKernel
-       
+
 .skipGamePaused
    ldx #NUM_LANES - 1
    lda kernelStatus                 ; get kernel status value
@@ -496,7 +496,7 @@ AdvanceToNextLevel
    beq CheckToPlayLevelTransitionSound; branch never taken
    sta kernelStatus                 ; set kernel status to show transition
    bmi CheckToPlayLevelTransitionSound
-       
+
 CheckObstaclesDestroyedForLevel
    lda obstaclesDestroyed           ; get number of obstacles destroyed
    ldy gameLevel                    ; get current game level
@@ -524,7 +524,7 @@ CheckToPlayLevelTransitionSound
    lda #7
    sta AUDC1
    jmp CalculateObjectHMOVEValues
-       
+
 .donePlayLevelTransitionSound
    lda #0
    sta AUDV1
@@ -562,7 +562,7 @@ CheckToPlayLevelTransitionSound
    lda #0
    sta laneColorStatus              ; clear lane color status
    beq CheckToPlayGameOverSounds    ; unconditional branch
-       
+
 .setLaneColorToBlack
    lda #<-1
    sta laneColorStatus              ; set to not cycle lane color
@@ -669,7 +669,7 @@ CheckForGameRestart
    lda ReservedShipsHorizPosValues + 3
    sta reservedShipsHorizPos
    jmp CalculateObjectHMOVEValues
-       
+
 .checkForResetSwitchReleased
    lda resetDebounce                ; get RESET debounce value
    bpl .checkForGameOverDisplayState; branch if RESET switch not held
@@ -691,12 +691,12 @@ CheckForGameRestart
    lda #>PlayerShipGraphics
    sta playerShipGraphicPtr + 1
    jmp CalculateObjectHMOVEValues
-       
+
 .checkForGameOverDisplayState
    lda gameOverSoundIndex           ; get game over sound index
    beq CheckGameSelectSwitch        ; branch if not playing game over sounds
    jmp DisplayKernel
-       
+
 CheckGameSelectSwitch
    lda SWCHB                        ; read console switches
    lsr                              ; shift RESET to carry
@@ -704,7 +704,7 @@ CheckGameSelectSwitch
    bcc .selectSwitchPressed
    sta selectDebounce               ; clear D7 value to show SELECT not pressed
    bpl CheckPlayerShipCollision     ; unconditional branch
-       
+
 .selectSwitchPressed
    lda #0
    sta AUDV1                        ; turn off sound by reducing volume
@@ -771,14 +771,14 @@ CheckPlayerShipCollision SUBROUTINE
    lda #1 << 4 | OBSTACLE_DIR_LEFT
    sta obstacleAttributes - 1,y
    bne .jmpToResetPlayerShipGraphics; unconditional branch
-       
+
 .placeGhostShipOnLeftSide
    lda #XMIN + 6
    sta obstacleHorizPos - 1,y
    lda #1 << 4 | OBSTACLE_DIR_RIGHT
    sta obstacleAttributes - 1,y
    bne .jmpToResetPlayerShipGraphics
-       
+
 .playerShipCollidedWithObstacle
    lda #ID_BLANK
    sta obstacleList - 1,y           ; remove obstacle from list
@@ -816,7 +816,7 @@ CheckPlayerShipCollision SUBROUTINE
    lda #>PlayerShipDeathGraphics
    sta playerShipGraphicPtr + 1
    bmi .setReservedShipsHorizPos    ; unconditional branch
-       
+
 .setValuesForDeathSequenceEnd
    lda #<PlayerShipGraphics
    sta playerShipGraphicPtr
@@ -904,7 +904,7 @@ CheckPlayerShipCollision SUBROUTINE
    sbc #8                           ; nudge TANK 8 pixels left
    sta obstacleHorizPos,x           ; set TANK horizontal position
    jmp .movePlayerShipShot
-       
+
 .playerShotLeftTravelingTank
    lda obstacleHorizPos,x           ; get TANK horizontal position
    cmp #XMAX - 15
@@ -915,7 +915,7 @@ CheckPlayerShipCollision SUBROUTINE
    adc #8                           ; nudge TANK 8 pixels right
    sta obstacleHorizPos,x           ; set TANK horizontal position
    jmp .movePlayerShipShot
-       
+
 .scorePointsForDestroyingTank
    lda gameState                    ; get current game state
    bpl .setObstacleToExplosion      ; branch if game not in progress
@@ -964,7 +964,7 @@ CheckPlayerShipCollision SUBROUTINE
    dex
    bmi AnimateObstacleGraphics
    jmp .processPlayerShots
-       
+
 AnimateObstacleGraphics
    lda obstacleAnimationIndex       ; get obstacle animation index value
    clc
@@ -974,7 +974,7 @@ AnimateObstacleGraphics
    lda #<ObstacleGraphicLSBValues_00
    sta obstacleGraphicLSBPtr
    jmp SetExplosiionTypeValues
-       
+
 .firstObstacleAnimationPtrs
    lda #<ObstacleGraphicLSBValues_01
    sta obstacleGraphicLSBPtr
@@ -995,7 +995,7 @@ SetExplosiionTypeValues
    lda #XMAX
    sta obstacleHorizPos,x           ; place item out of range
    bmi .nextExplosionType           ; unconditional branch
-       
+
 .setExplosionToMoveEveryFrame
    lda obstacleAttributes,x         ; get ID_EXPLOSION attribute value
    and #$0F                         ; clear movement delay value
@@ -1033,7 +1033,7 @@ SetExplosiionTypeValues
    clc
    adc obstacleSpeedValue           ; increment position by obstacle speed
    jmp .setObstacleHorizPos
-       
+
 .moveObstacleLeft
    lda obstacleHorizPos,x           ; get obstacle horizontal position
    sec
@@ -1061,7 +1061,7 @@ SetExplosiionTypeValues
    lda #5
    sta playerShipVertSoundIndex
    bne .changeObstacleDirection     ; unconditional branch
-       
+
 .checkToSpawnTankFromArrow
    cmp #ID_ARROW
    bne .spawnNewObstacle
@@ -1077,7 +1077,7 @@ SetExplosiionTypeValues
    lda #ID_BLANK
    sta obstacleList,x               ; set obstacle to ID_BLANK
    jmp .moveNextObstacle
-       
+
 .spawnNewObstacle
    stx tmpObstacleIndex             ; save current obstacle index
    lda #0
@@ -1091,7 +1091,7 @@ SetExplosiionTypeValues
    dex
    bmi CheckToSpawnPrizeToCannonball
    jmp .moveObstacles
-       
+
 CheckToSpawnPrizeToCannonball
    inc prizeFrameTimer              ; increment prize frame timer
    bpl .checkToIncrementScoreForPrize; branch if not reached 128
@@ -1111,7 +1111,7 @@ CheckToSpawnPrizeToCannonball
    lda #0 << 4 | OBSTACLE_DIR_RIGHT
    sta obstacleAttributes,x         ; set obstacle to travel right
    bne SetLaneColors                ; unconditional branch
-       
+
 .setCannonBallToTravelLeft
    lda #0 << 4 | OBSTACLE_DIR_LEFT
    sta obstacleAttributes,x
@@ -1121,7 +1121,7 @@ SetLaneColors
    lda #BLACK
    sta laneColor                    ; set lane color to BLACK
    beq .checkToIncrementScoreForPrize; unconditional branch
-       
+
 .incrementLaneColor
    lda laneColor                    ; get current lane color
    clc
@@ -1131,12 +1131,12 @@ SetLaneColors
    lda gameState                    ; get current game state
    bmi IncrementScoreForPrize       ; branch if game in progress
    jmp AnimateSneakerGraphics
-       
+
 IncrementScoreForPrize
    lda playerShipCollisionSoundIndex; get player ship collision sound index
    beq .incrementScoreForPrize      ; branch if not playing collision sound
    jmp AnimateSneakerGraphics
-       
+
 .incrementScoreForPrize
    lda prizePointValue
    beq CheckToPlayPlayerShipVertSound
@@ -1248,7 +1248,7 @@ AnimateSneakerGraphics
    lda #<SneakerGraphic_01
    sta sneakerGraphicPtr            ; set Sneaker to second animation
    bne .checkToMovePlayerShip       ; unconditional branch
-       
+
 .setSneakerToFirstAnimation
    lda #<SneakerGraphic_00
    sta sneakerGraphicPtr
@@ -1256,7 +1256,7 @@ AnimateSneakerGraphics
    lda playerShipCollisionSoundIndex; get player ship collision sound index
    beq CheckToMovePlayerShip        ; branch if not playing collision sound
    jmp CalculateObjectHMOVEValues
-       
+
 CheckToMovePlayerShip
    lda gameState                    ; get current game state
    bmi ReadPlayerJoystickValues     ; branch if game in progress
@@ -1264,13 +1264,13 @@ CheckToMovePlayerShip
    ldx #3
    stx playerShipVertDelay          ; set so player ship moves this frame
    bne .shiftMovementValues         ; unconditional branch
-       
+
 ReadPlayerJoystickValues
    lda SWCHA                        ; read the player joystick values
    cmp #$FF
    bne .shiftMovementValues         ; branch if joystick moved
    jmp .doneCheckToMovePlayerShip
-       
+
 .shiftMovementValues
    inc random + 1
    lsr                              ; shift player 1 values to lower nybbles
@@ -1300,7 +1300,7 @@ ReadPlayerJoystickValues
    lda #NO_REFLECT
    sta playerShipReflectValue
    beq .checkForJoystickMovingUp    ; unconditional branch
-       
+
 .checkForJoystickMovingLeft
    tya                              ; move joystick values to accumulator
    and #<(~MOVE_LEFT) >> 4          ; keep MOVE_LEFT value
@@ -1350,7 +1350,7 @@ ReadPlayerJoystickValues
    lda #NUM_LANES
    sta playerShipAlley
    bpl .doneCheckToMovePlayerShip
-       
+
 .checkForJoystickMovingDown
    tya                              ; move joystick values to accumulator
    and #<(~MOVE_DOWN) >> 4          ; keep MOVE_DOWN value
@@ -1400,7 +1400,7 @@ ReadPlayerJoystickValues
    lda #4
    sta playerShipShotHorizDir,y
    bpl CalculateObjectHMOVEValues   ; unconditional branch
-   
+
 .setPlayerShotDirToTravelLeft
    lda #<-4
    sta playerShipShotHorizDir,y
@@ -1416,7 +1416,7 @@ CalculateObjectHMOVEValues
    sbc #15                          ; divide position value by 15
    inx                              ; increment x for coarse value
    bne .determineObjectCoarseValue  ; unconditional branch
-   
+
 .setObjectFineCoarsePositionValue
    stx kernelFCPosValues,y          ; set object coarse value
    tax                              ; shift div15 remainder to x register
@@ -1444,12 +1444,12 @@ DisplayKernel SUBROUTINE
    dex                        ; 2
    beq .doneDisplayKernel     ; 2³
    jmp .displayKernel         ; 3
-       
+
 .doneDisplayKernel
    lda #BLACK                 ; 2
    sta COLUPF                 ; 3 = @14
    jmp NewFrame
-   
+
 .jmpToDrawScoreKernel
    jmp DrawScoreKernel        ; 3
 
@@ -1521,7 +1521,7 @@ DrawTurmoilLiteralKernel
    sta GRP1                   ; 3 = @75
 ;--------------------------------------
    jmp .doneTopStatusKernel   ; 3 = @02
-       
+
 DrawScoreKernel
    sta HMCLR                  ; 3 = @32
    lda #WHITE                 ; 2
@@ -1566,7 +1566,7 @@ DrawScoreKernel
    sta COLUP0                 ; 3
    sta COLUP1                 ; 3
    bpl .drawHighScore         ; 3         unconditional branch
-   
+
 .drawScore
    ldy tmpScoreIndexValues    ; 3         get value for tens position
    lda (digitGraphicPtrs),y   ; 5         get tens value graphic data
@@ -1592,7 +1592,7 @@ DrawScoreKernel
    dec digitGraphicPtrs       ; 5
    bpl .drawScore             ; 2³
    bmi .doneTopStatusKernel   ; 3         unconditional branch
-       
+
 .drawHighScore
    ldy tmpHighScoreIndexValues + 3;3      get value for tens position
    lda (digitGraphicPtrs),y   ; 5         get tens value graphic data
@@ -1627,7 +1627,7 @@ DrawScoreKernel
    lda kernelStatus           ; 3         get kernel status
    bne LevelTransitionKernel  ; 2³        branch to show level transition
    jmp GamePlayKernel         ; 3
-       
+
 LevelTransitionKernel
    sta WSYNC
 ;--------------------------------------
@@ -1690,7 +1690,7 @@ LevelTransitionKernel
    sta GRP1                   ; 3 = @17
    sta GRP0                   ; 3 = @20
    beq .nextLevelTransitionLine;3         unconditional branch
-       
+
 .checkToDrawSecondKernelSection
    bcc .nextLevelTransitionLine;2³
    cpx #H_LEVEL_TRANSITION_KERNEL - 54;2
@@ -1703,7 +1703,7 @@ LevelTransitionKernel
    sta GRP0                   ; 3 = @33
    sta COLUP1                 ; 3 = @36
    beq .nextLevelTransitionLine;3         unconditional branch
-       
+
 .checkToDrawPlayLevel
    cpx #H_LEVEL_TRANSITION_KERNEL - 72;2
    bcc .clearPlayLevelGraphics; 2³
@@ -1714,7 +1714,7 @@ LevelTransitionKernel
    dec tmpPlayLevelIndex      ; 5
    ldy tmpTransitionKernelBKColor;3
    bne .nextLevelTransitionLine;2³
-.clearPlayLevelGraphics 
+.clearPlayLevelGraphics
    lda #0                     ; 2
    sta GRP0                   ; 3
 .nextLevelTransitionLine
@@ -1732,7 +1732,7 @@ LevelTransitionKernel
    dex                        ; 2
    bne .wait4Scanlines        ; 2³
    jmp DrawStatusKernel       ; 3
-       
+
 GamePlayKernel
    lda #MSBL_SIZE8            ; 2
    sta NUSIZ0                 ; 3
@@ -1806,7 +1806,7 @@ BeginLaneKernel
    lda #>PlayerShotEnabledGraphicValues;2
    sta playerShipShotPtr + 1  ; 3
    bmi .determineObstacleColorLSBValue;3  unconditional branch
-       
+
 .playerShotDisabled
    lda #<BlankGraphic         ; 2 = @09
    sta playerShipShotPtr      ; 3
@@ -1824,13 +1824,13 @@ BeginLaneKernel
    lda #<ExplosionColorValues ; 2
    sta obstacleColorPtrs      ; 3
    jmp .setObstacleGraphicLSBAndDirection;3 = @45
-       
+
 .setObstacleColorLSBForArrow
 .setObstacleColorLSBForGhostShip
    lda #<ArrowAndGhostShipColorValues;2
    sta obstacleColorPtrs      ; 3
    jmp .setObstacleGraphicLSBAndDirection;3
-       
+
 .setObstacleColorLSBValue
    lda #<ObstacleColorValues ;2
    sta obstacleColorPtrs;3
@@ -1844,7 +1844,7 @@ BeginLaneKernel
    lda #REFLECT               ; 2
    sta REFP1                  ; 3 = @69
    bpl .checkToDrawPlayerShip ; 3         unconditional branch
-       
+
 .obstacleFacingRight
    lda #NO_REFLECT            ; 2
    sta REFP1                  ; 3
@@ -1856,7 +1856,7 @@ BeginLaneKernel
    lda #>BlankGraphic         ; 2
    sta tmpKernelShipGraphicPtr + 1;3
    bmi .startDrawKernelLane   ; 3         unconditional branch
-       
+
 .setToDrawPlayerShip
    lda playerShipGraphicPtr   ; 3
    sta tmpKernelShipGraphicPtr; 3
@@ -1873,7 +1873,7 @@ BeginLaneKernel
    dec currentKernelLane      ; 5
    bmi DrawStatusKernel       ; 2³
    jmp DrawKernelLane         ; 3
-       
+
 DrawStatusKernel
    lda #NO_REFLECT            ; 2
    sta REFP0                  ; 3 = @27
@@ -1932,7 +1932,7 @@ DrawStatusKernel
    sta WSYNC
 ;--------------------------------------
    jmp .doneStatusKernel      ; 3
-       
+
 DrawSneakerKernel
    ldy #H_SNEAKERS - 1        ; 2
 .drawSneakerKernel
@@ -1952,7 +1952,7 @@ DrawSneakerKernel
    lda #0                     ; 2
    sta GRP0                   ; 3 = @11
    beq .jmpIntoDoneStatusKernel;3         unconditional branch
-       
+
 DrawReservedShipsKernel
    lda #NO_REFLECT            ; 2
    sta REFP0                  ; 3 = @41
@@ -2007,10 +2007,10 @@ DrawReservedShipsKernel
 .doneStatusKernel
    ldx #OVERSCAN_SCANLINES    ; 2
    jmp .waitForKernelDone     ; 3
-       
+
 DrawKernelLane
    ldy #H_KERNEL_LANE - 1     ; 2
-.drawKernelLane 
+.drawKernelLane
    lda (obstacleColorPtrs),y  ; 5
    tax                        ; 2
    lda (tmpKernelShipGraphicPtr),y;5
@@ -2034,7 +2034,7 @@ DrawKernelLane
    bpl .checkPlayerObstacleCollision;2³   branch if players didn't collide
    sta tmpPlayerShipCollisionValue;3
    bmi .jmpToBeginLaneKernel  ; 3         unconditional branch
-       
+
 .checkPlayerObstacleCollision
    lda CXM0P                  ; 3         read player missile 0 collision value
    bpl .jmpToBeginLaneKernel  ; 2³        branch if obstacle not shot
@@ -2057,8 +2057,8 @@ SpawnNewObstacle
    lda #ID_GHOST_SHIP
    sta ghostShipSpawnTimer          ; set Ghost Ship timer value
    bne .setNewObstacle              ; spawn Ghost Ship in player ship lane
-       
-.newRandom 
+
+.newRandom
    jmp NewRandom
 
 DetermineLocationForSpawnedObstacle
@@ -2102,7 +2102,7 @@ DetermineLocationForSpawnedObstacle
    lda InitSpawnedObstacleSpeedValues,y
    sta obstacleAttributes,x         ; set new obstacle attribute value
    bpl .checkForSpawnedPrize        ; unconditional branch
-       
+
 .placeNewObstacleOnLeft
    lda #XMIN + 6
    sta obstacleHorizPos,x           ; spawn new obstacle on left side
@@ -2148,7 +2148,7 @@ SetObstacleValuesForGameLevel
    lda ObstacleSpeedValues,x
    sta obstacleSpeedValue
    rts
-       
+
 ;
 ; The following 23 bytes aren't used and come from Fast Eddie
 ;
@@ -2156,7 +2156,7 @@ SetObstacleValuesForGameLevel
    .byte $FE,$F0,$E0,$E6,$E6,$7C,$38
 
    BOUNDARY 0
-   
+
 ObstacleGraphics
 CrawlerGraphic_00
    .byte $00 ; |........|
@@ -2454,7 +2454,7 @@ PlayerShipGraphics
    .byte $E0 ; |XXX.....|
    .byte $F8 ; |XXXXX...|
    .byte $00 ; |........|
-   
+
 LeftReservedShipNUSIZValues
    .byte ONE_COPY, ONE_COPY, TWO_COPIES, THREE_COPIES
    .byte THREE_COPIES, THREE_COPIES, THREE_COPIES
@@ -2470,7 +2470,7 @@ InitObstacleHorizPosLevel_06
 InitObstacleHorizPosLevel_03
 InitObstacleHorizPosLevel_07
    .byte 0, 0, 64, 16, 48, 32, 56
-   
+
 InitObstacleHorizPosLevel_04
 InitObstacleHorizPosLevel_08
    .byte 0, 64, 56, 37, 48, 16, 24
@@ -2505,17 +2505,17 @@ InitObstacleHorizPosLevel_01
 InitObstacleTypesLevel_01
    .byte ID_BLANK, ID_BLANK, ID_BLANK, ID_BLANK
    .byte ID_MISSILE, ID_TIE_FIGHTER, ID_PRIZE
-   
+
 PlayerShipColorValues
    .byte BLACK, RED_ORANGE + 5, RED_ORANGE + 5, RED_ORANGE + 5, BLUE + 11
    .byte BLUE + 9, WHITE, RED_ORANGE + 5, WHITE, BLUE + 9, BLUE + 11
    .byte RED_ORANGE + 5, RED_ORANGE + 5, RED_ORANGE + 5, BLACK
-   
+
 ArrowAndGhostShipColorValues
    .byte WHITE, WHITE, BLUE + 10, BLUE + 10, BLUE + 10, BLUE + 10, BLUE + 10
    .byte WHITE, WHITE, BLUE + 10, BLUE + 10, BLUE + 10, BLUE + 10, WHITE, WHITE
    .byte WHITE
-   
+
 ExplosionColorValues
    .byte BLACK, RED_ORANGE + 12, RED_ORANGE + 9, RED_ORANGE + 5, RED_ORANGE + 9
    .byte RED_ORANGE + 7, RED_ORANGE + 15, WHITE, RED_ORANGE + 10, RED_ORANGE + 10
@@ -2562,9 +2562,9 @@ SneakerColorValues
    .byte $FA,$70,$60,$50,$40,$30,$20,$10,$00,$F0,$E0,$D0,$C0,$B0,$A0,$90
    .byte $00,$E0,$0E,$EE,$00,$05,$06,$07,$08,$35,$31,$9E,$BA,$B0,$A0,$90
    .byte $00,$E0,$0E,$EE,$00,$05,$06,$07,$08
-   
+
    BOUNDARY 0
-   
+
 NumberFonts
 zero
    .byte $3E ; |..XXXXX.|
@@ -2656,25 +2656,25 @@ nine
    .byte $63 ; |.XX...XX|
    .byte $63 ; |.XX...XX|
    .byte $3E ; |..XXXXX.|
-   
+
 GRP0_ReservedLivesLSBValues
    .byte <BlankGraphic, <PlayerShipGraphics, <PlayerShipGraphics
    .byte <PlayerShipGraphics, <PlayerShipGraphics, <PlayerShipGraphics
    .byte <PlayerShipGraphics
-   
+
 GRP1_ReservedLivesLSBValues
    .byte <BlankGraphic, <BlankGraphic, <BlankGraphic, <BlankGraphic
    .byte <PlayerShipGraphics, <PlayerShipGraphics, <PlayerShipGraphics
-   
+
 GRP0_ReservedLivesMSBValues
    .byte >BlankGraphic, >PlayerShipGraphics, >PlayerShipGraphics
    .byte >PlayerShipGraphics, >PlayerShipGraphics, >PlayerShipGraphics
    .byte >PlayerShipGraphics
-   
+
 GRP1_ReservedLivesMSBValues
    .byte >BlankGraphic, >BlankGraphic, >BlankGraphic, >BlankGraphic
    .byte >PlayerShipGraphics, >PlayerShipGraphics, >PlayerShipGraphics
-   
+
 ObstacleGraphicLSBValues_00
    .byte <BlankGraphic
    .byte <Cannon_Ball_Graphic_00
@@ -2689,7 +2689,7 @@ ObstacleGraphicLSBValues_00
    .byte <TankGraphic_00
    .byte <ExplosionGraphic_00
    .byte <GhostShipGraphic_00
-   
+
 ObstacleGraphicLSBValues_01
    .byte <BlankGraphic
    .byte <Cannon_Ball_Graphic_01
@@ -2704,7 +2704,7 @@ ObstacleGraphicLSBValues_01
    .byte <TankGraphic_01
    .byte <ExplosionGraphic_01
    .byte <GhostShipGraphic_01
-   
+
 InitSpawnedObstacleSpeedValues
    .byte 0 << 4                     ; ID_BLANK
    .byte 0 << 4                     ; ID_CANNON_BALL
@@ -2719,7 +2719,7 @@ InitSpawnedObstacleSpeedValues
    .byte 7 << 4                     ; ID_TANK
    .byte 0 << 4                     ; ID_EXPLOSION
    .byte 0 << 4                     ; ID_GHOST_SHIP
-   
+
 PlayerShotEnabledGraphicValues
    .byte DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM
    .byte -1, -1, -1, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM
@@ -2729,10 +2729,10 @@ PlayerShotEnabledGraphicValues
 ; The following 11 bytes aren't used.
 ;
    .byte $00,$00,$0B,$16,$21,$2C,$37,$42,$4D,$58,$63
-   
+
 LaneShotCollisionMaskValues
    .byte 1, 2, 4, 8, 16, 32, 64, 128
-   
+
 ObstaclePointValues
    .byte POINT_VALUE_BLANK >> 4, POINT_VALUE_CANNON_BALL >> 4
    .byte POINT_VALUE_FIGHTER_01 >> 4, POINT_VALUE_PRIZE >> 4
@@ -2741,7 +2741,7 @@ ObstaclePointValues
    .byte POINT_VALUE_CRAWLER >> 4, POINT_VALUE_ARROW >> 4
    .byte POINT_VALUE_TANK >> 4, POINT_VALUE_EXPLOSION >> 4
    .byte POINT_VALIE_GHOST_SHIP >> 4
-   
+
 NumberLSBValues
    .byte <one - 1, <two - 1, <three - 1, <four - 1, <five - 1
    .byte <six - 1, <seven - 1, <eight - 1, <nine - 1
@@ -2753,9 +2753,9 @@ NumberLSBValues
    .byte $A5,$D5,$75,$85,$3C,$4C,$5C,$6C,$7C,$8C,$9C,$AC,$FD,$FD,$FC,$FC
    .byte $FC,$FC,$FC,$FD,$FC,$FC,$FC,$FC,$FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
    .byte $01,$00,$FF,$01,$FF
-       
+
    BOUNDARY 0
-   
+
 TurmoilLiteral_00
    .byte $08 ; |....X...|
    .byte $08 ; |....X...|
@@ -2810,7 +2810,7 @@ TurmoilLiteral_05
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 PlayerShipDeathGraphics
 PlayerShipDeathGraphics_00
    .byte $00 ; |........|
@@ -2902,7 +2902,7 @@ PlayerShipDeathGraphics_05
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 NewRandom
    lda random
    ror
@@ -2914,7 +2914,7 @@ NewRandom
    sta random + 1
    stx random
    jmp DetermineLocationForSpawnedObstacle
-       
+
 NumberOfObstaclesToDestroy
    .byte OBSTACLE_LIMIT_LEVEL_01
    .byte OBSTACLE_LIMIT_LEVEL_02
@@ -2926,7 +2926,7 @@ NumberOfObstaclesToDestroy
    .byte OBSTACLE_LIMIT_LEVEL_08
    .byte OBSTACLE_LIMIT_LEVEL_09
    .byte OBSTACLE_LIMIT_LEVEL_10    ; not used
-   
+
 PlayerShipDeathGraphicsLSBValues
    .byte <PlayerShipDeathGraphics_00
    .byte <PlayerShipDeathGraphics_00
@@ -2952,7 +2952,7 @@ PlayerShipDeathGraphicsLSBValues
    .byte <PlayerShipDeathGraphics_03
    .byte <PlayerShipDeathGraphics_02
    .byte <PlayerShipDeathGraphics_01; not used
-   
+
 InitObstacleHorizPosLSBValues
    .byte <InitObstacleHorizPosLevel_01
    .byte <InitObstacleHorizPosLevel_02
@@ -2974,15 +2974,15 @@ InitObstacleTypeLSBValues
    .byte <InitObstacleTypesLevel_07
    .byte <InitObstacleTypesLevel_08
    .byte <InitObstacleTypesLevel_09
-   
+
 ObstacleSpeedValues
    .byte 1, 1, 1, 1, 1, 2, 2, 2, 2
-   
+
 ObjectFineHMOVEValues
    .byte HMOVE_L7, HMOVE_L6, HMOVE_L5, HMOVE_L4, HMOVE_L3, HMOVE_L2, HMOVE_L1
    .byte HMOVE_0,  HMOVE_R1, HMOVE_R2, HMOVE_R3, HMOVE_R4, HMOVE_R5, HMOVE_R6
    .byte HMOVE_R7
-   
+
 LanePF2GraphicData
    .byte $FF ; |XXXXXXXX|
    .byte $3F ; |..XXXXXX|
@@ -2992,7 +2992,7 @@ LanePF2GraphicData
    .byte $3F ; |..XXXXXX|
    .byte $3F ; |..XXXXXX|
    .byte $FF ; |XXXXXXXX|
-   
+
 ReservedShipsHorizPosValues
    .byte 0, 74, 66, 58, 50, 42, 34
 
@@ -3000,7 +3000,7 @@ ReservedShipsHorizPosValues
 ; The following 8 bytes aren't used and come from Fast Eddie.
 ;
    .byte $DD,$E2,$E7,$EC,$F1,$F6,$FB,$FB
-       
+
    .org ROM_BASE + 4096 - 4, 0      ; 4K ROM
    .word Start
    .word Start
