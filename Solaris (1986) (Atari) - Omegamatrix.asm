@@ -5887,7 +5887,7 @@ MTABL4
        .byte <KDL8+U,<KDL7+U,<KDL6+U,<KDL5+U,0,0,0,0
        .byte $00,$00,$00,$00,$00,$00,$00,$00
        .byte $00,$00,$00,$00,$00,$00,$00,$00
-       .byte <XDL8+U,<XDL7+U,<XDL6+U,<XDL5+U,XDL4+U,0,0,0
+       .byte <XDL8+U,<XDL7+U,<XDL6+U,<XDL5+U,<XDL4+U,0,0,0
        .byte <RDL1+U,<RDL1-1+U,<RDL1-3+U,<RDL1-4+U,0,0,0,0
        .byte <CDLF+U,<CDLE+U,<CDLC+U,<CDLA+U,0,0,0,0
        .byte $00,$00,$00,$00

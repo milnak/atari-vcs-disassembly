@@ -19,6 +19,22 @@ Or, to:
 
 `./dasm '.\game.asm' -f3 -v3 -I'machines\atari2600' -o'game.a26' -l'game.lst' -s'game.sym'`
 
+## Fixing build issues
+
+If you receive an "error: Value in 'byte byte 63971' must be <$100" error, it's because the source code was created in an older version of dasm. You likely need to make the following change:
+
+For example,  change:
+    
+```text
+.byte Zero,One,Two,<hree,Four,Five,Six,Seven,Eight,Nine
+```
+
+to:
+    
+```text
+.byte <Zero,<One,<Two,<Three,<Four,<Five,<Six,<Seven,<Eight,<Nine
+```
+
 ## Script to assemble all sources
 
 ```PowerShell

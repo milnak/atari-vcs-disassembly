@@ -1686,18 +1686,18 @@ GameReset SUBROUTINE
 ;-------------------------------------------
 
 ManGraphicsTab:
-     .byte StepOne,StepTwo,StepThree,StandingStill,Jumping
-     .byte ClimbingOne,ClimbingTwo,SwingAxeOut,SwingAxeDown,FrontTurn
+     .byte <StepOne,<StepTwo,<StepThree,<StandingStill,<Jumping
+     .byte <ClimbingOne,<ClimbingTwo,<SwingAxeOut,<SwingAxeDown,<FrontTurn
 F9E4:
      .byte $A0 ; |X X     | $F9E4
      .byte $B0 ; |X XX    | $F9E5
      .byte $C0 ; |XX      | $F9E6
 
 F9E7:
-     .byte MFD0,MFE0   ; stored in $90, ($90),Y = $FFD0, $FFE0
+     .byte <MFD0,<MFE0   ; stored in $90, ($90),Y = $FFD0, $FFE0
 
 FieldObjLoTab:
-     .byte HouseOne,HouseTwo, $AE   ; $AE tree
+     .byte <HouseOne,<HouseTwo, $AE   ; $AE tree
 
 FieldObjHiTab:
      .byte >HouseOne,>HouseTwo, $00
@@ -1715,11 +1715,11 @@ FieldObjSizeTab:
      .byte DOUBLE_SIZE,DOUBLE_SIZE,DOUBLE_SIZE
 
 AnimalTab:
-     .byte SnakeUp,SnakeDown,PigAAFeetOpen,PigAAFeetShut
-     .byte BirdWingDown,BirdWingUp,PigBBFeetOpen,PigBBFeetShut
+     .byte <SnakeUp,<SnakeDown,<PigAAFeetOpen,<PigAAFeetShut
+     .byte <BirdWingDown,<BirdWingUp,<PigBBFeetOpen,<PigBBFeetShut
 
 BirdTab:
-     .byte BirdWingDown,BirdWingUp
+     .byte <BirdWingDown,<BirdWingUp
 
 AnimalRefSizTab:
      .byte $00,$05

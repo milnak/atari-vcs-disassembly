@@ -1678,7 +1678,7 @@ CheckToDoYarExplosion
    bne .jmpToSetYarAnimationState   ; unconditional branch
    
 .rotateYarForDeathAnimation
-   lda #~NO_MOVE
+   lda #<(~NO_MOVE)
    sta joystickValue                ; set joystick value to not moving
    beq RotateYarForDeath            ; unconditional branch
    
@@ -3085,14 +3085,14 @@ YarDeath_4
    .byte $62 ; |.XX...X.|
    
 YarRotationPointers
-   .byte <YarSprite_0-YarSprites
-   .byte <YarSprite_1-YarSprites
-   .byte <YarSprite_2-YarSprites
-   .byte <YarSprite_3-YarSprites
-   .byte <YarSprite_4-YarSprites
-   .byte <YarSprite_3-YarSprites
-   .byte <YarSprite_2-YarSprites
-   .byte <YarSprite_1-YarSprites
+   .byte <(YarSprite_0-YarSprites)
+   .byte <(YarSprite_1-YarSprites)
+   .byte <(YarSprite_2-YarSprites)
+   .byte <(YarSprite_3-YarSprites)
+   .byte <(YarSprite_4-YarSprites)
+   .byte <(YarSprite_3-YarSprites)
+   .byte <(YarSprite_2-YarSprites)
+   .byte <(YarSprite_1-YarSprites)
    
 YarSprites
 YarSprite_0

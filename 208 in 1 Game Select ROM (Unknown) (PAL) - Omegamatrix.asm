@@ -399,7 +399,7 @@ InstThreeF:
 
 ;-----------------------------------------
 numGfxLoPtrTab:
-     .byte Zero,One,Two,Three,Four,Five,Six,Seven,Eight,Nine
+     .byte <Zero,<One,<Two,<Three,<Four,<Five,<Six,<Seven,<Eight,<Nine
 
 numGfxHiPtrTab:
      .byte >Zero,>One,>Two,>Three,>Four,>Five,>Six,>Seven,>Eight,>Nine
