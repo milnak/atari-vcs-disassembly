@@ -8,9 +8,14 @@ To assembly binary from source,  use [dasm](https://dasm-assembler.github.io/).
 
 `./dasm '.\game.asm'`
 
-Or,  to specify an output name,  a list file and a symbol file,  use:
+Or, to:
 
-`./dasm '.\game.asm' -o'game.bin' -l'game.lst' -s'game.sym' -v1`
+* specify an output name
+* generate a list file
+* generate a symbol file
+* show verbose output, including symbol table
+
+`./dasm '.\game.asm' -f3 -v3 -I'machines\atari2600' -o'game.a26' -l'game.lst' -s'game.sym'`
 
 ## Disassembling
 
