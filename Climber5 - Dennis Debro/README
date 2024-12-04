@@ -1,0 +1,135 @@
+Climber5 - for the Atari VCS/2600
+Copyright 2003/2004 - Dennis Debro
+
+This game is freeware but copyrighted. Do not distribute source code. Instead, please reference this repository. The assembled binaries cannot be sold in any form without my permission.
+
+GAME PLAY
+=========
+
+Your objective in Climber 5 is to retrieve the baseball located on the construction site while avoiding the moving girders.
+
+You are given 3 tries to retrieve as many baseballs as you can. In the NORMAL and ADVANCED game options you are awarded another try once you reach 10,000 points.
+
+Each level gets progressively harder as the girders increase in speed and your Climber slows down.
+
+USING THE CONTROLLER
+====================
+
+Use your Joystick controller with this Game Program cartridge. Be sure the controller cable is firmly plugged into the LEFT CONTROLLER jack. Hold the Joystick with the red controller button to your upper left, toward the television screen. (See your owner's manual for further details.)
+
+Use your Joystick controller to maneuver your climber to retrieve the baseball. Your climber may move left and right while standing on a platform. Use the ladders provided to ascend/descend the construction site to retrieve the ball or to avoid girders.
+
+CONSOLE CONTROLS
+================
+
+TV TYPE SWITCH (PAUSE 7800)
+
+This switch is used to pause the game action. 2600 users will need to toggle the switch back and forth to cause the game action to pause. 7800 users only need to press the PAUSE button for this action.
+
+If the game has been paused for approximately 10 minutes, the game screen will black out to save the television from image burn. To bring the game image back the player must wiggle the joystick.
+
+To resume play from the pause state 2600 users must toggle the TV TYPE switch. 7800 users only need to press the PAUSE button.
+
+GAME RESET SWITCH
+
+Use the GAME RESET switch to start the game, or to restart the game at any time during game play. The red controller button can also be used to start a new game from the title screen.
+
+GAME SELECT SWITCH
+
+Use the GAME SELECT switch to select the different Climber 5 play options.
+
+Play options
+
+Original
+This option mimics the original Atari 8-bit version as closely as I could execute.
+In this option the girders move from left to right trying to stop the climber from reaching the baseball at the top of the construction. In this option there is no score and no extra tries rewarded. See how many levels you can conquer.
+
+Normal
+The ladder positions and the girder movements are random in this option. You start out with a timer bonus of 5000 that ticks down approximately every 2 seconds. You must reach the baseball before time runs out or the player loses a turn. The player is awarded the remaining timer value as a score once the baseball has been retrieved. Move quickly...the baseball will change positions if you take too long.
+
+Advanced
+This option is the same as the Normal option with the exception of falling obstacles. As the climber tries to retrieve the ball various obstacles will fall from the platforms above. Some of these obstacles are harmful to the climber (lunchbox, brick, and hammer). If any of these touches the climber the player will lose a turn.
+
+Some obstacles will reward the player (cup, teddy bear, butterfly, AtariAge logo). These are worth points to the player so keep your eyes peeled. To achieve high scores try to catch these in the order of cup, teddy bear, butterfly, and AtariAge logo. The point values when caught in this order are as follows...
+1) Cup ..............100 points
+2) Teddy Bear........300 points
+3) Butterfly.........500 points
+4) AtariAge logo.....700 points
+
+These point values will increase every 5th level until the player reaches level 20. If the player retrieves an obstacle out of order they are rewarded the minimum point value and the sequence starts over.
+
+DIFFICULTY SWITCHES
+
+The left DIFFICULTY switch is used only for game NORMAL and ADVANCED game options. When in position A (EXPERT) the player is not warned before the girders change direction. When in position B (NOVICE) the girders flash to warn the player before they change directions.
+
+RED CONTROLLER BUTTON
+
+The red controller button is used only for NORMAL and ADVANCED game options. When the player presses this button the girders will change direction. The bonus timer is reduced by 500 units each time this button is pressed to penalize the player.
+
+NOTE: In the higher levels of the ADVANCED option this may be used to the players advantage. In higher levels, the girders push the falling obstacles. With good timing the player can use this to capture out of reach bonus items or to avoid dangerous items.
+
+SCORING
+=======
+
+A score is only awarded for game options NORMAL and ADVANCED.
+
+Each bonus item is worth 100 points unless retrieved in a certain order.
+
+The point/order break down
+1) Cup ..............100 points
+2) Teddy Bear........300 points
+3) Butterfly.........500 points
+4) AtariAge logo.....700 points
+
+These point values will increase every 5th level until the player reaches level 20.
+
+BONUSES
+
+Extra try..................At 10,000 points
+Retrieving the baseball....Remaining timer value
+
+STRATEGY
+========
+ORIGINAL
+	o The girders always move from left to right in this option. Once it passes over it will have to reach the right edge before coming back again.
+	o The Climber can climb a ladder while hanging off the left or right edge of the ladder. Keep this in mind for levels 5 and higher.
+	o You can get pass levels 5 and higher...timing is the key.
+	
+NORMAL and ADVANCED
+	o The girders don't have full screen range before changing direction. See if you can find their "secret" zones when you need a little breather.
+	o Keep your eyes peeled for falling bonus items to watch your score increase rapidly.
+	o Try to use the red controller button to change girder direction to your advantage. It can be a nice tool to push bonus items toward you or push harmful items away from you.
+
+
+ACKNOWLEGMENTS
+==============
+
+Here are a list people that helped me along the way (in no particular order):
+
+Peiro Cavina
+This game uses snippets from Peiro Cavina's PCMCD demo, with his permission, which later became Oystron. I couldn't have done this game without this code. Thank you Peiro!! Go to the AtariAge store at http://www.atariage.com/store/product_info.php?cPath=21_24&products_id=134 for more information on this excellent game. BTW, if you don't own it...I suggest you buy it. It's a great game.
+
+Andrew Davie
+Andrew (along with Thomas) knows how to squeeze every last byte out of 6502/7 assembler code. Andrew was instrumental in helping me reduce my first ROM image by over 190 bytes!! Using these same techniques I was able to get more into this game while still keeping it within my 4K ROM set limit. (For the techies...you aught to see how Andrew clears the game RAM and sets the stack to the beginning...Pure genius!)
+	
+Thomas Jentzsch
+Thomas has helped to improve this game by showing code samples and unselfishly sharing source code to his 2600 works. Through his guidance I've learned so much about 2600 programming in the last 2 years. There were areas that I thought were impossible to do. Thomas pushed me to keep adding to the game and ultimately showing me what I thought was impossible was possible.
+	
+Manuel Rotschkar
+Manuel suggested the most frustrating programming part of the game but also what I consider the best aspect. Manuel suggested the falling objects. This was about the most frustrating thing I had worked on in this game. Manuel also made suggestions on improving the look of the game (graphics).
+	
+Albert Yarusso
+Albert is a perfectionist. There was no way I was going to get a mediocre game pass him. Al gave a lot of suggestions for improving the original game that you see in the Normal and Advanced options:
+	1) random girder movement
+	2) random ball placement
+	3) score
+		
+Fabrizio Zavagli
+I sent many PAL50 builds to Fab to test on his PAL system. He helped me make sure the PAL timings were equivalent or comparable to the NTSC timings.
+
+Stella Mailing List and AtariAge Message Board Members
+Thank you for all of your suggestions, support, encouragement, and bug testing. It was invaluable to the release of Climber 5.
+
+NOTES
+=====
+Climber 5 is based on an Atari 8-bit computer game of the same name. The original game was written by James Rogers and appeared in COMPUTE! magazine (Aug. 1987 - Vol. 9, No. 8, Iss. 87). My college roommate and I had hours of fun playing this game.

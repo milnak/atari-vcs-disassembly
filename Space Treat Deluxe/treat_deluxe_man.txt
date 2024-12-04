@@ -1,0 +1,161 @@
+                                ==================
+                                SPACE TREAT DELUXE
+                                ==================
+
+                             © 2003 Fabrizio Zavagli
+
+                           - GAME PROGRAM INSTRUCTIONS -
+
+INTRODUCTION
+------------
+Your planet, a peaceful Class M world, has always been living in harmony and
+this allowed its people to quickly evolve into the space era. Anyway, as you 
+might have guessed, no good is going to last. There came a time where the forces 
+of evil, namely your neighbor planet, started to strike against you. The evil 
+planet's inhabitants are quite different. They don't care about nature and 
+peace. They are greedy, and only think about consuming the planet's sources to 
+gain more and more riches. This quickly led to a total draining of anything 
+their planet had to offer, making them more and more envious of your prospering 
+world. Unable to obtain any more of their environment, the evil planet sent its 
+combat drones to attack your world, aiming at stealing your food resources. 
+Unfortunately, they're succeeding in getting their tentacles on your valuable 
+goods, trapping them in a space cage above your planet...
+
+
+OBJECT OF THE GAME
+------------------
+Your mission is to bring back as much food as possible before the drones take it 
+away with them.
+
+
+HOW TO PLAY
+-----------
+To play Space Treat, use a joystick in the left port. Directions are as follows:
+
+                MOVE UP/LEAVE BASE
+                        ^ 
+                        |   
+                       \|/
+         MOVE LEFT <--- O ---> MOVE RIGHT
+                       /|\
+                        |  
+                        v 
+            MOVE DOWN/CONNECT TO BASE
+
+-	The joystick button and Reset switch start the game.
+-	Also use the Reset switch on your console to get back to the title screen.
+-	With PAL version, use the right difficulty switch to toggle
+	between 50hz and 60hz mode (60hz mode recommended).
+-	All other console switches are unused.
+
+In order to complete your mission, you will have to guide your ship to the upper 
+level of the screen, where the cage (represented as a horizontal line) is 
+located, while avoiding the mortal contact with the enemy drones. Position the 
+ship under the opening (door) in the cage and push UP to collect the food. At 
+this point, the enemy will detect you and send a new drone, so quickly get back 
+to the base in order to move on to the next level. After the first few stages, 
+the door in the cage will become locked. You will be forced to collect a 
+Passkey, graphically represented as a square, to unlock the cage.
+
+During your trips, you will have to keep an eye on the fuel level that 
+constantly decreases once your leave the ground. When it's low, it will become 
+yellow. Should it turn red, your ship will move slower and if it runs out, you'd 
+better prepare the next ship! But be careful, because you have a limited supply 
+of 6 ships. You will also lose one when crashing against drones. Getting your 
+ship destroyed will also result in losing the food you're carrying.  Maneuver 
+carefully!
+
+
+LEVELS
+------
+Space Treat contains 99 levels of increasing difficulty.
+The first 2 levels are the easiest ones, useful for basic control practice. 
+Starting from level 3, the cage containing food will be locked and you will have 
+to collect a Passkey in order to open it.
+Level 7 and above are the most difficult ones, with speeding drones adopting 
+advanced movement patterns.
+Level structures change each time you play.
+Every new game is a different challenge!
+
+
+SCORING
+-------
+100 points for each remaining ship at the end of level
+10 points for each fuel unit saved at the end of level
+1000 points for clearing level without losing a life
+Additional bonus ranging from 10 to 1000 for each stage cleared
+ (bonus amount depends on your current level)
+
+PLAYING TIPS
+- Always carefully choose the location where you will leave your base, as the 
+  fuel will not decrease while you're connected to it, but you won't be able to 
+  get back to the base until you collect the food.
+- Take some time to examine the movement patterns of the drones to find the best 
+  place and time to start your trip, both upward and downward.
+- You can take a break between levels, since the game will wait for you to push 
+  the fire button before starting a new screen.
+
+ABOUT THE GAME
+--------------
+Space Treat was started in May 2002 as my first homebrew. The idea has evolved a 
+lot during the creation process, with many features being included or scrapped. 
+A lot of suggestions came from the people on the Stella List, and great support 
+from the AtariAge forums and other individuals.
+
+
+ABOUT THE AUTHOR
+----------------
+I started my programming experience as a kid, once I understood that creating 
+games could have been at least as much fun as playing them. Being quite too 
+young to fully understand 6502 assembler on my Commodore 64, my early years 
+passed by with mostly basic programming. But the call for speed was strong, and 
+I often tried my hand at 8-bits assembler. By the end of the '64 era, I'd 
+managed to grasp the basics of machine language. After the C64 came the Amiga, 
+along with the powerful and readable 68000 assembler. That's where I've had most 
+of my assembler activity, coding demos that were released in the, at the time, 
+intense demo group scene. Long hours spent on assembler can really open your 
+mind to the inner workings of hardware and software, something that's being lost 
+as more and more generations of programming languages surface. Nowadays, even if 
+my daily job is not related to games or low-level programming, I keep doing asm 
+coding for fun, both because I love Atari and since it's a great exercise.
+
+
+ACKNOWLEDGMENTS
+---------------
+Without the help and support from the following people, this game would have 
+never been started and much less finished:
+
+- Cristina
+- AtariAge (Albert Yarusso and Alex Bilstein)
+- Randy Crihfield
+- Thomas Jentzsch, Manuel Polik, Dennis Debro, Eckhard Stolberg, Andrew 
+  Davie, Paul Slocum and all the people on the Stella List (sorry all others I've 
+  forgotten!)
+- All the great guys from the AtariAge forums
+- Daryl Litts
+- Davide Pasca (Kazzuya)
+- Fabrizio Farenga
+- Fabio Pacifici (Jag)
+- Lorenzo Lapi
+- Antonio Daniele
+- Christian Padovano
+- Sergio Paolantonio (Raoul)
+
+...and everyone else who took the time to write in to support the creation of 
+Space Treat! 
+
+CONTACT INFORMATION
+-------------------
+Contact Fabrizio Zavagli: http://www.rasty.com - rasty@rasty.com
+The game can be ordered on cartridge fro http://www.atariage.com
+Selling this game without the author's authorization is prohibited.
+
+
+HISTORY NOTES ON SPACE TREAT
+----------------------------
+- Space Treat first Solid State release: CGE2k2 (August 10-11 2002) as a Special 
+  Edition
+- Space Treat .BIN release: August 12, 2002
+- Space Treat Deluxe release: PhillyClassic 4 (March 28-30, 2003)
+- Space Treat Deluxe binaries + sources released (NTSC and PAL): May 21, 2003
+- Developed with z26 and CyberStella emulators and a CuttleCart.
