@@ -59,4 +59,4 @@ I use the [Stella](https://stella-emu.github.io/) emulator.
 
 To start disassembly of a VCS cartridge,  use [distella](https://github.com/johnkharvey/distella).
 
-A distella configuration file will give distella hints as how to interpret the binary.  Sample distella cfg files are located in the `tools/distella_cfg` folder.
+A distella configuration file will give distella hints as how to interpret the binary.
