@@ -9,7 +9,7 @@
 ; Compile switches
 
 NTSC                    = 0
-PAL                     = 1 
+PAL                     = 1
 COMPILE_VERSION         = NTSC
 
 MAXOBJECTS      = $09   ; if changed, change radar shifttab as well!!!!
@@ -43,7 +43,7 @@ zmov            ds #MAXOBJECTS      ; horizontal motion for sprite
 sprtsizetype    ds #MAXOBJECTS      ; list of sprite colors
 vline           ds 1                ; current vertical line being drawn
 p0count         ds 1                ; number of lines left to draw for player 0
-tieshapeptr     ds 2                ; 
+tieshapeptr     ds 2                ;
 tieshapeptr2    ds 2                ;
 laserCounter    ds 1                ; Decremented every frame
 expCounter      ds 1                ; Decremented every frame
@@ -69,7 +69,7 @@ tempPtr         ds 2                ; temp pointer
     ORG     $1000
     RORG    $D000
 
-ShowCrash 
+ShowCrash
     STA HMOVE
     LDA rnd              ; Set Crash Pointer:
     STA tempVar1         ; 1. Random Lo-byte
@@ -155,10 +155,10 @@ NextLine
     STA HMOVE           ; Horizontal Movement
 
 ; Reset stack to RESBL
-    TXA                 
+    TXA
     LDX #$1F
     TXS
-    TAX                 
+    TAX
 
 ; Draw starfield
     LDY vline
@@ -249,7 +249,7 @@ NotDraw
     STA GRP1
 
     LDY vline
-; Ok, the miraculous skipping code 
+; Ok, the miraculous skipping code
 ; I'm trying to comment that as good as possible... :-)
 
     CPY #$02            ; Y: Are we already to close to the bottom?
@@ -307,7 +307,7 @@ Radar
     STY ENAM1
 
     LDY #$04
-LaserHeatLoop    
+LaserHeatLoop
     STA WSYNC
     STA HMOVE
     LDX laserHeat
@@ -338,9 +338,9 @@ LaserHeatLoop
     STA HMOVE
     STY PF1
     STY PF2
-    INY             ; Unnecessary, but I left them 
+    INY             ; Unnecessary, but I left them
     STY GRP0        ;
-    STY GRP1        ; 
+    STY GRP1        ;
     STY ENABL       ; to keep the timing intact
     LDA #$1F
     STA vline
@@ -448,7 +448,7 @@ NextLine2
 ; To reposition or not to reposition?
     CMP radarY,X
     BNE Notstart2        ; N: Skip first kernel part
-    
+
     TAY
     LDA radarsprite,Y
     STA GRP1
@@ -459,7 +459,7 @@ NextLine2
     STA HMM0
     AND #$0F
     TAY
-; Go! Position it!  
+; Go! Position it!
 PosLoop3
     DEY
     BPL PosLoop3
@@ -514,7 +514,7 @@ RadarDone
     STA TIM64T          ; 30 lines overscan
 
 ;-----------------------------------------------------------
-; BANKSWITCH 
+; BANKSWITCH
 ;-----------------------------------------------------------
 
     LDY #$01            ; Game Over!
@@ -564,7 +564,7 @@ MainGame
     STA gameState       ; Game on!
     STA crashCounter    ; No Crash!
     STA warpCounter     ; No Warp!
-    STA shipCounter     
+    STA shipCounter
     STA specialon
     STA audioVolume
     STA expCounter
@@ -587,7 +587,7 @@ ClearRadar
     LDA #$05
     STA CTRLPF          ; Refleceted high priority PF
 
-; Init correct GFX page    
+; Init correct GFX page
     LDX #>tieshape08
     LDA waveCounter
     AND #%00000010
@@ -674,7 +674,7 @@ SlowLaserRecover
     BPL LaserHeatOk
     LDA #$00
     STA laserHeat
-LaserHeatOk    
+LaserHeatOk
 
     INC frameCounter
     BNE .WaveTimerOk
@@ -766,7 +766,7 @@ ChannelDone
     LDY #$00
     STY p0count ; Assume no half-sprite
 
-; Loop over all space objects, try finding the top 
+; Loop over all space objects, try finding the top
 ; half-sprite, if it exists
 
     LDX #MAXOBJECTS-1   ; all objects
@@ -776,7 +776,7 @@ SearchHalfSprite
     BMI TryNext         ; Sprite invisible, bail out
     LDY sprtsizetype,X  ; Preload Y with type
     LDA ypos,X          ; Sprite start already below screen start
-    CMP #$42            ; Sprite starts on top of screen 
+    CMP #$42            ; Sprite starts on top of screen
     BCC Loop2           ; Bail out!
     SBC shapeheight,Y   ; ypos-height
     STA tempVar1        ; Store temporary
@@ -818,7 +818,7 @@ BackgroundFine
     STA tempVar2
 
     LDY #$0C
-    
+
     JSR AnyRTS
     NOP
     NOP
@@ -843,7 +843,7 @@ ShieldLine
     LDX tempVar2
     BMI SkipoWait
 
-ShieldLoop    
+ShieldLoop
     DEX
     BNE ShieldLoop
 
@@ -871,7 +871,7 @@ DoHalfSprite
     SBC tempVar1
 FullSprite
     STA p0count         ; Store the remaing sprite lines
-    LDA shapeclrtab,Y   
+    LDA shapeclrtab,Y
     CPY #$07
     BCS .NoMothership4
     CPY #$03
@@ -903,7 +903,7 @@ FullSprite
 ;-----------------------------------------------------------
 ;FLICKER SORT SUB
 ;-----------------------------------------------------------
-   
+
 FlickerSort:
     LDX #MAXOBJECTS-2
 SortLoop:
@@ -942,7 +942,7 @@ DontSwap:
     LDX #MAXOBJECTS-1
 RadarFind
     LDA ypos,X
-    CLC 
+    CLC
     ADC #$20
     BPL YValueFound
     DEX
@@ -960,14 +960,14 @@ RadarSort
     LDA warpCounter         ; No Radar when warping
     BNE SkipShip
     LDA xpos,X
-    CLC 
+    CLC
     ADC #$40
     LSR
     LSR
     LSR
     STA radarX,Y
     LDA ypos,X
-    CLC 
+    CLC
     ADC #$20
     AND #%01111111
     LSR
@@ -992,10 +992,10 @@ SkipShip
 
 ; Reading the joystick
 
-Joy     
-    LDA warpCounter     
+Joy
+    LDA warpCounter
     BNE AnyRTS      ; Don't do anything when warping
-        
+
         LDX #$00
         LDA SWCHA
 
@@ -1027,7 +1027,7 @@ UpDone
         STX tempVar2
 
 ;-----------------------------------------------------------
-;INTELLIGENT MOVE AND HANDLE ALL SPACE OBJECTS 
+;INTELLIGENT MOVE AND HANDLE ALL SPACE OBJECTS
 ;-----------------------------------------------------------
 
     LDA #$00
@@ -1059,7 +1059,7 @@ MoveNextSprite
     LDA #$07
     STA sprtsizetype,X      ; Remove Object
     BNE .Spritedone2
-    
+
 .Incoming2
     LDA sprtsizetype,x
     ADC #$06
@@ -1084,7 +1084,7 @@ NoShipSprite
     LDA scoretab2,y      ; difficulty B
 HigherScores2
     JSR AddScore
-    
+
 .GateCollisionDone
     LDA #%00000110
     STA tempVar4            ; gates are very quick on z axxis
@@ -1150,11 +1150,11 @@ NodiamondSprite
     BPL .ShieldDone
 
     LDA #$01                ; Game Over!
-    STA gameState       
+    STA gameState
     LDA #$80
     STA crashCounter
     BNE .RemoveShot
-    
+
 .ShieldDone
     LDA #$10                 ; We're hit!
     STA crashCounter
@@ -1218,7 +1218,7 @@ NoMotherSpawn
     CMP #$C0            ; Spawn a Diamond?
     BNE NoDiamondSpawn
     JMP AddDiamond      ; Spawn a Diamond!
-    
+
 NoDiamondSpawn
     LDA shotCounter     ; Spawn a Shot?
     BNE .NoSpawn
@@ -1248,7 +1248,7 @@ NoStarDestroyer2
     INC ypos,X
 NoSlaveI2
 
-    TYA     
+    TYA
     BNE .Spritedone3    ; Mothership was hit?
 
     LDA #$01            ; Shot sound
@@ -1295,11 +1295,11 @@ NoMothership
     LDA frameCounter
     LSR                 ; Preset carry!
     LDA laserCounter
-    BMI .CheckFire       
+    BMI .CheckFire
     BCC .DontCount
     SBC #$04
     STA laserCounter
-    BMI .CheckFire       
+    BMI .CheckFire
 .DontCount
     TAY
     LDA laserxpos,Y
@@ -1350,7 +1350,7 @@ Handlerdone
 AddShip
     JSR Random
     STA zmov,x
-    ORA #%10000000       
+    ORA #%10000000
     STA xpos,X
     AND #$0F
     STA xymov,x
@@ -1426,7 +1426,7 @@ AddShot
     LDA #$00
     STA xymov,X
     LDA tempVar3
-    LSR 
+    LSR
     ORA #$10            ; Shotsize depends on enemy size!
     STA sprtsizetype,X
     LDA #$08            ; Shot sound
@@ -1577,7 +1577,7 @@ HigherScores
 
     LDA #$00
     STA xymov,X         ; Clear movement
-  
+
     LDY #$03
     LDA sprtsizetype,X  ; SoundFX
     CMP #$07
@@ -1588,7 +1588,7 @@ SpecialSFX
 
     LDA #$40
     STA expCounter
-  
+
     LDA sprtsizetype,X
     AND #%00000110
     ORA #%00001000
@@ -1627,7 +1627,7 @@ AddGate
     STA audioFreq       ; ...It's increased from there
 
     JMP Spritedone
-.GateDone3    
+.GateDone3
     JMP NoDiamondSpawn
 
 AddDiamond
@@ -1657,7 +1657,7 @@ AddDiamond
     JMP Spritedone
 
 ;-----------------------------------------------------------
-;Z MOVEMENT 
+;Z MOVEMENT
 ;-----------------------------------------------------------
 
 ZMovement
@@ -1738,7 +1738,7 @@ Starfield
     AND #$01
     ADC #NUM_STARS-2
     TAX
-    
+
 .MoveStars
     LDA    StarPosY,X
     LSR
@@ -1822,15 +1822,15 @@ SkipStarsMove
     STA HMOVE             ;
     STA WSYNC
     STA HMCLR
-    RTS       
+    RTS
 
 
-      
+
 ;-----------------------------------------------------------
 ;DATA BLOCK
 ;-----------------------------------------------------------
 
-    ORG     $1A00       
+    ORG     $1A00
     RORG    $DA00
 ;---------------------------------------------------------------------------
 ; Warp sequence kernel, written by Paul Slocum!
@@ -1840,7 +1840,7 @@ warplines
     ; The warp effect is an 8 frame animation.  The animation
     ; data was generated by a simple C program using a polynomial function.
 
-    ; First frame.  
+    ; First frame.
     ; (Each bit corresponds to a line on the screen.
     ; The data is read forwards for the top half of the display and
     ; backwards for the bottom.)
@@ -1915,7 +1915,7 @@ ShowWarp
 
     ; top half
     ldy #0
-ScanLoop2   
+ScanLoop2
 ;---------------------------------------------------------------------------
     ldx #128
 InnerLoop2
@@ -1942,7 +1942,7 @@ NoLine2
     ; bottom half
     ldy #7
     sty AUDF0
-ScanLoop    
+ScanLoop
 ;---------------------------------------------------------------------------
     ldx #1
 InnerLoop
@@ -2767,7 +2767,7 @@ scoretab2
 shiptab
     .byte 2
     .byte 3
-    .byte 3 
+    .byte 3
     .byte 4
 
 shotcounttab
@@ -2854,7 +2854,7 @@ curBit          ds 1                ; 0..7
 curLetter       ds 1                ; 0..9
 logoCol         ds 1
 charPtr         ds.w 6
-beat            ds 1 
+beat            ds 1
 tempoCount      ds 1
 measure         ds 1
 logo            ds 6*INTROLINES
@@ -3223,11 +3223,11 @@ ContinueScore
 
     SED
     LDA bcdWave
-    CLC 
+    CLC
     ADC #$01
     STA tempVar2
     CLD
-    
+
     LDX #11
     LDA tempVar2         ; load low/high values of states
     AND #$0F            ; select lower nibble
@@ -3239,9 +3239,9 @@ ContinueScore
     LDA digittab,Y      ; Load pointer to desired value
     STA charPtr,X       ; Store sprite pointer
     DEX
-    DEX 
+    DEX
     LDA tempVar2         ; load low/high values of states
-    LSR                 ; select higher nibble... 
+    LSR                 ; select higher nibble...
     LSR                 ; ...of status value (bcd!)
     LSR                 ; (numbers 0-9)
     LSR                 ;
@@ -3283,9 +3283,9 @@ NextDigit
     LDA digittab,Y      ; Load pointer to desired value
     STA charPtr,X       ; Store sprite pointer
     DEX
-    DEX 
+    DEX
     LDA tempVar3         ; load low/high values of states
-    LSR                 ; select higher nibble... 
+    LSR                 ; select higher nibble...
     LSR                 ; ...of status value (bcd!)
     LSR                 ; (numbers 0-9)
     LSR                 ;
@@ -3341,7 +3341,7 @@ OverScanIntro SUBROUTINE
     STA TIM64T          ; 30 lines overscan
 
 ;-----------------------------------------------------------
-; BANKSWITCH 
+; BANKSWITCH
 ;-----------------------------------------------------------
 
     LDA delayTimer
@@ -3399,7 +3399,7 @@ StartReset
     STX tempoCount
     STX measure
     INX
-    STX gameState   
+    STX gameState
     LDX #$05
     STX shieldState
     LDX bcdWaveBak
@@ -3412,7 +3412,7 @@ StartScore
     BNE StartReset
 
     ; Increment Wave
-    SED                 
+    SED
     LDA bcdWave
     CLC
     ADC #$01
@@ -3428,7 +3428,7 @@ StartScore
     STY GRP0
     STY AUDV0
     STY AUDV1
-    
+
     LDA #$40
     STA delayTimer
 
@@ -3466,7 +3466,7 @@ OverscanLoop2
     bne     OverscanLoop2
 
     VERTICAL_SYNC
-    
+
     JMP MainLoop
 
 BurnXLines
@@ -3741,7 +3741,7 @@ Score3:
     .byte   %10100010
     .byte   %10100011
     .byte   %10100010
-    .byte   %00011001 
+    .byte   %00011001
     .byte   %00000000
     .byte   %00000000
 

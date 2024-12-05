@@ -6,6 +6,8 @@
 
        include vcs.h
 
+VDEL01  =  $26 ;Vertical Delay Player 1
+
        ORG $1000
 
 START:
