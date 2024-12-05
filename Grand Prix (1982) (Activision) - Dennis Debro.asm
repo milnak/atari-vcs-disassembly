@@ -39,20 +39,20 @@
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -69,7 +69,7 @@
    ENDIF
 
    LIST ON
-   
+
 ;===============================================================================
 ; A S S E M B L E R - S W I T C H E S
 ;===============================================================================
@@ -108,13 +108,13 @@ VBLANK_TIME             = 54
 OVERSCAN_TIME           = 30
 
    ELSE
-   
+
 FPS                     = 50        ; ~50 frames per second
 VBLANK_TIME             = 80
 OVERSCAN_TIME           = 63
-   
+
    ENDIF
-   
+
 MICROSECONDS_PER_FRAME  = 16686
 MICRO_SECONDS_BCD       = $16
 
@@ -238,7 +238,7 @@ GAME_IN_PROGRESS        = %10000000
    MAC SLEEP_3
       lda div16Remainder
    ENDM
-   
+
    MAC SLEEP_5
       dec div16Remainder
    ENDM
@@ -1340,7 +1340,7 @@ JumpIntoConsoleSwitchCheck
    sta playerSpeed
 .bplToSetMaxSpeed
    bpl .setMaximumPlayerSpeed       ; unconditional branch
-   
+
 .incrementPlayerSpeed
    sta colorCycleMode
    inc playerSpeed
@@ -1484,7 +1484,7 @@ JumpIntoConsoleSwitchCheck
    ldy #<(~MOVE_UP) >> 4            ; move player up
 .setOilSlickSlideDirection
    tya                              ; move vertical movement to accumulator
-   ora joystickValue                
+   ora joystickValue
    sta joystickValue                ; set new vertical movement
 .checkForCrashSpinning
    lda crashTimer                   ; get current crash timer value
@@ -2048,7 +2048,7 @@ SkipPlayerDrawObstacleSection
 CrashValueSpeedReductions
    .byte SPEED_MIN + 8, SPEED_MIN + 16
    .byte SPEED_MIN + 32, SPEED_MIN + 48
-   
+
 RandomXORTable
    .byte $17, $46, $92, $00
 
@@ -2382,7 +2382,7 @@ OilSlickAnimation_00
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 CarAnimation_01
    .byte $00 ; |........|
    .byte $1F ; |...XXXXX|
@@ -2614,7 +2614,7 @@ CarAnimation_01
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 OilSlickAnimation_01
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -2648,7 +2648,7 @@ OilSlickAnimation_01
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 CarAnimation_02
    .byte $00 ; |........|
    .byte $1F ; |...XXXXX|
@@ -2916,7 +2916,7 @@ OilSlickAnimation_02
    .byte $00 ; |........|
 
    BOUNDARY 0
-   
+
 NumberFonts
 zero
    .byte $79 ; |.XXXX..X|
@@ -3093,7 +3093,7 @@ PlayfieldGraphicIndexValues
    .byte <rightPF2GraphicData - playfieldGraphicData
    .byte <rightPF2GraphicData - playfieldGraphicData
    .byte <rightPF2GraphicData - playfieldGraphicData
-   
+
 InitObstacleCoarseMoveValues
    .byte 4, 0, 0, 0, 0
 
@@ -3112,7 +3112,7 @@ ObstacleSpeedMaskValues
    .byte $30
    .byte $0C
    .byte $03
-   
+
 DecimalGraphicMask
    .byte %11111111
    .byte %11111111
@@ -3122,7 +3122,7 @@ DecimalGraphicMask
    .byte %11111110
    .byte %11111110
    .byte %11111110
-   
+
 ObstacleRightGraphicLSBValue
    .byte H_SPRITES * 6
    .byte H_SPRITES * 5

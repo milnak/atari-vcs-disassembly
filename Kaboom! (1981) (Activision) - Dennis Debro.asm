@@ -17,7 +17,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1981, ACTIVISION                                   =
+; = THE ASSEMBLED CODE IS ï¿½ 1981, ACTIVISION                                   =
 ; =                                                                            =
 ; ==============================================================================
 
@@ -25,20 +25,20 @@
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -71,7 +71,7 @@ FALSE                   = 0
 COMPILE_REGION          = NTSC      ; change to compile for different regions
 
    ENDIF
-   
+
    IF !(COMPILE_REGION = NTSC || COMPILE_REGION = PAL50)
 
       echo ""
@@ -95,7 +95,7 @@ OVERSCAN_TIME           = 33
    ELSE
 
 FPS                     = 50        ; ~50 frames per second
-VBLANK_TIME             = 79   
+VBLANK_TIME             = 79
 OVERSCAN_TIME           = 61
 
    ENDIF
@@ -108,7 +108,7 @@ BLACK                   = $00
 WHITE                   = $0E
 
    IF COMPILE_REGION = NTSC
-   
+
 YELLOW                  = $10
 BRICK_RED               = $30
 RED                     = $40
@@ -136,7 +136,7 @@ LOGO_COLOR              = WATER_COLOR
 ;===============================================================================
 
 ROM_BASE                = $F000
-   
+
 SELECT_DELAY            = 30
 
 PADDLE_MIN              = 2
@@ -192,7 +192,7 @@ CATCHING_BOMB_FREQ      = 16
 ;===============================================================================
    SEG.U variables
    .org $80
-   
+
 gameSelection           ds 1
 frameCount              ds 1
 randomSeed              ds 1
@@ -266,7 +266,7 @@ bombGraphicPointer      = digitPointer + 6
 
    SEG Bank0
    .org ROM_BASE
-   
+
 Start
 ;
 ; Set up everything so the power up state is known.
@@ -281,7 +281,7 @@ Start
    inx
    bne .clearLoop
    jmp JumpIntoConsoleSwitchCheck
-   
+
 MainLoop
    ldx #18
 .loadColorsLoop
@@ -346,7 +346,7 @@ DisplayKernel SUBROUTINE
    sta GRP0                   ; 3 = @48
    ldy loopCount              ; 3
    dey                        ; 2
-   bpl .scoreLoop             ; 2³
+   bpl .scoreLoop             ; 2ï¿½
    iny                        ; 2 = @57   y = 0
    lda bombLSB                ; 3         get the bomb LSB to store in
    sta bombGraphicPointer     ; 3         the graphic pointer for animation
@@ -363,7 +363,7 @@ DisplayKernel SUBROUTINE
    tax                        ; 2
 .coarseMoveBomb
    dex                        ; 2
-   bpl .coarseMoveBomb        ; 2³
+   bpl .coarseMoveBomb        ; 2ï¿½
    sta RESP0                  ; 3         set bomb's coarse position
    sta WSYNC
 ;--------------------------------------
@@ -377,7 +377,7 @@ DisplayKernel SUBROUTINE
    lda bombDropVelocity       ; 3         subtraction must start @ cycle 22
 .coarseMoveMadBomber
    dex                        ; 2
-   bpl .coarseMoveMadBomber   ; 2³
+   bpl .coarseMoveMadBomber   ; 2ï¿½
    sta RESP1                  ; 3         set bomber's coarse position
    sta WSYNC
 ;--------------------------------------
@@ -388,11 +388,11 @@ DisplayKernel SUBROUTINE
    lda playerScore            ; 3         get the player's score (MSB)
    cmp #1                     ; 2         see if the player scored >= 100,000
    ror bomberExpressionState  ; 5         rotate carry into D7
-   bmi DrawMadBomber          ; 2³
+   bmi DrawMadBomber          ; 2ï¿½
    lda bombExplodingTimer     ; 3
-   bne .colorMadBomberLoop    ; 2³
+   bne .colorMadBomberLoop    ; 2ï¿½
    lda remainingBuckets       ; 3
-   beq .colorMadBomberLoop    ; 2³
+   beq .colorMadBomberLoop    ; 2ï¿½
 DrawMadBomber
    lda MadBomberColors,x      ; 4
    eor colorEOR               ; 3
@@ -402,32 +402,32 @@ DrawMadBomber
    sta COLUP1                 ; 3 = @03
    lda MadBomber,x            ; 4
    cpx #22                    ; 2         are we drawing Bomber's upper mouth
-   bne .checkForLowerMouth    ; 2³        if not check lower mouth
+   bne .checkForLowerMouth    ; 2ï¿½        if not check lower mouth
    lda #%01101100             ; 2         Mad Bomber frown graphic
 .checkForLowerMouth
-   bcs .drawMadBomber         ; 2³
+   bcs .drawMadBomber         ; 2ï¿½
    lda #%01101100             ; 2         Mad Bomber surprise graphic
    bit bomberExpressionState  ; 3
-   bmi .drawMadBomber         ; 2³
+   bmi .drawMadBomber         ; 2ï¿½
    lda #%01010100             ; 2         Mad Bomber smile graphic
 .drawMadBomber
    sta GRP1                   ; 3
    dey                        ; 2
    dex                        ; 2
    cpx #21                    ; 2
-   bcs DrawMadBomber          ; 2³
+   bcs DrawMadBomber          ; 2ï¿½
 .colorMadBomberLoop
    lda MadBomberColors,x      ; 4
    eor colorEOR               ; 3
    and hueMask                ; 3
    cpx #3                     ; 2
-   bne .colorMadBomber        ; 2³ + 1    crosses page boundary
+   bne .colorMadBomber        ; 2ï¿½ + 1    crosses page boundary
    lda backgroundColor        ; 3
    sta WSYNC                  ; 3
 ;--------------------------------------
    sta COLUBK                 ; 3 = @03
    jmp .drawBombHeldByBomber  ; 3
-   
+
 .colorMadBomber
    sta WSYNC                  ; 3
 ;--------------------------------------
@@ -441,21 +441,21 @@ DrawMadBomber
    sta GRP0                   ; 3 = @23
    dey                        ; 2
    cpy #H_BOMB                ; 2
-   bcs .skipDrawHeldBomb      ; 2³
+   bcs .skipDrawHeldBomb      ; 2ï¿½
    lda (bombGraphicPointer),y ; 5
    sta tempBombGraphic        ; 3
 .skipDrawHeldBomb
    dex                        ; 2
-   bpl .colorMadBomberLoop    ; 2³ + 1    crosses page boundary
+   bpl .colorMadBomberLoop    ; 2ï¿½ + 1    crosses page boundary
    lda SWCHB                  ; 4         read the console switches
    ldx playerNumber           ; 3         get the current player number
-   bne .onePlayerGame         ; 2³        get player 1 difficulty value
+   bne .onePlayerGame         ; 2ï¿½        get player 1 difficulty value
    asl                        ; 2         shift to get difficulty in carry
 .onePlayerGame
    asl                        ; 2
    lda #ONE_COPY              ; 2
    sta bombNumber             ; 3         reset bomb number at kernel start
-   bcs .skipDoubleSizeBuckets ; 2³
+   bcs .skipDoubleSizeBuckets ; 2ï¿½
    lda #DOUBLE_SIZE           ; 2
 .skipDoubleSizeBuckets
    sta WSYNC                  ; 3
@@ -468,7 +468,7 @@ DrawMadBomber
    lda #0                     ; 2
    sta GRP1                   ; 3 = @21   clear the Mad Bomber graphic
    sta CXCLR                  ; 3 = @24   clear all previous collisions
-   bcc .calibratePaddle       ; 2³        branch if difficulty set to AMATEUR
+   bcc .calibratePaddle       ; 2ï¿½        branch if difficulty set to AMATEUR
    lda #10                    ; 2
 .calibratePaddle
    clc                        ; 2
@@ -479,15 +479,15 @@ DrawMadBomber
    lda #H_KERNEL              ; 2         get the kernel height
    sta scanline               ; 3         store it (decremented in kernel)
    dey                        ; 2
-   bmi StartBombKernel        ; 2³
+   bmi StartBombKernel        ; 2ï¿½
 .topDroppingBombKernel
    cpy #H_BOMB                ; 2
-   bcc .drawTopDroppingBomb   ; 2³
+   bcc .drawTopDroppingBomb   ; 2ï¿½
    sta WSYNC                  ; 3
 ;--------------------------------------
    dec scanline               ; 5
    dey                        ; 2
-   bne .topDroppingBombKernel ; 2³
+   bne .topDroppingBombKernel ; 2ï¿½
 .drawTopDroppingBomb
    lda (bombGraphicPointer),y ; 5
    sta WSYNC                  ; 3
@@ -497,11 +497,11 @@ DrawMadBomber
    sta COLUP0                 ; 3 = @10   color the bomb
    dec scanline               ; 5         reduce the scanline count
    lda INPT0,x                ; 4         read the paddle controller
-   bmi .skipReducePaddleValue ; 2³        check if capacitor charged
+   bmi .skipReducePaddleValue ; 2ï¿½        check if capacitor charged
    dec paddleValue            ; 5
 .skipReducePaddleValue
    dey                        ; 2
-   bpl .drawTopDroppingBomb   ; 2³
+   bpl .drawTopDroppingBomb   ; 2ï¿½
 StartBombKernel SUBROUTINE
    sta WSYNC                  ; 3
 ;--------------------------------------
@@ -514,7 +514,7 @@ StartBombKernel SUBROUTINE
    tay                        ; 2         move to y for coarse movement
 .coarseMoveBomb
    dey                        ; 2
-   bpl .coarseMoveBomb        ; 2³
+   bpl .coarseMoveBomb        ; 2ï¿½
    sta RESP0                  ; 3         set bomb's coarse position
    sta WSYNC                  ; 3
 ;--------------------------------------
@@ -528,7 +528,7 @@ StartBombKernel SUBROUTINE
    tay                        ; 2         move to y for coarse movement
 .coarseMoveBuckets
    dey                        ; 2
-   bpl .coarseMoveBuckets     ; 2³
+   bpl .coarseMoveBuckets     ; 2ï¿½
    sta RESP1                  ; 3         set bucket's coarse position
    sta WSYNC                  ; 3
 ;--------------------------------------
@@ -539,7 +539,7 @@ StartBombKernel SUBROUTINE
    lda bombColors - 1,y       ; 4         get the bomb colors to
    sta COLUP0                 ; 3         color the bomb
    lda INPT0,x                ; 4         read the paddle controller
-   bmi .skipReducePaddleValue ; 2³        check if capacitor charged
+   bmi .skipReducePaddleValue ; 2ï¿½        check if capacitor charged
    dec paddleValue            ; 5         reduce paddle value if not charged
 .skipReducePaddleValue
    dey                        ; 2
@@ -548,7 +548,7 @@ DroppingBombKernel SUBROUTINE
 .drawBomb
    lda bombNumber             ; 3         get the current bomb number
    cmp explodingBombNumber    ; 3         skip the explosion random colors
-   bne .skipExplosionColor    ; 2³        if this is not an exploding bomb
+   bne .skipExplosionColor    ; 2ï¿½        if this is not an exploding bomb
    lda randomSeed             ; 3         get the random number
    sta bombColors - 1,y       ; 5         set the color of the bomb explosion
 .skipExplosionColor
@@ -560,13 +560,13 @@ DroppingBombKernel SUBROUTINE
    sta COLUP0                 ; 3 = @10   color the bomb
 .bombKernelLoop
    dec scanline               ; 5
-   beq DrawBucketKernel       ; 2³ + 1    crosses page boundary
+   beq DrawBucketKernel       ; 2ï¿½ + 1    crosses page boundary
    lda INPT0,x                ; 4         read the paddle controller
-   bmi .skipReducePaddleValue ; 2³        check if capacitor charged
+   bmi .skipReducePaddleValue ; 2ï¿½        check if capacitor charged
    dec paddleValue            ; 5         reduce paddle value if not charged
 .skipReducePaddleValue
    dey                        ; 2
-   bpl .drawBomb              ; 2³
+   bpl .drawBomb              ; 2ï¿½
    inc bombNumber             ; 5         increment bomb number
    ldy bombNumber             ; 3         load y with bomb number for index
    lda bombLSB,y              ; 4         get the bomb's sprite LSB
@@ -582,20 +582,20 @@ DroppingBombKernel SUBROUTINE
    tay                        ; 2         move to y for coarse movement
 .coarseMoveBomb
    dey                        ; 2
-   bpl .coarseMoveBomb        ; 2³
+   bpl .coarseMoveBomb        ; 2ï¿½
    sta RESP0                  ; 3         set bomb's coarse position
    sta WSYNC
 ;--------------------------------------
    sta HMOVE                  ; 3
    ldy #H_BOMB                ; 2
    dec scanline               ; 5
-   beq JumpIntoBucketKernel   ; 2³ + 1    crosses page boundary
+   beq JumpIntoBucketKernel   ; 2ï¿½ + 1    crosses page boundary
    bne .bombKernelLoop        ; 3         unconditional branch
-   
+
 DrawBucketKernel SUBROUTINE
    ldx #H_BUCKETS * MAX_BUCKETS;2
    dey                        ; 2
-   bmi .doNextBomb            ; 2³
+   bmi .doNextBomb            ; 2ï¿½
    bpl .determineBombColor    ; 3         unconditional branch
 
 JumpIntoBucketKernel
@@ -605,14 +605,14 @@ JumpIntoBucketKernel
    stx tempXHolder            ; 3
    ldx playerNumber           ; 3         get the current player number
    lda INPT0,x                ; 4         read the paddle controller
-   bmi .resetKernelScanline   ; 2³        check if capacitor charged
+   bmi .resetKernelScanline   ; 2ï¿½        check if capacitor charged
    dec paddleValue            ; 5         reduce paddle value if not charged
 .resetKernelScanline
    ldx tempXHolder            ; 3
 .determineBombColor
    lda bombNumber             ; 3         get the current bomb number
    cmp explodingBombNumber    ; 3         skip the explosion random colors
-   bne .skipExplosionColor    ; 2³        if this is not an exploding bomb
+   bne .skipExplosionColor    ; 2ï¿½        if this is not an exploding bomb
    lda BucketColors - 1,x     ; 4         get the bucket colors
    and hueMask                ; 3
    sta WSYNC
@@ -621,7 +621,7 @@ JumpIntoBucketKernel
    lda.w randomSeed           ; 4         get the random number
    sta COLUP0                 ; 3 = @10   set the color of the bomb explosion
    jmp .drawBucket            ; 3
-   
+
 .skipExplosionColor
    lda BucketColors - 1,x     ; 4
    eor colorEOR               ; 3
@@ -637,15 +637,15 @@ JumpIntoBucketKernel
    lda (bombGraphicPointer),y ; 5
    sta GRP0                   ; 3 = @28
    dex                        ; 2
-   beq CopyrightKernel        ; 2³
+   beq CopyrightKernel        ; 2ï¿½
    dey                        ; 2
 .nextBucket
-   bpl .drawBucketKernelLoop  ; 2³
+   bpl .drawBucketKernelLoop  ; 2ï¿½
 .doNextBomb
    inc bombNumber             ; 5         increment bomb number
    ldy bombNumber             ; 3         load y with bomb number for index
    bit CXPPMM                 ; 3         check player to player collisions
-   bmi .bombCaught            ; 2³        branch if P0 and P1 collide
+   bmi .bombCaught            ; 2ï¿½        branch if P0 and P1 collide
    sty bombIndexCaught        ; 3
 .bombCaught
    lda bombLSB,y              ; 4         get the bomb's sprite LSB
@@ -665,7 +665,7 @@ JumpIntoBucketKernel
    sta GRP1                   ; 3 = @22
 .coarseMoveBomb_b
    dey                        ; 2
-   bpl .coarseMoveBomb_b      ; 2³
+   bpl .coarseMoveBomb_b      ; 2ï¿½
    sta RESP0                  ; 3
    lda BombColors + 13,x      ; 4
    eor colorEOR               ; 3
@@ -673,14 +673,14 @@ JumpIntoBucketKernel
 ;--------------------------------------
    sta HMOVE                  ; 3
    dex                        ; 2
-   beq .jmpIntoCopyrightKernel; 2³
+   beq .jmpIntoCopyrightKernel; 2ï¿½
    and hueMask                ; 3
    sta COLUP1                 ; 3 = @13
    lda bucketGraphics - 1,x   ; 4
    sta GRP1                   ; 3 = @20
    ldy #H_BOMB - 1            ; 2
    dex                        ; 2
-   bne .nextBucket            ; 2³
+   bne .nextBucket            ; 2ï¿½
 CopyrightKernel
    sta WSYNC
 ;--------------------------------------
@@ -722,7 +722,7 @@ CopyrightKernel
    sty GRP1                   ; 3 = @45
    sta HMCLR                  ; 3 = @48
    dex                        ; 2
-   bpl .activisionLogoLoop    ; 2³
+   bpl .activisionLogoLoop    ; 2ï¿½
 Overscan SUBROUTINE
    lda #OVERSCAN_TIME
    sta TIM64T                       ; set timer for overscan
@@ -772,7 +772,7 @@ CalculateBucketPosition
    dey
    beq .clearThirdRowBucket
    bne .nextBucketGraphicLine       ; unconditional branch
-   
+
 .clearFirstRowBucket
    sty firstRowBucketGraphics,x
 .clearSecondRowBucket
@@ -799,7 +799,7 @@ StoreSplashGraphics
    inx
    dec splashGraphicLoopCount
    bpl .storeBucketSplashGraphics
-VerticalSync SUBROUTINE   
+VerticalSync SUBROUTINE
 .waitTime
    lda INTIM                        ; wait until overscan is done
    bne .waitTime
@@ -857,7 +857,7 @@ ReadConsoleSwitches
    beq .incrementGameSelection      ; if it's zero -- increase game selection
    dec selectDebounce               ; decrement select debounce
    bpl .skipGameSelect              ; unconditional branch
-   
+
 .incrementGameSelection
    inc gameSelection
 JumpIntoConsoleSwitchCheck
@@ -880,7 +880,7 @@ JumpIntoConsoleSwitchCheck
    and #$7F
    bne .jumpToPlayGameSounds
    beq SwitchToOtherPlayer          ; unconditional branch
-       
+
 CheckForExplodingBombs
    lda bombExplodingTimer           ; get the exploding bomb timer
    beq DoneExplodingBombs
@@ -890,7 +890,7 @@ CheckForExplodingBombs
 .setExplodingBombSprite
    lda bombExplodingTimer           ; get the exploding bomb timer
    and #$0C
-   asl                              ; multiply by 4 (i.e. 12 * 4 = 
+   asl                              ; multiply by 4 (i.e. 12 * 4 =
    asl                              ; NUM_EXPLODE_ANIM * H_BOMB = 48)
    adc #<ExplodingBombs
    ldx explodingBombNumber
@@ -957,7 +957,7 @@ SwitchToOtherPlayer
    ldx #WAIT_LEVEL_START
    stx gameState
    bne .jumpToPlayGameSounds        ; unconditional branch
-       
+
 DoneExplodingBombs
    bit gameState
    bpl DetermineMadBomberMovement
@@ -973,7 +973,7 @@ DoneExplodingBombs
 .fireButtonNotPressed
    sta bombDropVelocity
    jmp .setBombHorizPos
-       
+
 DetermineMadBomberMovement
    lda frameCount                   ; get the current frame number
    and #$0F                         ; mask the upper nybble
@@ -1003,7 +1003,7 @@ DetermineMadBomberMovement
    ldx #MAD_BOMBER_TRAVELING_RIGHT  ; show bomber is traveling right
    lda #XMIN
    bne .setMadBomberDirection       ; unconditional branch
-       
+
 .moveMadBomberLeft
    cmp #XMAX
    bcc .setMadBomberPosition
@@ -1089,7 +1089,7 @@ SetFallingBombs
    dex
    bpl .setFallingBombsLoop
    jmp .bombLoop
-       
+
 BombAnimation
    ldx #MAX_BOMBS
 .bombAnimationLoop
@@ -1213,7 +1213,7 @@ DetermineSoundFrequency SUBROUTINE
 .setFrequencyAndChannel
    stx AUDF0
    sty AUDC0
-BCD2DigitPtrs       
+BCD2DigitPtrs
    ldy #2
 .bcd2DigitLoop
    tya                              ; move y to accumulator
@@ -1247,7 +1247,7 @@ BCD2DigitPtrs
    inx
    cpx #10
    bcc .suppressZeroLoop
-   
+
 .doneBCD2Digits
    jmp MainLoop
 
@@ -1271,7 +1271,7 @@ NextRandom
    sta randomSeed
 .leaveNextRandom
    rts
-   
+
 CalcPosX
    ldy #<-1
    sec
@@ -1297,18 +1297,18 @@ MadBomberColors
    .byte BLACK + 12, BLACK + 2, BRICK_RED + 8, BRICK_RED + 10, BRICK_RED + 10
    .byte BRICK_RED + 10, BRICK_RED + 10, BRICK_RED + 10, BRICK_RED + 8
    .byte BLACK + 2, BLACK + 2, BLACK + 2, YELLOW + 4, YELLOW + 2, YELLOW
-   
+
 GameColors
    .byte BLACK + 6                  ; Bomber area background color
    .byte GREEN + 4                  ; player area background color
    .byte YELLOW + 10                ; player1 score color
    .byte RED + 2                    ; player2 score color
-   
+
 BombColors
    .byte BLACK, BLACK + 2, BLACK + 4, BLACK + 6, BLACK + 6, BLACK + 4, BLACK + 2
    .byte BLACK, BLACK + 8, BLACK + 8, BLACK + 8, BLACK + 8, RED + 14, RED + 14
    .byte RED+14
-   
+
 BucketColors
    REPEAT 3
       .byte YELLOW + 2, YELLOW + 2, YELLOW + 4, YELLOW + 4, YELLOW + 6
@@ -1319,7 +1319,7 @@ BucketColors
       .byte BLUE + 8, BLUE + 8, BLUE + 8, BLUE + 8, BLUE + 8, BLUE + 8
       .byte BLUE + 8, BLUE + 8
    REPEND
-   
+
 Copyright0
    .byte $00 ; |........|
    .byte $AD ; |X.X.XX.X|
@@ -1387,7 +1387,7 @@ MadBomber
    .byte $7C ; |.XXXXX..|
    .byte $7C ; |.XXXXX..|
    .byte $38 ; |..XXX...|
-   
+
 MaxBombsPerGroup
    .byte MAX_BOMBS_GROUP1 - 1, MAX_BOMBS_GROUP2, MAX_BOMBS_GROUP3, MAX_BOMBS_GROUP4
    .byte MAX_BOMBS_GROUP5, MAX_BOMBS_GROUP6, MAX_BOMBS_GROUP7, MAX_BOMBS_GROUP8
@@ -1396,9 +1396,9 @@ MaxBombsPerGroup
 ; they had intended the bomb groups to go to 10.
 ;
    .byte 255, 255, 240
-   
+
    BOUNDARY 0
-   
+
 Blank
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -1623,7 +1623,7 @@ ExplodingBomb0
    .byte $12 ; |...X..X.|
    .byte $A0 ; |X.X.....|
    .byte $04 ; |.....X..|
-ExplodingBomb1       
+ExplodingBomb1
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $52 ; |.X.X..X.|
@@ -1657,10 +1657,10 @@ ExplodingBomb2
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-       
+
 WaterSplashOffset
    .byte H_SPLASH * 0, H_SPLASH * 2, H_SPLASH * 4, H_SPLASH * 6
-   
+
 BucketGraphics
    .byte $FE ; |XXXXXXX.|
    .byte $AA ; |X.X.X.X.|
@@ -1678,7 +1678,7 @@ BucketGraphics
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    .org ROM_BASE + 2048 - 4, 0      ; 2K ROM
    .word Start                      ; RESET vector
    .word 0                          ; BRK vector

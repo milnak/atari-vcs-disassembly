@@ -23,7 +23,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1982, MATTEL CANADA, INC.                          =
+; = THE ASSEMBLED CODE IS ï¿½ 1982, MATTEL CANADA, INC.                          =
 ; =                                                                            =
 ; ==============================================================================
 ;
@@ -42,20 +42,20 @@ TIA_BASE_READ_ADDRESS = $00         ; set the read address base so this runs on
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -96,7 +96,7 @@ COMPILE_REGION          = NTSC      ; change to compile for different regions
       err
 
    ENDIF
-                                    
+
 ;===============================================================================
 ; F R A M E  T I M I N G S
 ;===============================================================================
@@ -108,13 +108,13 @@ VBLANK_TIME             = 34        ; vertical blanking time for 60 FPS
 OVERSCAN_TIME           = 30        ; overscan time for 60 FPS
 
    ELSE
-   
+
 FPS                     = 50        ; ~50 frames per second
 VBLANK_TIME             = 74
 OVERSCAN_TIME           = 63
 
    ENDIF
-                                    
+
 ;===============================================================================
 ; C O L O R  C O N S T A N T S
 ;===============================================================================
@@ -235,13 +235,13 @@ FREE_BYTES SET FREE_BYTES + 1
      REPEND
 
    ENDM
-   
+
 ;===============================================================================
 ; Z P - V A R I A B L E S
 ;===============================================================================
    SEG.U variables
    .org $80
-   
+
 verticalDelta           ds 1
 playerHorizValues       ds 8
 ;--------------------------------------
@@ -363,7 +363,7 @@ mountainTerrainColor    ds 1
 tempArrayPosition       ds 1
 
    echo "***",(*-$80 - 1)d, "BYTES OF RAM USED", ($100 - * + 1)d, "BYTES FREE"
-   
+
 ;===============================================================================
 ; R O M - C O D E
 ;===============================================================================
@@ -415,7 +415,7 @@ AnimateFallingObjects
 
 VerticalOffsetTable
    .byte -2, -2, 2, 2
-   
+
 AnimateFallingPulsar
    lda playerGraphicLSBValues,x     ; get Pulsar graphic LSB value
    clc
@@ -459,19 +459,19 @@ DisplayKernel
    sta tempPlayer0Graphic
    sta tempPlayer1Graphic
    jmp KernelStart
-   
+
 KernelLoop
    sta WSYNC
 ;--------------------------------------
    lda #0                     ; 2
    cpy player0GraphicOffset   ; 3
-   bcs .setGRP0GraphicValue_0 ; 2³
+   bcs .setGRP0GraphicValue_0 ; 2ï¿½
    lda (player0GraphicsPointer),y;5
 .setGRP0GraphicValue_0
    sta GRP0                   ; 3 = @15
    dey                        ; 2
    cpy player1GraphicOffset   ; 3
-   bcs .skipSetGRP1GraphicValue_0;2³
+   bcs .skipSetGRP1GraphicValue_0;2ï¿½
    lda (player1GraphicsPointer),y;5
    sta GRP1                   ; 3 = @30
 .skipSetGRP1GraphicValue_0
@@ -479,33 +479,33 @@ KernelLoop
 ;--------------------------------------
    lda #0                     ; 2
    cpy player0GraphicOffset   ; 3
-   bcs .setGRP0GraphicValue_1 ; 2³
+   bcs .setGRP0GraphicValue_1 ; 2ï¿½
    lda (player0GraphicsPointer),y;5
 .setGRP0GraphicValue_1
    sta GRP0                   ; 3 = @15
 .jmpIntoKernel
    dey                        ; 2
-   beq .prepareToDrawScoreKernel;2³
+   beq .prepareToDrawScoreKernel;2ï¿½
    cpy player1GraphicOffset   ; 3
-   bcs .skipSetGRP1GraphicValue_1;2³
+   bcs .skipSetGRP1GraphicValue_1;2ï¿½
    lda (player1GraphicsPointer),y;5
    sta GRP1                   ; 3 = @32
    jmp SetupPlayerGraphicBufferValues;3
-   
+
 .skipSetGRP1GraphicValue_1
-   beq SetupPlayerGraphicBufferValues; 2³
+   beq SetupPlayerGraphicBufferValues; 2ï¿½
 .jmpIntoKernelLoop
    cpy player0GraphicOffset   ; 3
-   bcs .jmpToDrawMountainTerrain;2³
+   bcs .jmpToDrawMountainTerrain;2ï¿½
    lda (player0GraphicsPointer),y;5
    sta tempPlayer0Graphic     ; 3
 .jmpToDrawMountainTerrain
    dey                        ; 2
    jmp .checkToDrawMountainTerrain;3
-   
+
 SetupPlayerGraphicBufferValues
    cpy player0GraphicOffset   ; 3
-   bcs .setupGRP1BufferValue  ; 2³
+   bcs .setupGRP1BufferValue  ; 2ï¿½
    lda (player0GraphicsPointer),y;5
    sta tempPlayer0Graphic     ; 3
 .setupGRP1BufferValue
@@ -518,7 +518,7 @@ SetupPlayerGraphicBufferValues
    lda tempPlayer0Graphic     ; 3
    sta GRP0                   ; 3 = @06
    cpy #32                    ; 2
-   bcs .checkForPaddleCapacitor;2³
+   bcs .checkForPaddleCapacitor;2ï¿½
    tya                        ; 2
    sta tempScanline           ; 3
    lsr                        ; 2
@@ -535,7 +535,7 @@ SetupPlayerGraphicBufferValues
    lda tempPlayer1Graphic     ; 3
    sta GRP1                   ; 3
    bit INPT1                  ; 3         read paddle 1 value
-   bmi .skipSetPaddleValue    ; 2³        branch if capacitor charged
+   bmi .skipSetPaddleValue    ; 2ï¿½        branch if capacitor charged
    sty paddleValue            ; 3
 .skipSetPaddleValue
    lda #0                     ; 2
@@ -545,46 +545,46 @@ KernelStart
    sta WSYNC
 ;--------------------------------------
    cpy player0GraphicOffset   ; 3
-   bcs .drawGRP0ForCurrentSection;2³
+   bcs .drawGRP0ForCurrentSection;2ï¿½
    lda (player0GraphicsPointer),y;5
-   beq .prepareGRP0ForNextSection;2³
+   beq .prepareGRP0ForNextSection;2ï¿½
 .drawGRP0ForCurrentSection
    sta GRP0                   ; 3 = @15
 .nextScanline
    dey                        ; 2
-   beq .prepareToDrawScoreKernel;2³
+   beq .prepareToDrawScoreKernel;2ï¿½
    cpy player1GraphicOffset   ; 3
-   bcs .jmpToKernelLoop       ; 2³
+   bcs .jmpToKernelLoop       ; 2ï¿½
    lda (player1GraphicsPointer),y;5
    sta GRP1                   ; 3 = @32
-   beq PrepareGRP1ForNextSection;2³
+   beq PrepareGRP1ForNextSection;2ï¿½
 .jmpToKernelLoop
    jmp KernelLoop             ; 3
-   
+
 .prepareToDrawScoreKernel
    lda #0                     ; 2
    sta GRP1                   ; 3
    sta GRP0                   ; 3
    jmp DrawScoreKernel        ; 3
-   
+
 .prepareGRP0ForNextSection
    sta GRP0                   ; 3 = @16
    lda objectSortArray + 2,x  ; 4
    tax                        ; 2
    lda playerOffsetValues,x   ; 4
    sta player0GraphicOffset   ; 3
-   beq .nextScanline          ; 2³
+   beq .nextScanline          ; 2ï¿½
    lda playerGraphicLSBValues,x;4
    sta player0GraphicsPointer ; 3
    dey                        ; 2
-   beq .prepareToDrawScoreKernel;2³
+   beq .prepareToDrawScoreKernel;2ï¿½
    cpy player1GraphicOffset   ; 3
-   bcc .drawPlayer1Graphic    ; 2³
-   beq .bufferPlayer1GraphicValue;2³
+   bcc .drawPlayer1Graphic    ; 2ï¿½
+   beq .bufferPlayer1GraphicValue;2ï¿½
    lda #0                     ; 2
    sta tempPlayer1Graphic     ; 3
    dey                        ; 2
-   bne .setupToHorizPositionGRP0;2³
+   bne .setupToHorizPositionGRP0;2ï¿½
 .drawPlayer1Graphic
    lda (player1GraphicsPointer),y;5
    sta GRP1                   ; 3 = @56
@@ -601,7 +601,7 @@ KernelStart
    lda playerHorizValues,x    ; 4
    and #$0F                   ; 2
    cmp #6                     ; 2
-   bcc .coarseMovePlayer0OnLeft;2³
+   bcc .coarseMovePlayer0OnLeft;2ï¿½
    lda tempPlayer1Graphic     ; 3
    sta GRP1                   ; 3 = @21
    lda playerColorValues,x    ; 4
@@ -613,7 +613,7 @@ KernelStart
    sec                        ; 2
 .coarseMovePlayer0OnRight
    sbc #1                     ; 2
-   bne .coarseMovePlayer0OnRight;2³
+   bne .coarseMovePlayer0OnRight;2ï¿½
    sta RESP0                  ; 3
 .doneMovePlayer0
    sta WSYNC
@@ -623,16 +623,16 @@ KernelStart
    sta GRP0                   ; 3 = @08
    sta tempPlayer1Graphic     ; 3
    jmp .jmpIntoKernel         ; 3
-   
+
 PrepareGRP1ForNextSection
    lda objectSortArray + 2,x  ; 4
    tax                        ; 2
    lda playerOffsetValues,x   ; 4
    sta player1GraphicOffset   ; 3
-   beq .jmpToKernelLoop       ; 2³
+   beq .jmpToKernelLoop       ; 2ï¿½
    lda #0                     ; 2
    cpy player0GraphicOffset   ; 3
-   bcs .skipGRP0Draw          ; 2³
+   bcs .skipGRP0Draw          ; 2ï¿½
    lda (player0GraphicsPointer),y;5
 .skipGRP0Draw
    dey                        ; 2
@@ -643,7 +643,7 @@ PrepareGRP1ForNextSection
    lda playerHorizValues,x    ; 4
    and #$0F                   ; 2
    cmp #6                     ; 2
-   bcc .positionPlayer1OnLeft ; 2³
+   bcc .positionPlayer1OnLeft ; 2ï¿½
    lda playerGraphicLSBValues,x;4
    sta player1GraphicsPointer ; 3
    lda GRP0                   ; 3 = @23
@@ -655,27 +655,27 @@ PrepareGRP1ForNextSection
    sbc #5                     ; 2
 .coarseMovePlayer1OnRight
    sbc #1                     ; 2
-   bne .coarseMovePlayer1OnRight;2³
+   bne .coarseMovePlayer1OnRight;2ï¿½
    sta RESP1                  ; 3
 .donePrepareGRP1ForNextSection
    sta WSYNC
 ;--------------------------------------
    sta HMOVE                  ; 3 = @03
    cpy player0GraphicOffset   ; 3
-   bcs .checkForKernelEnd     ; 2³
+   bcs .checkForKernelEnd     ; 2ï¿½
    lda (player0GraphicsPointer),y;5
    sta GRP0                   ; 3 = @16
 .checkForKernelEnd
    dey                        ; 2
-   bne .continueGameKernel    ; 2³
+   bne .continueGameKernel    ; 2ï¿½
    jmp .prepareToDrawScoreKernel;3
-   
+
 .continueGameKernel
    jmp .jmpIntoKernelLoop     ; 3
-   
+
 .coarseMovePlayer0OnLeft
    sbc #1                     ; 2 = @18
-   bpl .coarseMovePlayer0OnLeft;2³
+   bpl .coarseMovePlayer0OnLeft;2ï¿½
    sta RESP0                  ; 3
    lda tempPlayer1Graphic     ; 3
    sta GRP1                   ; 3
@@ -684,12 +684,12 @@ PrepareGRP1ForNextSection
    lda playerHorizValues,x    ; 4
    sta HMP0                   ; 3
    jmp .doneMovePlayer0       ; 3
-   
+
 .positionPlayer1OnLeft
    sec                        ; 2 = @16
 .coarseMovePlayer1OnLeft
    sbc #1                     ; 2
-   bne .coarseMovePlayer1OnLeft;2³
+   bne .coarseMovePlayer1OnLeft;2ï¿½
    sta RESP1                  ; 3 = @43
    lda playerGraphicLSBValues,x;4
    sta player1GraphicsPointer ; 3
@@ -698,7 +698,7 @@ PrepareGRP1ForNextSection
    lda playerHorizValues,x    ; 4
    sta HMP1                   ; 3 = @64
    jmp .donePrepareGRP1ForNextSection;3
-   
+
 DrawScoreKernel
    sta WSYNC
 ;--------------------------------------
@@ -739,7 +739,7 @@ DrawScoreKernel
    lda (numOfBasesPF2GraphPtr),y;5
    sta PF2                    ; 3 = @58
    dex                        ; 2
-   bpl .drawScore             ; 2³
+   bpl .drawScore             ; 2ï¿½
    lda #PF_REFLECT            ; 2
    sta CTRLPF                 ; 3 = @67
    lda #0                     ; 2
@@ -788,7 +788,7 @@ Start
    lda #>InitializeGame
    sta overscanVector + 1
    jmp StartMainLoop
-   
+
 InitializeGame
    jsr InitGameBackground
    lda #INIT_NUM_LASER_BASES
@@ -802,7 +802,7 @@ InitializeGame
    lda #128
    sta newObjectVelocityMulti
    jmp .checkToStartGame
-   
+
 .setAmateurGameLevel
    lda #0
    sta gameLevel
@@ -812,7 +812,7 @@ InitializeGame
    bcc .doneInitializeGame          ; branch if fire button not pressed
    jsr ResetLaserBaseInitState
    jmp SetToPerformGameCalculations
-   
+
 .doneInitializeGame
    rts
 
@@ -862,7 +862,7 @@ MainLoop
    lsr                              ; shift RESET to carry bit
    bcs .continueMainLoop            ; branch if RESET not pressed
    jmp Start                        ; jump back to do a cold start
-   
+
 .continueMainLoop
    jsr TimerWait
    lda mountainTerrainColor
@@ -877,10 +877,10 @@ MainLoop
    jsr DisplayKernel
    jsr DetermineBasePositionForPaddles
    jmp MainLoop
-   
+
 Overscan
    jmp (overscanVector)
-   
+
 PerformGameCalculations
    inc frameCount                   ; increment current frame count
    ldy #ID_MISSILE_2
@@ -897,7 +897,7 @@ PerformGameCalculations
    jsr CheckToFireMissile
    jsr DetermineLaserbaseVelocity
    jmp .continuePerformGameCalculations
-   
+
 .checkToSpawnNewObjects
    jsr SpawnNewObjects
    jsr ScoreBCDToDigits
@@ -929,7 +929,7 @@ MoveObjectsForGameOverState
 
 BackgroundColorTable
    .byte BLACK, BLUE, PURPLE, BLUE_GREEN, BLACK + 2
-   
+
 CalculateObjectHorizPositions
    ldx #ID_LASER_BASE
    lda frameCount                   ; get current frame count
@@ -960,20 +960,20 @@ CalculateObjectHorizPositions
    cmp #WHITE - 2
    beq .removeUFOFromScreen         ; branch if object is UFO
    jmp .nextObject
-   
+
 .pulsarReachedSideBoundary
    lda soundIndex
    sec
    sbc #8
    sta soundIndex
    jmp .nextObject
-   
+
 .removeUFOFromScreen
    lda gameState                    ; get current game state
    and #<~(UFO_BOMBS | UFO_ACTIVE)  ; clear UFO_BOMBS and UFO_ACTIVE flags
    sta gameState
    jmp .nextObject
-   
+
 DetermineObjectHorizOffset
    lsr                              ; shift horizontal velocity to lower nybbles
    lsr
@@ -1044,7 +1044,7 @@ MoveObjectsVertically
    cmp #SPINNERS_INIT_VERT_POS
    bcs .removeObject
    bcc .setObjectNewVerticalPosition; unconditional branch
-   
+
 .objectVerticallyOutOfRange
    bit gameState                    ; check current game state value
    bmi .removeObject                ; branch if GAME_OVER
@@ -1052,7 +1052,7 @@ MoveObjectsVertically
    cmp #WHITE                       ; check if the object is a spinner
    bne .checkWhichObjectOutOfRange  ; branch if object is not a spinner
    jmp DestroyLaserBase
-   
+
 .checkWhichObjectOutOfRange
    cmp #WHITE - 1
    beq .pulsarLanded                ; branch if object is a pulsar
@@ -1065,7 +1065,7 @@ MoveObjectsVertically
 .removeObject
    jsr RemoveObject
    jmp .moveNextObject
-   
+
 .setObjectNewVerticalPosition
    sta playerOffsetValues,x         ; set new vertical position
    lda playerGraphicLSBValues,x     ; get object graphic LSB value
@@ -1083,7 +1083,7 @@ MoveObjectsVertically
    sbc #8
    sta soundIndex
    jmp .removeObject
-   
+
 TimerWait
    lda T1024T
    bpl .waitTime
@@ -1099,7 +1099,7 @@ SpawnNewObjects
    and #UFO_BOMBS | UFO_ACTIVE
    beq .continueSpawnNewObjects     ; branch if UFO not active and no UFO bombs
    jmp DetermineToLaunchUFO
-   
+
 .continueSpawnNewObjects
    lda frameCount                   ; get current frame count
    lsr                              ; shift D1 to carry bit
@@ -1123,7 +1123,7 @@ SpawnNewObjects
    lda NewObjectVerticalVelocityTable,x
    bne .setNewObjectVelocity
    jmp CheckToSpawnUFO
-   
+
 .setNewObjectVelocity
    sta tempObjectVelocity
    ldx #4
@@ -1201,7 +1201,7 @@ CheckToSpawnNewObject
    adc #8
    sta soundIndex
    jmp SetPulsarSoundIndicators
-   
+
 NewObjectVerticalVelocityTable
    .byte $07,$00,$06,$00,$05,$00,$07,$00,$06,$00,$07,$00,$06,$00,$00,$07
    .byte $00,$05,$07,$00,$00,$07,$00,$00,$06,$00,$00,$06,$00,$00,$00,$00
@@ -1213,16 +1213,16 @@ NewObjectVerticalVelocityTable
    .byte $00,$04,$00,$05,$06,$04,$00,$00,$04,$05,$00,$06,$00,$03,$00,$00
    .byte $07,$00,$04,$05,$06,$00,$00,$05,$00,$00,$04,$05,$06,$00,$04,$00
    .byte $05,$00,$05,$04,$00,$03,$04,$05,$00,$03,$06,$04,$00,$00,$03,$05
-   
+
 SpawningFrequencyTable
    .byte $07, $07, $06, $05, $05
-   
+
 SpinnerSpawnFrequency
    .byte $1F, $07, $07, $0F, $07
-   
+
 PulsarSpawnFrequency
    .byte $3F, $0F, $07, $07, $07
-   
+
 PlayerMissileHitUFO
    lda gameState                    ; get the current game state
    and #<~(UFO_BOMBS | UFO_ACTIVE)  ; clear UFO_BOMBS and UFO_ACTIVE flags
@@ -1233,12 +1233,12 @@ PlayerMissileHitUFO
    jsr SetGameSoundIndicators
    lda #POINT_VALUE_UFO
    jmp IncrementScore
-   
+
 PlayerMissileHitUFOBomb
    lda tempObjectIndex
    tax
    jmp RemoveObject
-   
+
 PlayerMissileHitObject
    stx tempObjectIndex              ; save index of object hit by player missile
    tya                              ; move missile index to accumulator
@@ -1267,13 +1267,13 @@ PlayerMissileHitObject
    jsr SetGameSoundIndicators
    lda #POINT_VALUE_BIG_ROCK
    jmp IncrementScore
-   
+
 PlayerMissileHitSmallRock
    jsr RemoveObject
    jsr SetGameSoundIndicators
    lda #POINT_VALUE_SMALL_ROCK
    jmp IncrementScore
-   
+
 SplitBigRockIntoSmallRocks
    ldy tempObjectIndex              ; get object index of object hit by player missile
    lda playerHorizValues,y          ; get horizontal value of hit object
@@ -1306,7 +1306,7 @@ SplitBigRockIntoSmallRocks
    jsr SetGameSoundIndicators
    lda #POINT_VALUE_BIG_ROCK
    jmp IncrementScore
-   
+
 PlayerMissileHitSpinner
    dec soundIndex
    lda tempObjectIndex
@@ -1315,7 +1315,7 @@ PlayerMissileHitSpinner
    jsr SetGameSoundIndicators
    lda #POINT_VALUE_SPINNER
    jmp IncrementScore
-   
+
 PlayerMissileHitPulsar
    lda soundIndex
    sec
@@ -1327,7 +1327,7 @@ PlayerMissileHitPulsar
    jsr SetGameSoundIndicators
    lda #POINT_VALUE_PULSAR
    jmp IncrementScore
-   
+
 ObjectSort
    ldy #ID_MISSILE_2
    sty objectSortArray
@@ -1365,17 +1365,17 @@ ResetLaserBaseInitState
    sta objectHorizPositions,x
    lda #LASERBASE_INIT_VERT_POS
    sta playerOffsetValues,x
-   
+
    IF COMPILE_REGION = NTSC
-   
+
       lda #RED + 10
-      
+
    ELSE
-   
+
       lda #GREEN + 10
-      
+
    ENDIF
-   
+
    sta playerColorValues,x
    lda #VELOCITY_STATIONARY
    sta objectVelocity,x             ; set laser base vertical velocity
@@ -1393,13 +1393,13 @@ DetermineLaserbaseVelocity
    lsr
    lsr
    and SWCHA                        ; and with player 2 joystick values
-   
+
    IF COMPILE_REGION = PAL50
-   
+
       eor #$0F
-      
+
    ENDIF
-   
+
    tay
    lda JoystickVelocityTable,y
    sta.w laserBaseVelocity
@@ -1408,47 +1408,47 @@ DetermineLaserbaseVelocity
 JoystickVelocityTable
 
    IF COMPILE_REGION = NTSC || COMPILE_REGION = PAL60
-   
+
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
-   
+
    .byte VELOCITY_STATIONARY - 1 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 1 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 1 << 4 | VELOCITY_STATIONARY
-   
+
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
-   
+
    .byte VELOCITY_STATIONARY + 1 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY + 1 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY + 1 << 4 | VELOCITY_STATIONARY
-   
+
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
-   
+
    ELSE
-   
+
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
-   
+
    .byte VELOCITY_STATIONARY + 1 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY + 1 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY + 1 << 4 | VELOCITY_STATIONARY
-   
+
    .byte VELOCITY_STATIONARY - 8 << 4 | VELOCITY_STATIONARY
-   
+
    .byte VELOCITY_STATIONARY - 1 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 1 << 4 | VELOCITY_STATIONARY
    .byte VELOCITY_STATIONARY - 1 << 4 | VELOCITY_STATIONARY
-   
+
    ENDIF
-   
+
 DestroyLaserBase
    lda #POINT_VALUE_DECREMENT_LASERBASE
    jsr DecrementScore               ; decrement score
@@ -1517,7 +1517,7 @@ PerformDeathAnimation
    beq .removeDeathAnimtionObjects
    jsr ScoreBCDToDigits
    jmp SetBackgroundForDeathAnimation
-   
+
 .removeDeathAnimtionObjects
    ldx #4
 .removeNextObject
@@ -1554,7 +1554,7 @@ SetToGameOver
    lda peakScore + 2
    sta playerScore + 2
    jmp ScoreBCDToDigits
-   
+
 CheckPlayerCollisions
    ldx objectSortArray
    lda.w laserBaseHorizPosition
@@ -1590,12 +1590,12 @@ CheckPlayerCollisions
    cpy tempObjectHorizDistance
    bcc .checkNextPlayerCollision
    jmp DestroyLaserBase
-   
+
 .checkNextPlayerCollision
    lda objectSortArray + 2,x
    tax
    jmp .checkPlayerCollisions
-   
+
 .noPlayerCollisions
    clc
    rts
@@ -1634,12 +1634,12 @@ CheckPlayerMissileCollision SUBROUTINE
    cmp tempObjectHorizDistance
    bcc .checkNextPlayerMissileCollision
    jmp PlayerMissileHitObject
-   
+
 .checkNextPlayerMissileCollision
    lda objectSortArray + 2,x
    tax
    jmp .checkPlayerMissileCollisionLoop
-   
+
 .doneCheckPlayerMissileCollision
    rts
 
@@ -1652,7 +1652,7 @@ CheckToFireMissile
    and INPT5                        ; and with right joystick fire button
    bpl .checkToFireMissile          ; branch if either fire button is pressed
    bmi .fireButtonNotPressed        ; unconditional branch
-   
+
 .readPaddleFireButton
    bit SWCHA                        ; read left port paddle fire buttons
    bvc .checkToFireMissile          ; branch if left paddle fire button pressed
@@ -1690,7 +1690,7 @@ CheckToFireMissile
    lda #<(MissileSprite_0 + H_MISSILE - MISSILE_INIT_VERT_POS)
    sta playerGraphicLSBValues,x     ; set missile graphic LSB value
    jmp SetMissileLaunchSoundIndicators
-   
+
 SetBackgroundForDeathAnimation
    lda #RED
    sta backgroundColor
@@ -1735,7 +1735,7 @@ MountainTerrainPF2GraphicData
    .byte $00, $00, $0E, $31, $40, $40, $80, $00
 DeathMountainTerrainPF0GraphicData
    .byte $00, $30, $F0, $30, $30, $30, $30, $30
-   
+
 SetupDeathAnimtationSounds
    lda #$00
    sta AUDC1
@@ -1772,14 +1772,14 @@ SetMissileLaunchSoundIndicators
 .clearMissileLaunchSoundBits
    lda #0
    jmp .setVolume0SoundBitIndicators
-   
+
 SetSpinnerSoundIndicators
    lda soundIndex
    and #$38
    bne .doneSetGameSoundIndicators
    lda #1
    jmp .setVolume0SoundBitIndicators
-   
+
 SetPulsarSoundIndicators
    lda #2
 .setVolume0SoundBitIndicators
@@ -1792,14 +1792,14 @@ SetPulsarSoundIndicators
    sta soundBits
    ldy #0
    jmp .setSoundRegisters
-   
+
 SetGameSoundIndicators
    lda gameState                    ; get current game state
    and #UFO_BOMBS                   ; keep UFO_BOMBS flag
    bne .doneSetGameSoundIndicators  ; branch if UFO_BOMBS are active
    lda #3
    jmp .setVolume1SoundBitIndicators
-   
+
 SetUFOSoundIndicators
    lda #4
 .setVolume1SoundBitIndicators
@@ -1825,16 +1825,16 @@ SetUFOSoundIndicators
 
 SoundChannelTable
    .byte $08, $04, $04, $02, $04
-   
+
 SoundFrequencyTable
    .byte $10, $10, $04, $06, $0C
-   
+
 SoundVolumeTable
    .byte $05, $0A, $08, $0F, $0B
-   
+
 SoundVolumeDurationTable
    .byte $10, $FF, $FF, $20, $FF
-   
+
 PlayGameSounds
    lda soundVolume0Index            ; get sound volume 0 index
    beq .checkToAdjustSoundChannel1
@@ -1849,7 +1849,7 @@ PlayGameSounds
    lsr                              ; divide value by 2
    sta AUDV0                        ; set volume value for audio channel 0
    jmp .checkToAdjustSoundChannel1
-   
+
 .checkToChangeChannel0Frequency
    lda soundIndex
    and #7
@@ -1859,7 +1859,7 @@ PlayGameSounds
    eor #$1F
    sta AUDF0
    jmp .checkToAdjustSoundChannel1
-   
+
 .checkToSetChannel0Volume
    lda soundIndex
    and #$38
@@ -1868,13 +1868,13 @@ PlayGameSounds
    and #$08
    sta AUDV0
    jmp .checkToAdjustSoundChannel1
-   
+
 .checkToSetSpinnerSoundIndicator
    lda soundIndex
    beq .turnOffVolumeChannel0
    jsr SetSpinnerSoundIndicators
    jmp .checkToAdjustSoundChannel1
-   
+
 .turnOffVolumeChannel0
    lda #0
    sta AUDV0
@@ -1929,7 +1929,7 @@ ScoreBCDToDigits
    lda playerScore + 2
    jsr DetermineDigitLSBValue
    jmp PF2LSBBCDToDigit
-   
+
 LaserBaseBCDToDigits
    lda #0
    sta suppressZeroValue
@@ -1942,7 +1942,7 @@ LaserBaseBCDToDigits
    and #$0F
    jsr MultiplyBy5
    jmp OffsetForNumberFonts_2
-   
+
 DetermineDigitMSBValue
    and #$F0                         ; mask lower nybbles
    bne .decrementSuppressZeroValue
@@ -2050,7 +2050,7 @@ IncrementScore
    cld                              ; clear decimal mode
    jsr LaserBaseBCDToDigits
    jmp .checkToSetNewPeakScore
-   
+
 CheckToIncrementNumberOfBases
    lda peakScore + 1                ; get peak score hundreds value
    cmp #$99
@@ -2161,7 +2161,7 @@ DetermineGameLevel
    lda #<fiveNumberFonts_3          ; set right PF0 digit to point to "5"
    sta rightPF0DigitPointer
    bne .computeScoreDecrementValue  ; unconditional branch
-   
+
 DetermineControllerType
    lda #DUMP_PORTS | DISABLE_TIA
    sta VBLANK
@@ -2172,7 +2172,7 @@ DetermineControllerType
    dex
    bne .waitForCapacitorCharge
    beq .setControllerTypeToPaddles  ; unconditional branch
-   
+
 .continueDetermineControllerType
    lda #DISABLE_TIA
    sta VBLANK                       ; disable TIA (i.e. D1 = 1)
@@ -2236,14 +2236,14 @@ DetermineBasePositionForPaddles
    bcc .setLaserBaseNewHorizontalPosition
    lda #XMAX
    bne .setLaserBaseNewHorizontalPosition;unconditional branch
-   
+
 .laserBaseReachedLeftLimit
    lda #XMIN - 2
 .setLaserBaseNewHorizontalPosition
    ldx #ID_LASER_BASE
    sta objectHorizPositions,x
    jmp CalculateHorizontalPosition
-   
+
 DetermineToLaunchUFO
    and #UFO_BOMBS                   ; keep UFO_BOMBS flags
    beq CheckToLaunchUFO             ; branch if UFO_BOMBS not active
@@ -2291,7 +2291,7 @@ DetermineToLaunchUFO
    bcs .contDetermineUFOBombVelocity
    lda #<-28
    jmp .contDetermineUFOBombVelocity
-   
+
 DetermineUFOBombVelocity
    cmp #28
    bcc .contDetermineUFOBombVelocity
@@ -2321,7 +2321,7 @@ CheckToLaunchUFO
    lda #(VELOCITY_STATIONARY + 3) << 4 | VELOCITY_STATIONARY
    sta objectVelocity
    jmp .continueLaunchUFO
-   
+
 .launchUFOFromLeft
    lda #XMIN - 1
    sta objectHorizPositions
@@ -2341,7 +2341,7 @@ CheckToLaunchUFO
    ora #UFO_BOMBS                   ; set UFO_BOMBS flag
    sta gameState
    jmp SetUFOSoundIndicators
-   
+
 CheckToSpawnUFO
    bit gameState                    ; check current game state value
    bmi .doneDetermineToLaunchUFO    ; branch if GAME_OVER
@@ -2375,7 +2375,7 @@ DetermineHighestObjectOffsetValue
    rts
 
    FILL_BOUNDARY 0, -1
-   
+
 GameSprites_0
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -2641,7 +2641,7 @@ UFOBombSprite_0
    .byte $10 ; |...X....|
 
    FILL_BOUNDARY 0, -1
-   
+
 GameSprites_1
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -2907,7 +2907,7 @@ UFOBombSprite_1
    .byte $10 ; |...X....|
 
    FILL_BOUNDARY 0, -1
-   
+
 NumberFonts
 NumberFonts_0
 zeroNumberFonts_0
@@ -3177,7 +3177,7 @@ blankNumberFonts_3
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 NextRandom
    lda randomSeed
    asl
@@ -3199,7 +3199,7 @@ NextRandom
 
    FILL_BOUNDARY 250, -1            ; push to the RESET vector (this was done instead
                                     ; of using an .ORG to easily keep track of free ROM)
-                                    
+
    echo "***", (FREE_BYTES)d, "BYTES OF ROM FREE"
 
    .word Start                      ; IRQ/NMI vector

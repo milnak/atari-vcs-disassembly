@@ -16,7 +16,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1977, ATARI, INC.                                  =
+; = THE ASSEMBLED CODE IS ï¿½ 1977, ATARI, INC.                                  =
 ; =                                                                            =
 ; ==============================================================================
 ;
@@ -25,7 +25,7 @@
 ;   horizontal delta for the fine position and the coarse value needed to
 ;   reset the player's position.
 ; - The game speeds aren't adjusted for PAL50.
-; - The kernel zone height was adjusted for PAL50. PAL50 kernel zones are 4 
+; - The kernel zone height was adjusted for PAL50. PAL50 kernel zones are 4
 ;   lines higher than NTSC.
 ; - D4 of SWCHB is set for output in the NTSC version. I assume this was done
 ;   to save a bit when calculating missile size based on difficutly setting as
@@ -37,23 +37,23 @@
 
       processor 6502
 
-   include "tia_constants.h"
+   include "tia_constants_100.h"
    include "vcs.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
-   
+
    LIST ON
 
 ;===============================================================================
@@ -132,7 +132,7 @@ BROWN                   = $20
 ;===============================================================================
 
 ROM_BASE                = $F000
-   
+
 XMIN                    = 8
 XMAX                    = 158
 MISSILE_XMAX            = XMAX - 7
@@ -216,7 +216,7 @@ BLIMP_SCORE             = $00
 RABBIT_SCORE            = $03
 CLOWN_SCORE             = $01
 DUCK_SCORE              = $02
-AIRCRAFT_CARRIER_SCORE  = $03 
+AIRCRAFT_CARRIER_SCORE  = $03
 PT_BOAT_SCORE           = $04
 FREIGHTER_SCORE         = $01
 PIRATE_SHIP_SCORE       = $02
@@ -276,11 +276,11 @@ tempFineMotion          = temp      ; holds fine motion in CalcXPos routine
 objectXMax              ds 1
 ;--------------------------------------
    IF COMPILE_REGION = PAL50
-   
+
 kernelZonePad           = objectXMax; only used for PAL50
                                     ; PAL50 kernel zones are 4 lines higher
    ENDIF                            ; than NTSC
-   
+
 hueMask                 ds 1        ; masks the color hues
 ;--------------------------------------
 objectStateMask         = hueMask   ; used to show/hide objects
@@ -369,14 +369,14 @@ playerColors            ds NUM_KERNEL_ZONES; color of object's in kernel zone
 kernelZoneColors        ds NUM_KERNEL_ZONES; background color of kernel zone
 
    echo "***",(*-$80 - 2)d, "BYTES OF RAM USED", ($100 - * + 2)d, "BYTES FREE"
-   
+
 ;===============================================================================
 ; R O M - C O D E
 ;===============================================================================
 
    SEG Bank0
    .org ROM_BASE
-   
+
 Start
 ;
 ; Set up everything so the power up state is known.
@@ -393,14 +393,14 @@ Start
    sta REFP1                        ; REFLECT player 1 (D3 = 1)
    sta CTRLPF                       ; set to SCORE mode and non-relective PF
    sta gameState
-   
+
    IF COMPILE_REGION = NTSC
 
    lda #%00010000
    sta SWBCNT                       ; set D4 of SWCHB as output
 
    ENDIF
-   
+
 MainLoop
 VerticalSync
    lda #DISABLE_TIA | START_VERT_SYNC
@@ -438,9 +438,9 @@ DisplayKernel SUBROUTINE
 ;--------------------------------------
    lda currentScanline        ; 3         continue looping until the
    cmp startingKernelScanline ; 2         appropriate starting scan line has
-   bcc .scoreKernelWait       ; 2³        been reached
+   bcc .scoreKernelWait       ; 2ï¿½        been reached
    cmp #255 - H_KERNEL + 3    ; 2
-   bcs BeginPlayfieldKernel   ; 2³
+   bcs BeginPlayfieldKernel   ; 2ï¿½
 ScoreKernel
    sta WSYNC
 ;--------------------------------------
@@ -471,7 +471,7 @@ ScoreKernel
    inc currentScanline        ; 5
    lda currentScanline        ; 3
    cmp #YMIN                  ; 2
-   bcs BeginPlayfieldKernel   ; 2³
+   bcs BeginPlayfieldKernel   ; 2ï¿½
    lda scoreGraphic1          ; 3
    sta PF1                    ; 3 = @18
    inc player1LSBOffset       ; 5
@@ -481,7 +481,7 @@ ScoreKernel
    lda scoreGraphic2          ; 3
    sta PF1                    ; 3 = @44
    jmp ScoreKernel            ; 3
-   
+
 BeginPlayfieldKernel
    ldx #0                     ; 2
    stx PF1                    ; 3 = @18   clear PF1 so digit doesn't bleed
@@ -500,14 +500,14 @@ BeginPlayfieldKernel
    sta COLUP1                 ; 3 = @55
    lda kernelZoneColors,x     ; 4         get the kernel zone color
    sta COLUBK                 ; 3 = @62
-   
+
    IF COMPILE_REGION = PAL50
-   
+
    lda #3                     ; 2
    sta kernelZonePad          ; 3
-   
+
    ENDIF
-   
+
    sta WSYNC
 ;--------------------------------------
    lda kernelZoneHorizPos,x   ; 4
@@ -517,13 +517,13 @@ BeginPlayfieldKernel
    tay                        ; 2
 .coarseMoveObject
    dey                        ; 2
-   bpl .coarseMoveObject      ; 2³
+   bpl .coarseMoveObject      ; 2ï¿½
    sta RESP0                  ; 3         set the object's coarse position
    sta WSYNC
 ;--------------------------------------
    sta HMOVE                  ; 3
    bmi .setMissileState       ; 3         unconditional branch
-   
+
 ZoneKernel
    sta WSYNC
 ;--------------------------------------
@@ -543,12 +543,12 @@ ZoneKernel
    and player2MissileMask     ; 3
    sta temp                   ; 3
    lda objectIds,x            ; 4
-   bpl .determineSpriteOffset ; 2³
+   bpl .determineSpriteOffset ; 2ï¿½
    asl                        ; 2
-   bpl .setToExplosionSprite  ; 2³
+   bpl .setToExplosionSprite  ; 2ï¿½
    lda #0                     ; 2
    beq DrawObjectSprite       ; 3         unconditional branch
-   
+
 .setToExplosionSprite
    lda explosionSpriteOffset  ; 3
 .determineSpriteOffset
@@ -565,20 +565,20 @@ DrawObjectSprite
    inc objectGraphicIndex     ; 5
    lda objectGraphicIndex     ; 3         get graphic index to see if we're
    and #7                     ; 2         done with the "zone" (same as sprite
-   bne ZoneKernel             ; 2³ + 1    height)
-   
+   bne ZoneKernel             ; 2ï¿½ + 1    height)
+
    IF COMPILE_REGION = PAL50
-   
+
    dec objectGraphicIndex     ; 5         dec index so inc above resets to 0
    dec kernelZonePad          ; 5         reduce PAL50 zone height until done
-   bpl ZoneKernel             ; 2³ + 1    crosses page boundary
-   
+   bpl ZoneKernel             ; 2ï¿½ + 1    crosses page boundary
+
    ENDIF
-   
+
    sta objectGraphicIndex     ; 3         reset object graphic index (a = 0)
    inx                        ; 2
    cpx #NUM_KERNEL_ZONES - 1  ; 2
-   bcc .playfieldKernelLoop   ; 2³ + 1    crosses page boundary
+   bcc .playfieldKernelLoop   ; 2ï¿½ + 1    crosses page boundary
    sta HMP0                   ; 3 = @33
    sta WSYNC
 ;--------------------------------------
@@ -589,7 +589,7 @@ DrawObjectSprite
    tay                        ; 2
 .coarseMovePlayer2
    dey                        ; 2
-   bpl .coarseMovePlayer2     ; 2³
+   bpl .coarseMovePlayer2     ; 2ï¿½
    sta RESP1                  ; 3
    sta WSYNC
 ;--------------------------------------
@@ -600,7 +600,7 @@ DrawObjectSprite
    lda playerColors + 9       ; 3
    sta COLUP1                 ; 3 = @17
    bit gameVariation          ; 3         if this game doesn't have the gun
-   bmi Overscan               ; 2³        at the bottom then go to Overscan
+   bmi Overscan               ; 2ï¿½        at the bottom then go to Overscan
    ldy player1GraphicOffset   ; 3
    ldx player2GraphicOffset   ; 3
 AntiAircraftKernel
@@ -617,7 +617,7 @@ AntiAircraftKernel
    inc currentScanline        ; 5
    txa                        ; 2
    and #7                     ; 2         see if we're done with the "zone"
-   bne AntiAircraftKernel     ; 2³
+   bne AntiAircraftKernel     ; 2ï¿½
    sta GRP0                   ; 3 = @18   clear the player graphics (a = 0)
    sta GRP1                   ; 3 = @21
    lda kernelZoneColors + 9   ; 3
@@ -629,17 +629,17 @@ Overscan
    inc currentScanline
    bne .overscanWait
    jmp MainLoop
-       
+
 GameCalculations
 ReadConsoleSwitches
    lda gameState                    ; get the current game state
-   
+
    IF COMPILE_REGION = NTSC
-   
+
    sta SWCHB                        ; set D4 of SWCHB
-   
+
    ENDIF
-   
+
    cmp #SYSTEM_POWERUP
    beq .showGameSelection           ; branch if game powering up
    lda SWCHB                        ; read the console switches
@@ -662,7 +662,7 @@ ReadConsoleSwitches
    lda #$0F                         ; set score mask to show player2's score
    sta scoreMask
    jmp ResetPlayerPositions
-       
+
 .skipGameReset
    ldy #255 - H_KERNEL + 1          ; initial scan line to start kernel
    lda gameTimer
@@ -688,7 +688,7 @@ ReadConsoleSwitches
    beq .selectSwitchPressed
    sta selectDebounce               ; show SELECT not pressed this frame
    bne CheckMissileCollisions       ; unconditional branch
-   
+
 .selectSwitchPressed
    bit selectDebounce               ; if SELECT held then skip SELECT button
    bmi CheckMissileCollisions       ; logic
@@ -728,7 +728,7 @@ ReadConsoleSwitches
    beq .setObjectShowState
    lda #OBJECT_DISABLED_STATE
    bne .setObjectShowState          ; unconditional branch
-   
+
 .polarisOrBomberGameSelection
    rol                              ; shift value left 4 times so
    rol                              ; POLARIS_OR_BOMBER, MOVE_LEFT_RIGHT,
@@ -758,7 +758,7 @@ ResetPlayerPositions
    lda #PLAYER2_STARTING_X
    sta player2HorizPos
    bne DoneCollisionCheck           ; unconditional branch
-       
+
 CheckMissileCollisions
    ldx #1
 .checkPlayerCollisionLoop
@@ -799,9 +799,9 @@ DoneCollisionCheck
    lda frameCount                   ; get the current frame count
    and #$01                         ; make the value between 0 and 1
    tax
-   
+
    IF COMPILE_REGION = NTSC
-   
+
    lda SWCHB                        ; read the console switch values
    eor #$FF                         ; and flip the bits
    and DifficultySwitchMask,x       ; mask to get difficulty values
@@ -810,9 +810,9 @@ DoneCollisionCheck
 .setMissileSize
    sta playerDiffState,x
    sta NUSIZ0,x                     ; set missile size
-   
+
    ELSE
-   
+
    ldy #MSBL_SIZE2                  ; assume EXPERT setting
    lda SWCHB                        ; read the console switch values
    and DifficultySwitchMask,x
@@ -821,9 +821,9 @@ DoneCollisionCheck
 .setMissileSize
    sty playerDiffState,x
    sty NUSIZ0,x                     ; set missile size
-   
-   ENDIF   
-   
+
+   ENDIF
+
    lda gameVariation                ; get the current game variation
    bpl DeterminePlayerVelocity      ; branch if not a polaris game
    and #GUIDED_MISSILES             ; check for the guided missile option
@@ -866,7 +866,7 @@ DeterminePlayerHorizMovement
    bcs .setPlayersHorizPos
    lda GunXMinTable,x               ; set the player's position to the minimum
    bne .setPlayersHorizPos          ; gun position (unconditional branch)
-   
+
 .movePlayerRight
    clc
    lda playerHorizPos,x             ; get the player's horizontal position
@@ -972,7 +972,7 @@ CalculateMissileXPos
    lda playerHorizPos,x             ; get the player's horizontal position
    sta tempMissileHorizPos          ; save it for later
    jmp DetermineMissileXPos
-       
+
 .setMissileXPosFromTrajectory
    lda missileTrajectory,x          ; get missile trajectory
    and #MY_MOVE_DOWN | MY_MOVE_UP
@@ -1020,7 +1020,7 @@ DetermineMissileXPos
    cmp #YMAX
    bcs DisablePlayerMissile         ; disable missile if out of range
    bcc DetermineIfGameBoardDone     ; unconditional branch
-       
+
 .moveMissileUp
    sec
    lda missileVertPos,x
@@ -1080,7 +1080,7 @@ SetObjectStates
    lda objectIds,x                  ; get the object id
    bmi ObjectShot                   ; branch if shot
    jmp CheckToMoveObject
-       
+
 ObjectShot
    cmp #OBJECT_DISABLED_STATE | EXPLOSION_TIME + 1
    bcs .skipObjectDisableTimeIncrement
@@ -1118,7 +1118,7 @@ CheckToSpawnNewObject
    lda playerVelocity,y
    and #$40                         ; mask all but D6
    jmp SetObjectId
-       
+
 SpawnNewShootingGalleryObject
    lda gameVariation                ; get the current game variation
    and #SHOOTING_GALLERY | WATER_OBSTACLES
@@ -1132,7 +1132,7 @@ SpawnNewShootingGalleryObject
    cmp #ID_AIRCRAFT_CARRIER
    bcc SetObjectId                  ; set id if in shooting gallery range
    bcs .disableObject               ; disable object if out of range
-       
+
 SpawnNewWaterObstacleObject
    bit gameVariation
    bmi .polarisOrBomberGame
@@ -1140,14 +1140,14 @@ SpawnNewWaterObstacleObject
    bcc .polarisOrBomberGame
    lda #ID_BLIMP
    bne .determineNewObjectId        ; unconditional branch
-       
+
 .polarisOrBomberGame
    lda gameSelection                ; get the current game selection
    cmp #24                          ; if less than game 24 then determine
    bcc SpawnNewObject               ; new object to spawn
    lda #ID_MINE_1                   ; spawn a new mine
    bne SetObjectId                  ; unconditional branch
-       
+
 SpawnNewObject
    lda randomSeed                   ; get the random seed
    lsr                              ; shift D0 to carry
@@ -1157,7 +1157,7 @@ SpawnNewObject
 .disableObject
    lda #OBJECT_DISABLED_STATE       ; set value to not display object
    bne SetObjectId                  ; unconditional branch
-       
+
 .determineNewObjectId
    cpy #0                           ; set the object id if this is not a
    beq SetObjectId                  ; water obstacle game
@@ -1184,7 +1184,7 @@ SetObjectId
    sta zoneHorizPos,x
    sty kernelZoneHorizPos,x
    jmp .nextObject
-       
+
 CheckToMoveObject
    ldy playerHitKernelZone          ; get the player zone that was hit
    bmi .skipVelocityLoad            ; branch if no player hit
@@ -1224,7 +1224,7 @@ MoveObjects
    bcs .setObjectHorizontalPosition
    lda objectXMax
    bne .disableTorpedoGameObject    ; unconditional branch
-   
+
 .moveObjectRight
    clc
    lda zoneHorizPos,x               ; get the object's horizontal position
@@ -1240,7 +1240,7 @@ MoveObjects
    lda #OBJECT_DISABLED_STATE       ; Torpedo game--set value to not display
    sta objectIds,x                  ; object
    bne .nextObject                  ; unconditional branch
-   
+
 .setObjectHorizontalPosition
    sta zoneHorizPos,x
    jsr CalcXPos
@@ -1258,7 +1258,7 @@ MoveObjects
    lsr objectStateMask              ; for next object iteration
    jsr NextRandom                   ; re-seed random number
    jmp SetObjectStates              ; set states of all objects
-       
+
 DoneGameCalculations SUBROUTINE
    ldx #1
 .loop
@@ -1387,26 +1387,26 @@ GameVariationTable
    .byte POLARIS_OR_BOMBER|MOVE_LEFT_RIGHT|POLARIS_VS_BOMBER|WATER_OBSTACLES
    .byte POLARIS_OR_BOMBER|MOVE_LEFT_RIGHT|POLARIS_VS_BOMBER|WATER_OBSTACLES|GUIDED_MISSILES
    .byte POLARIS_OR_BOMBER|MOVE_LEFT_RIGHT|POLARIS_VS_BOMBER|SINGLEPLAYER|WATER_OBSTACLES
-   
+
 ObjectShowStateTable
    .byte %00001100,%00000000,%00110000,%01111110
-   
+
 Player1KernelZoneTable
    .byte 0, -1, 6, 0
-   
+
 Player2KernelZoneTable
    .byte 1, -1, 7, 7
-       
+
 PlayerVertPosTable
    .byte YPOS_PLAYER1, YPOS_PLAYER2
-       
+
 KernelZoneColorTable
    .byte LIGHT_BLUE, LIGHT_BLUE + 2, LIGHT_BLUE + 2, LIGHT_BLUE + 4, LIGHT_BLUE + 6
    .byte LIGHT_BLUE + 8, LIGHT_BLUE + 10, LIGHT_BLUE + 12, LIGHT_BLUE + 14, BROWN + 8
-   
+
    .byte LIGHT_BLUE + 2, LIGHT_BLUE + 2, LIGHT_BLUE + 2, LIGHT_BLUE + 2, LIGHT_BLUE + 6
    .byte LIGHT_BLUE + 8, LIGHT_BLUE + 10, LIGHT_BLUE + 12, LIGHT_BLUE + 14, BROWN + 8
-       
+
 PlayerColorTable
 .blackAndWhite
    .byte BLACK + 12, BLACK + 6, BLACK + 10, BLACK + 12, WHITE
@@ -1414,7 +1414,7 @@ PlayerColorTable
 .color
    .byte GREEN_BLUE + 8, RED + 8, YELLOW + 6, GREEN + 12, BLUE + 12
    .byte PURPLE + 6, GREEN_BLUE + 6, RED + 8, GREEN_BLUE + 8, RED + 8
-   
+
 PlayerVelocityTable
    .byte VELOCITY_FAST              ; value not used
    .byte VELOCITY_FAST              ; joystick pushed up
@@ -1426,7 +1426,7 @@ ScoreTable
    .byte BLIMP_SCORE, RABBIT_SCORE, CLOWN_SCORE, DUCK_SCORE
    .byte AIRCRAFT_CARRIER_SCORE, PT_BOAT_SCORE, FREIGHTER_SCORE
    .byte PIRATE_SHIP_SCORE, MINE_SCORE, MINE_SCORE
-   
+
 NumberFonts
 zero
    .byte $0E ; |....XXX.|
@@ -1488,7 +1488,7 @@ nine
    .byte $EE ; |XXX.XXX.|
    .byte $22 ; |..X...X.|
    .byte $EE ; |XXX.XXX.|
-   
+
 GameSprites
 LargeJet
    .byte $00 ; |........|
@@ -1616,7 +1616,7 @@ Mine_1
    .byte $5A ; |.X.XX.X.|
    .byte $18 ; |...XX...|
    .byte $00 ; |........|
-   
+
 ExplosionSprites
 Explosion_0
    .byte $18 ; |...XX...|
@@ -1636,10 +1636,10 @@ Explosion_1
    .byte $81 ; |X......X|
    .byte $42 ; |.X....X.|
    .byte $00 ; |........|
-   
+
 AudioChannelTable
    .byte 8, 9, 4, 12, 3, 1, 8
-   
+
 AntiAircraftGuns
 _60Degrees_0
    .byte $1C ; |...XXX..|
@@ -1677,22 +1677,22 @@ _60Degress_1
    .byte $70 ; |.XXX....|
    .byte $FF ; |XXXXXXXX|
    .byte $FF ; |XXXXXXXX|
-   
+
 MissileAngleTable
    .byte MISSILE_HORZ_VELOCITY_60   ; value not used
    .byte MISSILE_HORZ_VELOCITY_90   ; joystick pushed back
    .byte MISSILE_HORZ_VELOCITY_30   ; joystick pulled up
    .byte MISSILE_HORZ_VELOCITY_60   ; joystick at rest
-   
+
 MissileVertVelocityTable
    .byte MISSILE_VERT_VELOCITY_60   ; value not used
    .byte MISSILE_VERT_VELOCITY_90   ; joystick pushed back
    .byte MISSILE_VERT_VELOCITY_30   ; joystick pushed forward
    .byte MISSILE_VERT_VELOCITY_60   ; joystick at rest
-       
+
 MissileCollisionZoneTable
    .byte %00010000, %10000000
-       
+
 DifficultySwitchMask
 MissileCollisionMask
 PlayerValueMasks
@@ -1702,7 +1702,7 @@ GunXMinTable
    .byte PLAYER1_GUN_XMIN, PLAYER2_GUN_XMIN
 GunXMaxTable
    .byte PLAYER1_GUN_XMAX, PLAYER2_GUN_XMAX
-       
+
 CalcXPos
    sta tempXPosition                ; save off the x position
    bpl .determineCoarseValue
@@ -1751,7 +1751,7 @@ CalcXPos
 ; will cause a tap of D6 which will cause the initial value to be 64d.
 ; see...
 ; http://www.ciphersbyritter.com/GLOSSARY.HTM#LinearFeedbackShiftRegister
-; 
+;
 NextRandom
    lsr randomSeed
    rol
@@ -1831,16 +1831,16 @@ CalculateScore SUBROUTINE
    rts
 
    IF COMPILE_REGION = NTSC
-   
+
    .org ROM_BASE + 2048 - 6, 106    ; 2K ROM
    .word Start                      ; NMI vector
    .word Start                      ; RESET vector
    .word Start                      ; BRK vector
-   
+
    ELSE
-   
+
    .org ROM_BASE + 2048 - 4, 234    ; 2K ROM
    .word Start                      ; RESET vector
    .word Start                      ; BRK vector
-   
+
    ENDIF

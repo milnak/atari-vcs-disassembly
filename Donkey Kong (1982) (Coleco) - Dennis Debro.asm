@@ -16,7 +16,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1982, COLECO INDUSTRIES, INC.                      =
+; = THE ASSEMBLED CODE IS ï¿½ 1982, COLECO INDUSTRIES, INC.                      =
 ; =                                                                            =
 ; ==============================================================================
 ;
@@ -25,7 +25,7 @@
 ; in a number of games.
 ;
 ; To produce the PAL50 listing I used the CBS version. The PAL50 version adjusts
-; the vertical blank time and overscan time to make the game produce 312 
+; the vertical blank time and overscan time to make the game produce 312
 ; scanlines. The colors were also adjusted but it seems they missed the place in
 ; the kernel where Garry colors Mario directly. The speeds were not adjusted but
 ; the sound frequencies were.
@@ -34,7 +34,7 @@
 ; variable meanings or table positions.
 
    processor 6502
-      
+
 ;
 ; NOTE: You must compile this with vcs.h version 105 or greater.
 ;
@@ -44,20 +44,20 @@ TIA_BASE_READ_ADDRESS = $30         ; set the read address base so this runs on
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -103,7 +103,7 @@ COMPILE_REGION          = NTSC      ; change to compile for different regions
    ENDIF
 
    IFNCONST CHEAT_ENABLED
-   
+
 CHEAT_ENABLED           = FALSE     ; set to TRUE to enable no death collisions
 
    ENDIF
@@ -117,7 +117,7 @@ CHEAT_ENABLED           = FALSE     ; set to TRUE to enable no death collisions
       err
 
    ENDIF
-   
+
 ;===============================================================================
 ; F R A M E - T I M I N G S
 ;===============================================================================
@@ -133,7 +133,7 @@ VBLANK_TIME             = 75
 OVERSCAN_TIME           = 64
 
    ENDIF
-   
+
 ;===============================================================================
 ; C O L O R - C O N S T A N T S
 ;===============================================================================
@@ -144,7 +144,7 @@ WHITE                   =  $0F
 NTSC_COLOR_MARIO_SUIT   = $46       ; missed in PAL50 conversion
 
    IF COMPILE_REGION = NTSC
-   
+
 YELLOW                  = $10
 RED_ORANGE              = $20
 BRICK_RED               = $30
@@ -153,7 +153,7 @@ COBALT_BLUE             = $60
 BLUE                    = $80
 CYAN                    = $A0
 DK_GREEN                = $D0
-   
+
 COLOR_GIRLFRIEND_HAIR   = YELLOW + 14
 COLOR_GIRLFRIEND_SHOES  = YELLOW + 14
 COLOR_GIRLFRIEND_SASH   = RED + 6
@@ -168,7 +168,7 @@ COLOR_OBSTACLES         = RED_ORANGE + 15
 COLOR_DONKEY_KONG       = BRICK_RED + 4
 
    ELSE
-   
+
 YELLOW                  = $20
 GREEN                   = $30
 BRICK_RED               = $40
@@ -197,7 +197,7 @@ COLOR_DONKEY_KONG       = BRICK_RED + 4
 ;===============================================================================
 
 ROM_BASE                = $F000
-   
+
 ; game state values
 GAME_IN_PROGRESS        = %10000000
 GAME_PAUSED             = %00000000
@@ -293,7 +293,7 @@ LEVEL_COMPLETED_SOUND_IDX = 5
 ;===============================================================================
    SEG.U variables
    .org $80
-   
+
 obstacleVertPos         ds 4
 marioHorizAnimationValue ds 1
 jumpHangTime            ds 1
@@ -371,14 +371,14 @@ obstaclePointerLSB      ds 6
 marioColorPointerLSB    ds 6
 
    echo "***",(* - $80)d, "BYTES OF RAM USED", ($100 - *)d, "BYTES FREE"
-   
+
 ;===============================================================================
 ; R O M - C O D E
 ;===============================================================================
 
    SEG Bank0
    .org ROM_BASE
-   
+
 Start
 ;
 ; Set up everything so the power up state is known.
@@ -468,7 +468,7 @@ ClearGameRAM
    lda #STARTING_MARIOS             ; set the starting Mario lives
    sta numberOfLives
    bne .setMarioGraphicPointerInfo  ; unconditional branch
-   
+
 .resetNotPressed
    lda gameState                    ; get current game state
    bmi DetermineMarioMovement       ; branch if game in progress
@@ -480,7 +480,7 @@ ClearGameRAM
    lsr                              ; shift START_NEW_LEVEL to carry
    bcs .resetBonusTimer             ; reset timer if starting a new level
    lda resetDebounce                ; get RESET debounce value
-   bpl .setMarioGraphicPointerInfo  ; branch if RESET released       
+   bpl .setMarioGraphicPointerInfo  ; branch if RESET released
 .resetBonusTimer
    lda #STARTING_BONUS >> 8
    sta bonusTimer                   ; init bonus timer value
@@ -493,7 +493,7 @@ ClearGameRAM
 
 DetermineMarioMovement
    lda losingLifeFlag               ; get losing life value
-   bmi .checkForJumpingMario        ; branch if Mario losing life       
+   bmi .checkForJumpingMario        ; branch if Mario losing life
    dec marioFrameDelay
    bmi .checkJoystickForMarioMovement
 .checkForJumpingMario
@@ -513,7 +513,7 @@ DetermineMarioMovement
    jsr DetermineIfVerticalMovementAllowed
    bcc DetermineMarioPlatform       ; branch if vertical motion not allowed
    jmp CheckVerticalJoystickValues
-       
+
 DetermineMarioPlatform
    ldx #NUM_WALKWAYS
    lda marioVertPos                 ; get Mario vertical position
@@ -545,7 +545,7 @@ DetermineMarioPlatform
    cpy marioHorizPos
    bcc CheckRampValues              ; branch if Mario not reached left edge
    bcs .setMarioHorizPosition       ; unconditional branch
-   
+
 .checkRightMotion
    bcs CheckVerticalJoystickValues  ; branch if not moving right
    inc randomSeed
@@ -575,7 +575,7 @@ CheckRampValues
    lda marioPlatform                ; get Mario platform
    beq .doneMarioHorizMovement      ; branch if first platform...no ramp
    cmp #5                           ; determine if top platform
-   beq .doneMarioHorizMovement      ; branch if top platform...no ramp   
+   beq .doneMarioHorizMovement      ; branch if top platform...no ramp
    ldx #7
    lda marioHorizPos                ; get Mario horizontal position
    ldy marioDirection               ; get Mario direction value
@@ -593,14 +593,14 @@ CheckRampValues
    tya                              ; move Mario direction to the accumulator
    bne .moveUpRamp                  ; branch if Mario is moving left
    beq .moveDownRamp                ; unconditional branch
-   
+
 .checkEvenNumberRamp
    tya                              ; move Mario direction to the accumulator
    bne .moveDownRamp                ; branch if Mario is moving left
 .moveUpRamp
    inc marioVertPos                 ; increment Mario vertical position
    bne .doneMarioHorizMovement      ; unconditional branch
-   
+
 .moveDownRamp
    dec marioVertPos                 ; decrement Mario vertical position
 .doneMarioHorizMovement
@@ -644,7 +644,7 @@ DetermineMarioDownLadder
    bne .moveMarioDown
 .doneMarioVerticalMovement
    jmp CheckForJumpingMario
-   
+
 .moveMarioDown
    inc marioVertPos                 ; increment Mario vertical position
    bne CheckToRemoveRivits          ; unconditional branch
@@ -657,11 +657,11 @@ CheckForUpMotion
    lda marioDirection               ; get Mario direction value
    bmi MarioMovingUp                ; branch if moving vertically
    lda hammerTime                   ; get Mario hammer time
-   bne .doneMarioVerticalMovement   ; branch if Mario using hammer   
+   bne .doneMarioVerticalMovement   ; branch if Mario using hammer
    ldx #MAX_MARIO_BARREL_UP_LADDERS ; maximum barrel ladders Mario can ascend
    ldy #MAX_MARIO_BARREL_UP_LADDERS ; offset for the up ladder table
    lda currentGameBoard             ; get current game board
-   beq DetermineMarioUpLadder       ; branch if barrels   
+   beq DetermineMarioUpLadder       ; branch if barrels
    ldy #<[FirefoxUpLadderTable - UpLadderTable + MAX_FIREFOX_LADDERS]
    ldx #MAX_FIREFOX_LADDERS         ; maximum number of ladders Mario can use
 DetermineMarioUpLadder
@@ -703,7 +703,7 @@ CheckToRemoveRivits
    bcs .marioStandingInTheGap       ; branch if right rivit pulled
    adc #RIGHT_RIVIT_VALUE
    bpl .rivitPulled                 ; unconditional branch
-   
+
 .determineLeftRivitValue
    cmp #COMPLETE_RIVIT_WALKWAY
    bcs .marioStandingInTheGap       ; branch if all platform rivits removed
@@ -718,7 +718,7 @@ CheckToRemoveRivits
    sta firefoxPFIndexValues,x
    jsr IncrementScoreForPullingRivit; increment points for removing rivit
    bne PlayWalkingSound             ; unconditional branch
-   
+
 .marioStandingInTheGap
    lda jumpHangTime                 ; get Mario jumping hang time value
    bne PlayWalkingSound             ; branch if Mario jumping over rivit gap
@@ -741,7 +741,7 @@ PlayWalkingSound
    sta currentSoundPlaying          ; set to show walking sound playing
    sta soundIndex
    bne CheckActionButtonForJump     ; unconditional branch
-   
+
 CheckForJumpingMario
    lda jumpHangTime                 ; get Mario jumping hang time value
    beq CheckActionButtonForJump     ; branch if Mario not jumping
@@ -764,9 +764,9 @@ CheckForJumpingMario
    lda jumpingObstacle              ; get jumping obstacle value
    bmi .playMarioJumpingSound       ; branch if rewarded for jumping obstacle
    dec jumpingObstacle              ; set D7 high to show rewarded for jumping
-   jsr IncrementScoreForJumpingObstacle       
+   jsr IncrementScoreForJumpingObstacle
    jmp .playMarioJumpingSound
-   
+
 .doneCheckForJumpingOverObstacle
    inx                              ; x = 0
    stx jumpingObstacle              ; set D7 low for not jumping obstacle
@@ -774,7 +774,7 @@ CheckForJumpingMario
    lda currentSoundPlaying          ; get the current sound being played
    cmp #JUMPING_SOUND_IDX
    bne .reduceHangtime              ; branch if not playing jumping sound
-   lda #12 
+   lda #12
    sta AUDC0
    lda jumpHangTime                 ; get Mario jumping hang time value
    lsr                              ; divide by 2
@@ -789,7 +789,7 @@ CheckForJumpingMario
    lda #0
    sta marioHorizAnimationValue
    beq SetMarioGraphicPointerInfo   ; unconditional branch
-   
+
 CheckActionButtonForJump
    lda INPT4                        ; read left port action button
    ora losingLifeFlag               ; combine with losing life value
@@ -818,7 +818,7 @@ CheckActionButtonForJump
    sta jumpHangTime                 ; set Mario jumping hangtime
    sta soundIndex
    bne SetMarioGraphicPointerInfo   ; unconditional branch
-   
+
 .clearActionButtonDebounce
    lda #0
    sta actionButtonDebounce         ; set to show button not held
@@ -832,7 +832,7 @@ SetMarioGraphicPointerInfo
 .setIndexForVerticalMovingMario
    txa                              ; move graphic index value to accumulator
    bne .determineMarioGraphicPointers; unconditional branch
-   
+
 .setIndexForHorizontalMovingMario
    lda marioHorizAnimationValue     ; get Mario horizontal animation value
    and #3 << 1
@@ -884,7 +884,7 @@ SetMarioGraphicPointerInfo
    sta zpMarioGraphics,y
    dey
    bpl .setMarioGraphicData
-   
+
 .clearMarioOffsetGraphicData
    lda #6
    sta temp
@@ -896,7 +896,7 @@ SetMarioGraphicPointerInfo
    bpl .setMarioClearGraphicBytes
 CheckMarioWithHammer
    lda hammerTime                   ; get Mario hammer time
-   bne .setHammerHorizPosition      ; branch if Mario using hammer   
+   bne .setHammerHorizPosition      ; branch if Mario using hammer
    lda CXM1P                        ; check missile collisions (i.e. hammer handle)
    bpl SetCurrentSoundAudioFrequency; branch if Mario not touching hammer handle
    lda jumpHangTime                 ; get Mario jumping hang time value
@@ -967,7 +967,7 @@ NewFrame
    sta WSYNC
    sta WSYNC
    sta WSYNC
-   stx VSYNC                        ; end VSYNC (i.e. D1 = 0)  
+   stx VSYNC                        ; end VSYNC (i.e. D1 = 0)
    lda #VBLANK_TIME
    sty WSYNC                        ; wait for next scanline
    sta TIM64T                       ; set timer for vertical blank period
@@ -975,7 +975,7 @@ NewFrame
    cmp #LEVEL_COMPLETED
    beq .checkToSwitchToNewLevel     ; branch if LEVEL_COMPLETED
    lda currentGameBoard             ; get current game board
-   beq .checkIfBarrelLevelComplete  ; branch if barrels   
+   beq .checkIfBarrelLevelComplete  ; branch if barrels
 CheckForLevelComplete
    ldx #3
 .checkIfRivitLevelComplete
@@ -1035,7 +1035,7 @@ CheckToSpawnNewObstacle
    lda #OBSTACLE_MOVING_RIGHT
    sta obstacleDirections,x         ; set barrel moving right
    bne .doneSpawnNewObstacle        ; unconditional branch
-   
+
 .spawnNewFirefox
    lda randomSeed                   ; get current random seed value
    and #$1F                         ; value 0 <= a <= 31
@@ -1056,7 +1056,7 @@ MoveObstacles
    ldy #1
    lda frameCount                   ; get current frame count
    lsr                              ; shift D0 to carry
-   bcc .setLastObstacleToMove       ; branch on even frame   
+   bcc .setLastObstacleToMove       ; branch on even frame
    ldx #1
    ldy #<-1
 .setLastObstacleToMove
@@ -1065,7 +1065,7 @@ MoveObstacleLoop
    ldy obstacleVertPos,x            ; get obstacle vertical position
    bne .moveObstacle                ; branch if obstacle present
    jmp MoveNextObstacle
-   
+
 .doneMovingObstacles
    jmp SetupObstaclesForKernel
 
@@ -1082,7 +1082,7 @@ MoveObstacleLoop
    beq ChangeFirefoxDirection       ; branch if Firefox at right rivit
    lda firefoxPFIndexValues + 2,x
    cmp #COMPLETE_RIVIT_WALKWAY
-   bcc MoveFirefox   
+   bcc MoveFirefox
 .checkLeftRivitConstraint
    lda #HORIZ_LEFT_RIVIT
    cmp obstacleHorizPositions,x
@@ -1090,17 +1090,17 @@ MoveObstacleLoop
 ChangeFirefoxDirection
    lda obstacleDirections,x         ; get Firefox direction
    eor #1                           ; flip D0 value to change direction
-   sta obstacleDirections,x         ; set Firefox new direction   
+   sta obstacleDirections,x         ; set Firefox new direction
 MoveFirefox
    lda obstacleDirections,x         ; get Firefox direction
    beq .moveFirefoxLeft
-.moveFireFoxRight   
+.moveFireFoxRight
    inc obstacleHorizPositions,x     ; increment Firefox horizontal position
    lda #XMAX_FIREFOX
    cmp obstacleHorizPositions,x
    bcc .changeFirefoxDirection      ; change direction if reached right max
    bcs .computeRandomDirection      ; unconditional branch
-   
+
 .moveFirefoxLeft
    dec obstacleHorizPositions,x     ; decrement Firefox horizontal position
    lda #XMIN_FIREFOX
@@ -1120,7 +1120,7 @@ MoveFirefox
    eor #1                           ; flip D0 value
    tay                              ; move new direction value to y register
    bpl .setFirefoxDirection         ; unconditional branch
-   
+
 .skipRandomDirection
    lda obstacleVertPos,x            ; get Firefox vertical position
    clc
@@ -1144,9 +1144,9 @@ MoveBarrelObject SUBROUTINE
 .barrelMovingRight
    inc obstacleHorizPositions,x     ; increment barrel horizontal position
    bne BarrelRampMovement           ; unconditional branch
-   
+
 .moveBarrelLeft
-   dec obstacleHorizPositions,x     ; decrement barrel horizontal position   
+   dec obstacleHorizPositions,x     ; decrement barrel horizontal position
 BarrelRampMovement
    cpy #TOP_PLATFORM_VALUE          ; y is barrel vertical position
    beq .doneBarrelRampMovement      ; branch if barrel on top platform
@@ -1202,7 +1202,7 @@ BarrelRampMovement
    lda obstacleDirections,x         ; get barrel direction
    ora #OBSTACLE_MOVING_DOWN
    bmi .setBarrelDirection
-       
+
 .moveBarrelDown
    inc obstacleVertPos,x
    inc obstacleVertPos,x
@@ -1220,7 +1220,7 @@ BarrelRampMovement
 .setBarrelDirection
    sta obstacleDirections,x
    jmp MoveNextObstacle
-       
+
 .checkBarrelDone
    lda obstacleHorizPositions,x     ; get barrel horizontal position
    cmp #XMIN_FIREFOX - 1
@@ -1232,7 +1232,7 @@ MoveNextObstacle
    cpx tmpLastObstacleToMove
    beq SetupObstaclesForKernel
    jmp MoveObstacleLoop
-       
+
 SetupObstaclesForKernel
    ldx #MAX_OBSTACLES - 1
 .setupObstaclesForKernel
@@ -1274,7 +1274,7 @@ CheckForSmashingObstacle
    sta obstacleVertPos,x            ; clear obstacle vertical position
 .beqNextObstacle
    beq .nextObstacle                ; unconditional branch
-   
+
 .calculateObstaclePointers
    sta obstacleOffset
    clc
@@ -1313,21 +1313,21 @@ CheckForSmashingObstacle
    dex
    bmi CheckToPlayDeathSound
    jmp .setupObstaclesForKernel
-   
+
 CheckToPlayDeathSound
    lda losingLifeFlag               ; get losing life value
    bmi .continueDeathSound          ; branch if Mario losing life
-   
+
    IF CHEAT_ENABLED = TRUE
-   
+
       lda #0
-      
+
    ELSE
 
       lda CXPPMM                    ; read player and missile collision value
-      
+
    ENDIF
-   
+
    bpl .clearCollisions             ; branch if no player collisions
    jsr PlayDeathSound
 .continueDeathSound
@@ -1365,7 +1365,7 @@ CheckToPlayDeathSound
    sty hammerHandleNUSIZ            ; set hammer handle to MSBL_SIZE_2
    lda #<-1
    bne .horizontallyPositionHammerMallot; unconditional branch
-   
+
 .setHammerHandleSwingDownValue
    stx hammerHandleNUSIZ            ; set hammer handle to MSBL_SIZE_4
    lda currentGameBoard             ; get current game board
@@ -1406,7 +1406,7 @@ DisplayKernel SUBROUTINE
    sta RESP1                  ; 3 = @42   coarse position GRP1 @ pixel 126
    lda gameState              ; 3         get current game state
    asl                        ; 2         shift D7 to the carry bit
-   bcc .colorDigits           ; 2³        carry clear -- game in progress
+   bcc .colorDigits           ; 2ï¿½        carry clear -- game in progress
    ldx #COLOR_BONUS_TIMER     ; 2         bonus timer color
 .colorDigits
    stx COLUP0                 ; 3 = @54
@@ -1414,7 +1414,7 @@ DisplayKernel SUBROUTINE
    sta WSYNC
 ;--------------------------------------
    sta HMOVE                  ; 3
-.drawDigits   
+.drawDigits
    lda NumberFonts,y          ; 4         read graphic value for zero
    sta digitPointer + 8       ; 3
    sta WSYNC
@@ -1436,7 +1436,7 @@ DisplayKernel SUBROUTINE
    sty GRP0                   ; 3 = @54
    ldy tmpSixDigitLoopCount   ; 3
    dey                        ; 2
-   bpl .drawDigits            ; 2³
+   bpl .drawDigits            ; 2ï¿½
    stx WSYNC
 ;--------------------------------------
    sta HMCLR                  ; 3 = @03   clear all horizontal movements
@@ -1451,7 +1451,7 @@ DisplayKernel SUBROUTINE
    sta COLUPF                 ; 3 = @28   color the playfield
    sta RESP0 - H_DONKEY_KONG,x; 4 = @32   wastes a cycle but saves a byte
    lda marioDirection         ; 3         get Mario direction value
-   bpl .setMarioReflectState  ; 2³        branch if Mario moving horizontally
+   bpl .setMarioReflectState  ; 2ï¿½        branch if Mario moving horizontally
    lda marioVertPos           ; 3         get Mario vertical position
    and #REFLECT >> 1          ; 2
    asl                        ; 2
@@ -1476,16 +1476,16 @@ DisplayKernel SUBROUTINE
    lda GirlfriendColors - 2,x ; 4
    sta COLUP1                 ; 3 = @22   color girfriend character
    cpx #H_DONKEY_KONG - 7     ; 2
-   bcs .nextDonkeyKongLoop    ; 2³
+   bcs .nextDonkeyKongLoop    ; 2ï¿½
    cpx #H_DONKEY_KONG - 15    ; 2
-   bcc .nextDonkeyKongLoop    ; 2³
+   bcc .nextDonkeyKongLoop    ; 2ï¿½
    lda TopBarrelSectionPFDataTable - 5,x;4
    sta rightPF1Pointer - 5,x  ; 4
    lda LivesPFPattern,y       ; 4
    sta PF1                    ; 3 = @45   draw lives indicators
 .nextDonkeyKongLoop
    dex                        ; 2
-   bne .drawDonkeyKongLoop    ; 2³
+   bne .drawDonkeyKongLoop    ; 2ï¿½
    stx NUSIZ0                 ; 3         set to ONE_COPY (i.e. x = 0)
    lda hammerHandleNUSIZ      ; 3         get hammer handle NUSIZ value
    sta NUSIZ1                 ; 3
@@ -1503,7 +1503,7 @@ DisplayKernel SUBROUTINE
    sta PF2                    ; 3 = @10
    ldx #6                     ; 2         wait 35 cycles for barrel board
    lda currentGameBoard       ; 3         get current game board
-   beq .donkeyKongPlatformWaitLoop;2³     branch if barrels
+   beq .donkeyKongPlatformWaitLoop;2ï¿½     branch if barrels
    ldx firefoxPFIndexValues + 5;3 = @20   get top section playfield index value
    lda FireFoxLeftPF1Table,x  ; 4
    sta leftPF1Pointer         ; 3
@@ -1519,9 +1519,9 @@ DisplayKernel SUBROUTINE
    stx REFP1                  ; 3 = @57
 .donkeyKongPlatformWaitLoop
    dex                        ; 2
-   bne .donkeyKongPlatformWaitLoop;2³
+   bne .donkeyKongPlatformWaitLoop;2ï¿½
    dey                        ; 2 = @49
-   bpl .drawDonkeyKongPlatform; 2³
+   bpl .drawDonkeyKongPlatform; 2ï¿½
    stx PF1                    ; 3 = @68   clear the playfield registers
    stx PF2                    ; 3 = @71
    sec                        ; 2
@@ -1530,7 +1530,7 @@ DisplayKernel SUBROUTINE
    lda marioHorizPos          ; 3         get Mario horizontal position
 .coarseMoveMario
    sbc #15                    ; 2         divide position by 15
-   bcs .coarseMoveMario       ; 2³
+   bcs .coarseMoveMario       ; 2ï¿½
    eor #15                    ; 2         4-bit 1's complement for fine motion
    asl                        ; 2
    asl                        ; 2
@@ -1546,10 +1546,10 @@ DisplayKernel SUBROUTINE
 ;--------------------------------------
    sta HMOVE                  ; 3
    cmp #YMIN_LEVEL0           ; 2
-   bcs .skipMarioDraw         ; 2³
+   bcs .skipMarioDraw         ; 2ï¿½
    ldy #$1C                   ; 2         first byte of Mario sprite
    bne .drawMario             ; 3         unconditional branch
-   
+
 .skipMarioDraw
    ldy #0                     ; 2
    SLEEP 2                    ; 2
@@ -1559,7 +1559,7 @@ DisplayKernel SUBROUTINE
    ldy obstacleCoarseHorizPosValue + 5;3  get top obstacle coarse position value
 .coarsePositionTopObstacle
    dey                        ; 2
-   bpl .coarsePositionTopObstacle;2³
+   bpl .coarsePositionTopObstacle;2ï¿½
    ldy #<GRP0                 ; 2
    SLEEP 2                    ; 2
    sta RESP1                  ; 3
@@ -1570,9 +1570,9 @@ DisplayKernel SUBROUTINE
    sta WSYNC
 ;--------------------------------------
    sta HMOVE                  ; 3
-   bcc .drawMario_a           ; 2³
+   bcc .drawMario_a           ; 2ï¿½
    bcs .skipMarioDraw_a       ; 3         unconditional branch
-   
+
 .drawMario_a
    ldx #$7E                   ; 2         second byte of Mario sprite
 .skipMarioDraw_a
@@ -1581,13 +1581,13 @@ DisplayKernel SUBROUTINE
    jmp EnterKernel            ; 3
 
    IF COMPILE_REGION = PAL50
-   
+
       .byte $00                     ; not used
-      
+
    ELSE
 
       .byte $9D                     ; not used
-   
+
    ENDIF
 
 EndKernel
@@ -1597,7 +1597,7 @@ BarrelHammerKernel SUBROUTINE
    stx PF2                    ; 3 = @58
    lda (marioColorPointer),y  ; 5
    stx PF1                    ; 3 = @66   clear the playfield registers (x = 0)
-   beq .skipMarioDraw         ; 2³
+   beq .skipMarioDraw         ; 2ï¿½
    ldx zpMarioGraphics,y      ; 4
 .skipMarioDraw
    sta WSYNC
@@ -1617,12 +1617,12 @@ BarrelHammerKernel SUBROUTINE
    sta PF1                    ; 3 = @48
    dey                        ; 2
    cpy #H_KERNEL_SECTION - H_HAMMER + 1;2
-   bcs BarrelHammerKernel     ; 2³
+   bcs BarrelHammerKernel     ; 2ï¿½
 BarrelKernel SUBROUTINE
    stx PF2                    ; 3 = @57
    lda (marioColorPointer),y  ; 5
    stx PF0                    ; 3 = @65
-   beq .skipMarioDraw         ; 2³
+   beq .skipMarioDraw         ; 2ï¿½
    ldx zpMarioGraphics,y      ; 4
 .skipMarioDraw
    sta WSYNC
@@ -1642,15 +1642,15 @@ BarrelKernel SUBROUTINE
    sta PF1                    ; 3 = @48
    dey                        ; 2
    cpy tmpKernelHeight        ; 3
-   bne BarrelKernel           ; 2³
+   bne BarrelKernel           ; 2ï¿½
 ContinueKernel SUBROUTINE
    lda (marioColorPointer),y  ; 5
    stx PF2                    ; 3 = @63
    sta COLUP0,x               ; 4 = @67
-   bne .drawMario             ; 2³
+   bne .drawMario             ; 2ï¿½
    sta GRP0,x                 ; 4 = @73
    beq .skipMarioDraw         ; 3 = @76   unconditional branch
-   
+
 .drawMario
    lda zpMarioGraphics + 2    ; 3
    sta GRP0                   ; 3 = @76
@@ -1661,12 +1661,12 @@ ContinueKernel SUBROUTINE
    lda (obstaclePointer),y    ; 5
    sta GRP1                   ; 3 = @14
    ldx kernelSection          ; 3
-   beq EndKernel              ; 2³ + 1    branch crosses a page boundary
+   beq EndKernel              ; 2ï¿½ + 1    branch crosses a page boundary
    ldy obstacleCoarseHorizPosValue - 1,x;4 get obstacle coarse position value
-   bmi SkipObstacleMove       ; 2³
+   bmi SkipObstacleMove       ; 2ï¿½
 .coarseMoveObstacle
    dey                        ; 2
-   bpl .coarseMoveObstacle    ; 2³
+   bpl .coarseMoveObstacle    ; 2ï¿½
    sta RESP1                  ; 3
    lda obstacleFineHorizPosValue - 1,x;4  get obstacle fine horizontal position
    sta HMP1                   ; 3
@@ -1679,16 +1679,16 @@ SkipObstacleMove SUBROUTINE
    sta GRP1                   ; 3 = @11
    lda (marioColorPointer),y  ; 5
    sta.w COLUP0               ; 4 = @20
-   bne .drawMario             ; 2³
+   bne .drawMario             ; 2ï¿½
    sta.w GRP0                 ; 4 = @26
    beq .skipMarioDraw         ; 3         unconditional branch
-   
+
 .drawMario
    lda zpMarioGraphics + 1    ; 3
    sta GRP0                   ; 3 = @29
 .skipMarioDraw
    lda currentGameBoard       ; 3         get current game board
-   beq .loadBarrelPFPointers  ; 2³        branch if barrels
+   beq .loadBarrelPFPointers  ; 2ï¿½        branch if barrels
    ldy firefoxPFIndexValues - 1,x;4 = @38
    lda FireFoxLeftPF1Table,y  ; 4
    sta leftPF1Pointer         ; 3
@@ -1698,7 +1698,7 @@ SkipObstacleMove SUBROUTINE
    ldy #0                     ; 2
    sta pf0Pointer,y           ; 5 = @63
    beq .skipBarrelPFPointers  ; 3         unconditional branch
-   
+
 .loadBarrelPFPointers
    lda BarrelLeftPF1Table - 1,x;4 = @39
    sta leftPF1Pointer         ; 3
@@ -1715,7 +1715,7 @@ SkipObstacleMove SUBROUTINE
    lda (marioColorPointer),y  ; 5
 ;--------------------------------------
    sta.w COLUP0               ; 4 = @05   (barrles) @06(firefox)
-   bne .drawMario_a           ; 2³
+   bne .drawMario_a           ; 2ï¿½
    sta.w GRP0                 ; 4 = @11   (barrels) @12 (firefox)
    beq .skipDrawMario_a       ; 3
 .drawMario_a
@@ -1733,24 +1733,24 @@ EnterKernel
    SLEEP 2                    ; 2
    stx kernelSection          ; 3
    cpx #HAMMER_KERNEL_SECTION ; 2
-   bne .skipHammerKernel      ; 2³
+   bne .skipHammerKernel      ; 2ï¿½
    ldx #0                     ; 2
    jmp (hammerKernelVector)   ; 5
-   
+
 .skipHammerKernel
    lda KernelSectionHeight,x  ; 4
    sta tmpKernelHeight        ; 3
    ldx #0                     ; 2
    lda (marioColorPointer),y  ; 5
    jmp (kernelVector)         ; 5
-       
+
 FirefoxHammerKernel SUBROUTINE
    SLEEP 2                    ; 2 = @54
    lda (marioColorPointer),y  ; 5
-   bne .drawMario             ; 2³
+   bne .drawMario             ; 2ï¿½
    SLEEP 2                    ; 2
    beq .skipMarioDraw         ; 3         unconditional branch
-   
+
 .drawMario
    ldx zpMarioGraphics,y      ; 4
 .skipMarioDraw
@@ -1772,11 +1772,11 @@ FirefoxHammerKernel SUBROUTINE
    ldx #0                     ; 2
    dey                        ; 2
    cpy #H_KERNEL_SECTION - H_HAMMER + 1;2
-   bcs FirefoxHammerKernel    ; 2³
+   bcs FirefoxHammerKernel    ; 2ï¿½
 FirefoxKernel SUBROUTINE
    lda (marioColorPointer),y  ; 5
 JumpFirefoxKernel
-   beq .skipMarioDraw         ; 2³
+   beq .skipMarioDraw         ; 2ï¿½
    ldx zpMarioGraphics,y      ; 4
 .skipMarioDraw
    sta WSYNC
@@ -1795,9 +1795,9 @@ JumpFirefoxKernel
    dey                        ; 2
    cpy tmpKernelHeight        ; 3
    sta PF2                    ; 3 = @50
-   bne FirefoxKernel          ; 2³
+   bne FirefoxKernel          ; 2ï¿½
    jmp ContinueKernel         ; 3
-       
+
 RandomSeedTable
    .byte $30,$50,$70,$90,$B0,$D0,$D0,$D0,$FF,$FF
 
@@ -1960,7 +1960,7 @@ ClimbingMarioSprite
    .byte $7C ; |.XXXXX..|
    .byte $60 ; |.XX.....|
    .byte $00 ; |........|
-       
+
 JumpingSoundFrequencyValues
    .byte 15, 15, 15, 15, 15, 15, 14, 13, 13, 13, 14, 15, 15, 15, 15, 15
    .byte 14, 13, 13, 14;, 15, 15, 15, 15, 14, 13, 14, 15, 15, 15, 14
@@ -1969,10 +1969,10 @@ JumpingSoundFrequencyValues
 ;
 LevelCompletedSoundFrequencyValues
    .byte 15, 15, 15, 15, 14, 13, 14, 15, 15, 15, 14, 15; last byte not read
-       
+
 ObstacleColor
    .byte COLOR_OBSTACLES            ; color of hammer handle and obstacles
-       
+
 GirlfriendColors
    .byte COLOR_GIRLFRIEND_SHOES
    .byte COLOR_GIRLFRIEND_SHOES
@@ -1990,7 +1990,7 @@ GirlfriendColors
    .byte COLOR_GIRLFRIEND_HAIR
    .byte COLOR_GIRLFRIEND_HAIR
    .byte COLOR_GIRLFRIEND_HAIR
-       
+
 StoreMarioGraphics SUBROUTINE
    ldy #H_KERNEL_SECTION
 .storeMarioGraphicLoop
@@ -2022,7 +2022,7 @@ InitializationTable
    .byte 3                          ; firefoxPFIndexValues + 3
    .byte 4                          ; firefoxPFIndexValues + 4
    .byte 5                          ; firefoxPFIndexValues + 5
-   
+
 FirefoxPlayfieldData
 FireFoxPF1Data_01
    .byte $0F ; |....XXXX|
@@ -2147,7 +2147,7 @@ FireFoxPF2Data_02
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $08 ; |....X...|
-       
+
 InitializeGame
    ldx #<[hammerHorizPos - backgroundColor]
 .initBarrelLevel
@@ -2161,7 +2161,7 @@ InitializeGame
 .initFireFoxLevel
    lda InitializationTable + 11,x
    sta playfieldColor,x
-   dex 
+   dex
    bpl .initFireFoxLevel
 .leaveInitialization
    rts
@@ -2169,20 +2169,20 @@ InitializeGame
 PlayDeathSound
    lda #$FF
    sta losingLifeFlag               ; set value to show player losing life
-   
+
    IF COMPILE_REGION = PAL50
-   
+
    ldx #14
-   
+
    ELSE
-   
+
    ldx #17
-   
+
    ENDIF
-   
+
    lda #LOSING_LIFE_SOUND_IDX
    bne PlayMusic                    ; unconditional branch
-       
+
 IncrementScoreForJumpingObstacle
 IncrementScoreForPullingRivit
    lda #(POINT_VALUE_JUMPING_OBSTACLE | POINT_VALUE_PULLING_RIVIT) >> 8
@@ -2199,15 +2199,15 @@ PlayIncrementScoreMusic
 PlayGameOverMusic
 
    IF COMPILE_REGION = PAL50
-   
+
    ldx #26
-   
+
    ELSE
-   
+
    ldx #32
-   
+
    ENDIF
-   
+
    lda #INCREMENT_SCORE_SOUND_IDX | GAME_OVER_SOUND_IDX
 PlayMusic
    sta currentSoundPlaying
@@ -2223,13 +2223,13 @@ BarrelDownLadderTable
    .byte 132, 101, 104, 74, 76, 46, 48, 21, 5
    .byte 21, 44, 72, 129, 21, 49, 77, 105, 133
 
-FirefoxDownLadderTable   
+FirefoxDownLadderTable
    .byte 21, 21, 21, 21, 49, 49, 49, 49
    .byte 77, 77, 77, 77, 105, 105, 105, 105
-       
+
 KernelVectorTable
    .word BarrelHammerKernel + 2
-   .word BarrelKernel + 6   
+   .word BarrelKernel + 6
    .word FirefoxHammerKernel
    .word JumpFirefoxKernel
 
@@ -2240,20 +2240,20 @@ TopBarrelSectionPFDataTable
    .word LeftPF1DataTopBarrelSection - 3
 
    IF COMPILE_REGION = PAL50
-   
+
       .byte $00                     ; not used
-   
+
    ELSE
-   
+
       .byte $2A                     ; not used
-   
+
    ENDIF
-   
+
 UpLadderTable
 BarrelUpLadderTable
    .byte 154, 130, 127, 101, 99, 73, 71, 43, 21
    .byte 46, 75, 103, 154, 42, 70, 98, 126, 154
-   
+
 FirefoxUpLadderTable
    .byte 49, 49, 49, 49, 77, 77, 77, 77
    .byte 105, 105, 105, 105, 133, 133, 133, 133
@@ -2264,21 +2264,21 @@ HorizontalColors
    REPEAT H_KERNEL_SECTION + 2
    .byte BLACK
    REPEND
-   
+
    .byte COLOR_MARIO_SHOES
    .byte COLOR_MARIO_SHOES
    .byte COLOR_MARIO_SUIT
    .byte COLOR_MARIO_SUIT
-   .byte COLOR_MARIO_SUIT   
-   .byte COLOR_MARIO_SUIT   
+   .byte COLOR_MARIO_SUIT
+   .byte COLOR_MARIO_SUIT
    .byte COLOR_MARIO_SUIT
    .byte COLOR_MARIO_SUIT
    .byte COLOR_MARIO_SUIT
    .byte COLOR_MARIO_SUIT
    .byte WHITE
    .byte WHITE
-   .byte WHITE   
-   .byte WHITE   
+   .byte WHITE
+   .byte WHITE
    .byte WHITE
    .byte COLOR_MARIO_SUIT
    .byte COLOR_MARIO_SUIT
@@ -2287,27 +2287,27 @@ VerticalColors
    REPEAT H_KERNEL_SECTION + 2
    .byte BLACK
    REPEND
-   
+
    .byte COLOR_MARIO_SHOES
    .byte COLOR_MARIO_SHOES
    .byte COLOR_MARIO_SHOES
    .byte COLOR_MARIO_SUIT
-   .byte COLOR_MARIO_SUIT   
-   .byte COLOR_MARIO_SUIT   
-   .byte COLOR_MARIO_SUIT   
-   .byte COLOR_MARIO_SUIT   
-   .byte COLOR_MARIO_SUIT   
-   .byte COLOR_MARIO_SUIT   
-   .byte COLOR_MARIO_SUIT   
-   .byte COLOR_MARIO_SUIT   
-   .byte COLOR_MARIO_SUIT   
    .byte COLOR_MARIO_SUIT
    .byte COLOR_MARIO_SUIT
-   
+   .byte COLOR_MARIO_SUIT
+   .byte COLOR_MARIO_SUIT
+   .byte COLOR_MARIO_SUIT
+   .byte COLOR_MARIO_SUIT
+   .byte COLOR_MARIO_SUIT
+   .byte COLOR_MARIO_SUIT
+   .byte COLOR_MARIO_SUIT
+   .byte COLOR_MARIO_SUIT
+   .byte COLOR_MARIO_SUIT
+
    REPEAT H_KERNEL_SECTION + 1
    .byte BLACK
    REPEND
-   
+
 DonkeyKong
    .byte $00 ; |........|
    .byte $E0 ; |XXX.....|
@@ -2329,7 +2329,7 @@ DonkeyKong
    .byte $55 ; |.X.X.X.X|
    .byte $7C ; |.XXXXX..|
    .byte $38 ; |..XXX...|
-       
+
 ObstacleTable
    .byte <HorizontalBarrelSprite + OBSTACLE_HEIGHT - H_KERNEL_SECTION
    .byte <FallingBarrelSprite + OBSTACLE_HEIGHT - H_KERNEL_SECTION
@@ -2372,7 +2372,7 @@ FireFoxLeftPF1Table
    .byte <FireFoxPF1Data_01 - 3
    .byte <FireFoxPF1Data_01 - 3
    .byte <FireFoxPF1Data_01 - 3
-   
+
 FireFoxPF2Table
 ;
 ; no rivits removed
@@ -2410,7 +2410,7 @@ FireFoxPF2Table
    .byte <FireFoxPF2Data_02 - 3
    .byte <FireFoxPF2Data_02 - 3
    .byte <FireFoxPF2Data_02 - 3
-   
+
 FireFoxPF0Table
 ;
 ; no rivits removed
@@ -2448,25 +2448,25 @@ FireFoxPF0Table
    .byte <FireFoxPF2Data_02 - 3
    .byte <FireFoxPF2Data_02 - 3
    .byte <FireFoxPF2Data_02 - 3
-       
+
 LivesPFPattern
    .byte $00 ; |........|           no lives remaining
    .byte $01 ; |.......X|           one life
    .byte $05 ; |.....X.X|           two lives
    .byte $15 ; |...X.X.X|           three lives
-   
+
    IF COMPILE_REGION = PAL50
-   
+
       .byte $00, $FF, $FF, $00, $00 ; not used
-      
+
    ELSE
-   
+
       .byte $89, $A5, $0D, $E9, $00 ; not used
-   
+
    ENDIF
 
    BOUNDARY 0
-   
+
 NumberFonts
 zero
    .byte $3C ; |..XXXX..|
@@ -2558,7 +2558,7 @@ nine
    .byte $66 ; |.XX..XX.|
    .byte $3C ; |..XXXX..|
    .byte $00 ; |........|
-   
+
 BarrelOffsetDiffTable
    .byte 128, 144, 50, 54, 54, 58, 50, 49, 255, 52, 58, 58, 128
 
@@ -2602,7 +2602,7 @@ HorizontalBarrelSprite
    .byte $DF ; |XX.XXXXX|
    .byte $76 ; |.XXX.XX.|
    .byte $3C ; |..XXXX..|
-   
+
 FallingBarrelSprite
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -2641,7 +2641,7 @@ FallingBarrelSprite
    .byte $99 ; |X..XX..X|
    .byte $7E ; |.XXXXXX.|
    .byte $00 ; |........|
-   
+
 FirefoxSprite
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -2709,10 +2709,10 @@ FirefoxSprite
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-       
+
 FirefoxVerPos
    .byte 96, 68, 40, TOP_PLATFORM_VALUE
-   
+
 StartNewGameBoard
    lda #0
    ldx #<[hammerTime - obstacleVertPos]
@@ -2723,18 +2723,18 @@ StartNewGameBoard
    bmi .doneStartNewGameBoard
    sty marioColorPointerLSB,x
    bpl .startNewGameBoard           ; unconditional branch
-   
+
 .doneStartNewGameBoard
    jmp InitializeGame
 
    IF COMPILE_REGION = PAL50
 
       .byte $00                     ; not used
-   
+
    ELSE
-   
+
       .byte $98                     ; not used
-   
+
    ENDIF
 
 AudioFrequencyTable
@@ -2744,17 +2744,17 @@ AudioFrequencyTable
    .word DeathSoundFrequencyValues
    .word LevelCompletedSoundFrequencyValues
    .word RandomSeedTable                  ; not used
-   
+
 DeathSoundFrequencyValues
 
    IF COMPILE_REGION = PAL50
 
    .byte 12, 12, 12, 17, 17, 8, 8, 11, 10, 9, 8, 7, 6, 5, 0, 0, 0
-   
+
    ELSE
-   
+
    .byte 12, 12, 12, 12, 17, 17, 17, 8, 8, 8, 11, 10, 9, 8, 7, 6, 5
-   
+
    ENDIF
 
 BarrelRightPF1Data_05
@@ -2929,7 +2929,7 @@ Girlfriend
    .byte $07 ; |.....XXX|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   .byte $00 ; |........|   
+   .byte $00 ; |........|
 
 LadderHorizValues
    .byte 109, 81, 49, 89, 109, 69, 49, 109, 77
@@ -2938,7 +2938,7 @@ LadderHorizValues
 .firefoxLadderHorizValues
    .byte 41, 61, 97, 117, 41, 61, 97, 117
    .byte 41, 61, 97, 117, 41, 61, 97, 117
-       
+
 PositionHammerObject
    sta WSYNC                        ; wait for next scan line
    sec
@@ -2960,13 +2960,13 @@ RampHorizValues
    .byte 117, 105, 93, 81, 69, 58, 45
 
    IF COMPILE_REGION = PAL50
-   
+
       .byte $00                     ; not used
-   
+
    ELSE
-   
+
       .byte $88                     ; not used
-   
+
    ENDIF
 
 MarioColorTable
@@ -2976,16 +2976,16 @@ MarioColorTable
 
 WalkingSoundFrequencyValues
    .byte 26, 28
-   
+
 BarrelRightPF1Table
    .byte <BarrelRightPF1Data_05 - 13
    .byte <BarrelRightPF1Data_04 - 3
    .byte <BarrelRightPF1Data_03 - 3
    .byte <BarrelRightPF1Data_02 - 3
    .byte <BarrelRightPF1Data_01 - 3
-   
+
    .byte $91                        ; not used
-   
+
 BarrelLeftPF1Data_05
    .byte $0F ; |....XXXX|
    .byte $0F ; |....XXXX|
@@ -3239,17 +3239,17 @@ BarrelPF2Data_05
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    IF COMPILE_REGION = PAL50
-   
+
       .byte $00                     ; not used
-   
+
    ELSE
-   
+
       .byte $A0                     ; not used
-   
+
    ENDIF
-   
+
 MarioAnimationTable
    .byte <StationaryMarioSprite - H_KERNEL_SECTION - 1
    .byte <RunningMarioSprite_00 - H_KERNEL_SECTION - 1
@@ -3386,12 +3386,12 @@ PF0DataTopBarrelSection
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 NoHammerAnimation
    .byte $F0 | DISABLE_BM, $F0 | DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM
    .byte DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM
    .byte DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM
-   
+
 HandleUpSwingAnimation
    .byte DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM
    .byte DISABLE_BM, $FF,$FF,$FF, DISABLE_BM, DISABLE_BM, DISABLE_BM, $FF
@@ -3412,11 +3412,11 @@ HandleDownSwingAnimation
    .byte DISABLE_BM, DISABLE_BM, DISABLE_BM, $FF, $FF, DISABLE_BM, DISABLE_BM
    .byte DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM
    .byte DISABLE_BM
-       
+
 ScoringSoundFrequencyValues
    .byte 10, 10, 10, 10, 10, 10, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6
    .byte 6, 6, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 10, 10, 10, 10, 10 ; last byte not read
-       
+
 BarrelLeftPF1Table
    .byte <BarrelLeftPF1Data_05 - 13
    .byte <BarrelLeftPF1Data_04 - 3
@@ -3432,16 +3432,16 @@ BarrelPF2Table
    .byte <BarrelPF2Data_03 - 3
    .byte <BarrelPF2Data_02 - 3
    .byte <BarrelPF2Data_01 - 3
-   
+
    .byte $D4                        ; not used
-   
+
 BarrelPF0Table
    .byte <BarrelPF0Data_05 - 13
    .byte <BarrelPF0Data_04 - 3
    .byte <BarrelPF0Data_03 - 3
    .byte <BarrelPF0Data_02 - 3
    .byte <BarrelPF0Data_01 - 3
-   
+
    .byte $62                        ; not used
 
 KernelSectionHeight

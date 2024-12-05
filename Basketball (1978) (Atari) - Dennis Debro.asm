@@ -23,7 +23,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1977, ATARI, INC.                                  =
+; = THE ASSEMBLED CODE IS ï¿½ 1977, ATARI, INC.                                  =
 ; =                                                                            =
 ; ==============================================================================
 ;
@@ -32,7 +32,7 @@
 ; - Computer jumping can be controlled by right port fire button
 
    processor 6502
-      
+
 ;
 ; NOTE: You must compile this with vcs.h version 105 or greater.
 ;
@@ -42,20 +42,20 @@ TIA_BASE_READ_ADDRESS = $30         ; set the read address base so this runs on
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -70,7 +70,7 @@ TIA_BASE_READ_ADDRESS = $30         ; set the read address base so this runs on
       err
 
    ENDIF
-   
+
    LIST ON
 
 ;===============================================================================
@@ -111,7 +111,7 @@ INIT_XPOS_LEFT_BOUNDARY = 50        ; horizontal position of left bound line
 INIT_XPOS_RIGHT_BOUNDARY = 110      ; horizontal position of right bound line
 
    ELSE
-   
+
 FPS                     = 50        ; ~50 frames per second
 VBLANK_TIME             = 67
 OVERSCAN_SCANLINE_COUNT = 24
@@ -129,7 +129,7 @@ BLACK                   = $00
 WHITE                   = $0E
 
    IF COMPILE_REGION = NTSC
-   
+
 RED                     = $30
 COBALT_BLUE             = $60
 BLUE                    = $80
@@ -154,7 +154,7 @@ CLOCK_COLOR             = BLUE + 10
 FLOOR_COLOR             = YELLOW + 6
 
    ENDIF
-   
+
 ;===============================================================================
 ; U S E R - C O N S T A N T S
 ;===============================================================================
@@ -242,11 +242,11 @@ BALL_BOUNCING_UP        = 0 << 6
    .org $80
 
    IF COMPILE_REGION = NTSC || COMPILE_REGION = PAL60
-   
+
 frameCount              ds 1
 
    ENDIF
-   
+
 gameState               ds 1
 gameSelection           ds 1
 selectDebounce          ds 1
@@ -286,7 +286,7 @@ colorEOR                ds 1
 frameCount              ds 1
 
    ENDIF
-   
+
 scoringBasketStatus     ds 1
 ballPossessionStatus    ds 1
 ballBouncingDirectionStatus ds 1
@@ -396,7 +396,7 @@ floorColor              ds 1
 
    SEG Bank0
    .org ROM_BASE
-   
+
 SetupFontKernelGraphics
    stx spriteRAMPointer + 1         ; x = 0
    lda #>NumberFonts                ; get the MSB of the number fonts
@@ -503,7 +503,7 @@ CalculateObjectHorizPosition
    sta RESP0 - 1,x                  ; set object's coarse position
    sta WSYNC                        ; wait for next scan line
    sta HMP0 - 1,x                   ; set object's fine motion
-   dex   
+   dex
    bne .calculateObjectHorizPositions
    sta WSYNC
    sta HMOVE
@@ -588,13 +588,13 @@ ScoreKernel
    sta PF1                    ; 3 = @48   draw player 2 score
    lda player2ScoreColor      ; 3         get color for player 2
    sta COLUP1                 ; 3 = @54   color GRP1 (i.e. CTRLPF in score mode)
-   bcc ScoreKernel            ; 2³        branch if scan line less than loopCount
+   bcc ScoreKernel            ; 2ï¿½        branch if scan line less than loopCount
    inx                        ; 2 = @58   increment score sprite index
    tya                        ; 2         move scan line count to accumulator
    clc                        ; 2
    adc #3                     ; 2         increment by 3 for new loop count
    sta loopCount              ; 3 = @67
-   bmi ScoreKernel            ; 2³        continue kernel until value wraps
+   bmi ScoreKernel            ; 2ï¿½        continue kernel until value wraps
    ldx player1ScoreColor      ; 3 = @72
    stx COLUP0                 ; 3 = @75
 ;--------------------------------------
@@ -615,17 +615,17 @@ ScoreKernel
    sta REFP1                  ; 3 = @21   set GRP1 reflect state
    lda #MSBL_SIZE4 | PF_REFLECT;2
    sta CTRLPF                 ; 3 = @26   set ball to 4 clocks and reflect PF
-   
+
    IF COMPILE_REGION = PAL50
-   
+
    ldy #0                     ; 2         15 more scan lines for PAL50 playfield
-   
+
    ELSE
-   
+
    ldy #(H_FONT * 3) - 1      ; 2
-   
+
    ENDIF
-   
+
    sty scanline               ; 3         set scan line after drawing score
    ldy #0                     ; 2 = @33
 .kernelLoop
@@ -638,7 +638,7 @@ ScoreKernel
    lda ballScanline           ; 3         get the ball's scan line
    sbc scanline               ; 3         subtract current scan line
    and #~(H_BALL - 1)         ; 2 = @18   and with 2's complement of H_BALL
-   beq .setBallEnableState    ; 2³        enable if difference between 0 and 7
+   beq .setBallEnableState    ; 2ï¿½        enable if difference between 0 and 7
    ldy #DISABLE_BM            ; 2 = @22
 .setBallEnableState
    sty ENABL                  ; 3 = @25
@@ -659,10 +659,10 @@ ScoreKernel
    lsr                        ; 2         divide value by 2
    tax                        ; 2         set index for player graphics
    and #~(H_PLAYER - 1)       ; 2 = @67   and with 2's complement of H_PLAYER
-   beq .loadPlayer0Graphics   ; 2³        draw player if between 0 and 14
+   beq .loadPlayer0Graphics   ; 2ï¿½        draw player if between 0 and 14
    lda #0                     ; 2 = @71
    beq .drawPlayer0           ; 3         unconditional branch
-   
+
 .loadPlayer0Graphics
    lda player2Graphics,x      ; 4
 .drawPlayer0
@@ -673,7 +673,7 @@ ScoreKernel
    sty PF1                    ; 3 = @09   draw basketball goal graphics
    lda scanline               ; 3         get the current scan line
    cmp #YMIN                  ; 2 = @14
-   bcc .determinePlayer1Draw  ; 2³
+   bcc .determinePlayer1Draw  ; 2ï¿½
    ldx kernelFloorColor       ; 3 = @19   get the color for the floor
    stx COLUBK                 ; 3 = @22   color background for floor illusion
    stx ENAM0                  ; 3 = @25
@@ -685,24 +685,24 @@ ScoreKernel
    lsr                        ; 2         divide value by 2
    tax                        ; 2         set index for player graphics
    and #~(H_PLAYER - 1)       ; 2         and with 2's complement of H_PLAYER
-   beq .loadPlayer1Graphics   ; 2³        draw player if between 0 and 14
+   beq .loadPlayer1Graphics   ; 2ï¿½        draw player if between 0 and 14
    ldy #0                     ; 2
    beq .determineKernelDone   ; 3         unconditional branch
-   
+
 .loadPlayer1Graphics
    ldy player1Graphics,x      ; 4
 .determineKernelDone
    lda scanline               ; 3         get the current scan line
    cmp #YMAX                  ; 2
-   bcs Overscan               ; 2³        branch if done with kernel
+   bcs Overscan               ; 2ï¿½        branch if done with kernel
    and #3                     ; 2         see if scan line is divisible by 4
-   bne .kernelLoop            ; 2³        if not then continue with kernel
+   bne .kernelLoop            ; 2ï¿½        if not then continue with kernel
    ldx #HMOVE_L1              ; 2         if divisible by 4 then move missiles
    stx HMM0                   ; 3         (i.e. boundary lines) to show
    ldx #HMOVE_R1              ; 2         diagonal line
    stx HMM1                   ; 3
    bne .kernelLoop            ; 3         unconditional branch
-   
+
 Overscan SUBROUTINE
    lda #0
    ldy #OVERSCAN_SCANLINE_COUNT
@@ -780,7 +780,7 @@ ClearGameTIARegisters
    stx cpuPlayerAggression
    stx player1ReflectValue
    jmp DisplayKernel
-       
+
 CheckForGameSelectOrReset
    inc frameCount                   ; incremented each frame
    lda SWCHB                        ; read the console switches
@@ -792,29 +792,29 @@ CheckForGameSelectOrReset
    stx player1Score                 ; set player 1 score to zero
    stx player2Score                 ; set player 2 score to zero
    beq ClearGameTIARegisters        ; unconditional branch
-   
+
 .skipGameReset
    lda selectDebounce               ; get the select debounce value
-   beq .determineToCheckForSelectSwitch                        
+   beq .determineToCheckForSelectSwitch
    inc selectDebounce
 .determineToCheckForSelectSwitch
 
    IF COMPILE_REGION = PAL50
-   
+
    lda frameCount                   ; get current frame count
    cmp #FPS
    bne .checkForSelectSwitch        ; branch if not reached 50 frames
    stx frameCount                   ; reset frame count
-   
-   
+
+
    ELSE
-   
+
    lda frameCount                   ; get current frame count
    and #SELECT_DELAY                ; the select switch is checked ~ every 60
    bne .checkForSelectSwitch
-   
+
    ENDIF
-   
+
    bit gameState                    ; check current game state
    bpl .skipGameClockReduction      ; skip clock reduction if not in game mode
    sec
@@ -833,17 +833,17 @@ CheckForGameSelectOrReset
 .skipGameClockReduction
    inc colorEOR
    bne .checkForSelectSwitch
-   
+
    IF COMPILE_REGION = PAL50
-   
+
    stx gameState
-   
+
    ELSE
-   
+
    sta gameState
-   
+
    ENDIF
-   
+
 .checkForSelectSwitch
    lda SWCHB                        ; read the console switches
    eor #$FF                         ; flip the bits
@@ -851,7 +851,7 @@ CheckForGameSelectOrReset
    bne .selectSwitchPressed         ; branch if SELECT pressed
    sta selectDebounce               ; clear select debounce value
    beq ReadJoystickValues           ; unconditional branch
-   
+
 .selectSwitchPressed
    bit selectDebounce
    bmi ReadJoystickValues
@@ -879,7 +879,7 @@ ReadJoystickValues
    ldx gameSelection                ; get current game selection
    bne .ignorePlayer1JoystickValues ; branch if one player game
    jmp ReadJoystickActionButtonStatus
-       
+
 .ignorePlayer1JoystickValues
    ldx #0
    and #P1_NO_MOVE                  ; keep player 2's values
@@ -887,7 +887,7 @@ ReadJoystickValues
    lda tmpJoystickValue             ; get the temporary joystick value
    and #P0_NO_MOVE                  ; keep player 1's values
    ora player2JoystickValue         ; or in player2 joystick value
-   sta joystickValue                ; save in current joystick value 
+   sta joystickValue                ; save in current joystick value
    lda ballPossessionStatus         ; check ball possession status
    bmi .determineHorizTargetForPlayer1WithBall; branch if ball in possession
    sec
@@ -910,44 +910,44 @@ ReadJoystickValues
    tay                              ; transfer to target horizontal position
    ldx ballVerticalPosition         ; get ball vertical position
    bne DetermineCPUPlayerJoystickValues; unconditional branch
-   
+
 .determineHorizTargetForPlayer1WithBall
    and #PLAYER_POSSESSION_MASK      ; keep D0 to see which player has ball
    beq .checkForCPUPlayerShootingBall; branch if player 1 has the ball
    lda #3
    bne .determineTargetHorizontalPosition;unconditional branch
-   
+
 .checkForCPUPlayerShootingBall
    bit ballPossessionStatus         ; check ball possession status
    bvc .determineCPUPlayerHorizTarget; branch if player not preparing to shoot
    dec cpuPlayerShootingDelay
    bpl .checkForFireButtonHeld
    bne ReadJoystickActionButtonStatus;unconditional branch
-   
+
 .determineCPUPlayerHorizTarget
    lda frameCount                   ; get current frame count
-   
+
    IF COMPILE_REGION = NTSC || COMPILE_REGION = PAL60
-   
+
    tax                              ; move frame count to x register
    sec
    and #$3F
    ora #$10
    tay
    sbc player2HorizPos              ; subtract player 2 horizontal position
-   
+
    ELSE
-   
+
    asl
    asl
    tax
    and #$3F
    tay
    cmp player2HorizPos
-   
+
    ENDIF
 
-   bcc DetermineCPUPlayerJoystickValues; branch if player 2 to the right   
+   bcc DetermineCPUPlayerJoystickValues; branch if player 2 to the right
    lda player2VertPos               ; get player 2 vertical position
    sbc #Y_MID_COURT                 ; get distance from player 2 and mid court
    bcs .determineCPUPlayerShootingDelay
@@ -961,7 +961,7 @@ ReadJoystickValues
    sta cpuPlayerShootingDelay       ; i.e. (|y - mid | + x) / 4
    ldx #0
    beq .checkForFireButtonHeld      ; unconditional branch
-       
+
 DetermineCPUPlayerJoystickValues
    lda frameCount                   ; get current frame count
    and cpuPlayerAggression
@@ -976,7 +976,7 @@ DetermineCPUPlayerJoystickValues
    bcs .setCPUOpponentToMoveDown    ; branch if target is lower then player 2
    and #MOVE_UP                     ; remove D4 to simulate MOVE_UP
    bcc .setCPUOpponentVerticalMovement;unconditional branch
-   
+
 .setCPUOpponentToMoveDown
    and #MOVE_DOWN                   ; remove D5 to simulate MOVE_DOWN
 .setCPUOpponentVerticalMovement
@@ -988,7 +988,7 @@ DetermineCPUPlayerJoystickValues
    bcs .setCPUOpponentToMoveRight   ; branch if target is to the right of player
    and #MOVE_LEFT                   ; remove D6 to simulate MOVE_LEFT
    bcc .setCPUOpponentHorizontalMovement;unconditional branch
-   
+
 .setCPUOpponentToMoveRight
    and #MOVE_RIGHT                  ; remove D7 to simulate MOVE_RIGHT
 .setCPUOpponentHorizontalMovement
@@ -1011,14 +1011,14 @@ ReadJoystickActionButtonStatus
    sta ballPossessionStatus         ; set possession status to SHOOTING_STATUS
    sty shootingAnimationCount       ; clear shooting animation counter
    bne .checkNextPlayerFireButton   ; unconditional branch
-       
+
 .incrementPlayerJumpingValue
    ldy playerJumpingValues,x        ; get player jumping value
    bne .jmpToCheckNextPlayerFireButton
    inc playerJumpingValues,x
 .jmpToCheckNextPlayerFireButton
    bne .checkNextPlayerFireButton   ; unconditional branch
-   
+
 .checkForFireButtonReleased
    lda fireButtonDebounceValues,x   ; get player fire button debounce value
    bpl .checkNextPlayerFireButton   ; branch if fire button not held
@@ -1030,7 +1030,7 @@ ReadJoystickActionButtonStatus
    bne .checkNextPlayerFireButton   ; branch if player not shooting ball
    sty ballPossessionStatus         ; clear possession status
    lda ballBouncingDirectionStatus
-   and #~BALL_BOUNCING_VERT_MASK    ; clear the ball vertical direction 
+   and #~BALL_BOUNCING_VERT_MASK    ; clear the ball vertical direction
    ora bouncingBallVertDirection
    sta ballBouncingDirectionStatus
 .checkNextPlayerFireButton
@@ -1064,7 +1064,7 @@ ReadJoystickActionButtonStatus
    bit SWCHB                        ; check console difficulty switches
    bvs .determineNextPlayerMovement ; skip joystick movement if set to PRO
    bvc .checkPlayerJoystickValues   ; unconditional branch
-       
+
 .checkRightPortDifficultySwitch
    bit SWCHB                        ; check console difficulty switches
    bmi .determineNextPlayerMovement ; skip joystick movement if set to PRO
@@ -1126,18 +1126,18 @@ ReadJoystickActionButtonStatus
    stx tmpBallPossessionPlayerIdx   ; set to index of player that has ball
    ora #PLAYER_HAS_BALL_STATUS
    sta ballPossessionStatus         ; set status to show player has ball
-   lda #BALL_BOUNCING_RIGHT | BALL_BOUNCING_DOWN 
+   lda #BALL_BOUNCING_RIGHT | BALL_BOUNCING_DOWN
    sta ballBouncingDirectionStatus  ; set to bounce ball downward
    sta ballDribblingCount
    bne .checkBallPossessionStatus   ; unconditional branch
-       
+
 .checkForJumpingPlayerBlockingShot
    ldy playerJumpingValues,x        ; get player jumping value
    beq .checkForNonJumpingPlayerBlockingShot; branch if player not jumping
    and #~[(H_PLAYER * 2) - 1]
    beq .setPlayerBallPossessionStatus; block ball if player within 32 scan lines
    bne .checkNextPlayerBallCollision
-       
+
 .checkForNonJumpingPlayerBlockingShot
    and #~(H_PLAYER - 1)
    beq .setPlayerBallPossessionStatus; branch if within 16 scan line distance
@@ -1148,7 +1148,7 @@ ReadJoystickActionButtonStatus
    bit ballPossessionStatus         ; check ball possession status
    bmi .determineBounceHeightForPossessedBall; branch if player has the ball
    jmp CheckBallForHittingBasket
-       
+
 .determineBounceHeightForPossessedBall
    bvs .determineBallHeightForShootingAnimation; branch if preparing to shoot
    ldx tmpBallPossessionPlayerIdx   ; get index of player that has ball
@@ -1168,7 +1168,7 @@ ReadJoystickActionButtonStatus
    sta ballBounceHeight
    inc ballDribblingCount           ; increment ball dribbling count
    jmp DetermineToAllowBlockedShot
-       
+
 .determineBallHeightForShootingAnimation
    lda frameCount                   ; get current frame count
    and #3                           ; shooting amimation updated every 4 frames
@@ -1195,7 +1195,7 @@ ReadJoystickActionButtonStatus
    adc BallAndPlayerHorizOffsetValues,x
    sbc #2
    bne .setBallHorizontalPosition   ; unconditional branch
-   
+
 .setPlayer1BallHorizontalPosition
    sec
    lda player1HorizPos              ; get player1's horizontal position
@@ -1252,7 +1252,7 @@ DetermineBouncingBallDirectionStatus
    dex
    beq .determineBallMotionDelay
    bne .divPlaeryDistanceBy2        ; unconditional branch
-       
+
 DetermineBallMotionDelay
    lda #2
    sta tmpPlayerDistanceValues,x
@@ -1275,7 +1275,7 @@ DetermineBallMotionDelay
    sta ballHorizMotionDelay
    sta decBallHorizMotionDelay
    jmp DetermineToAllowBlockedShot
-       
+
 CheckBallForHittingBasket
    bit CXBLPF                       ; check ball and playfield collision
    bpl .clearBallInHoopStatus       ; branch if ball didn't hit basket
@@ -1317,7 +1317,7 @@ CheckBallForHittingBasket
    lda #2
    sta leftSoundChannelVolumeControl
    bne .checkForScoring             ; unconditional branch
-       
+
 .clearBallInHoopStatus
    lda #0
    sta ballInHoopStatus
@@ -1463,7 +1463,7 @@ SetupPlayerGraphics
    beq .setPlayerSpriteLegsToStationary
    lda #<PlayerLegsRunning
    bne .setPlayerLegSpritePointerLSB; unconditional branch
-       
+
 .setPlayerSpriteLegsToStationary
    lda #<PlayerLegsStationary       ; point to player sprite stationary legs
 .setPlayerLegSpritePointerLSB
@@ -1471,7 +1471,7 @@ SetupPlayerGraphics
    lda ballPossessionStatus         ; get ball possession status
    bpl .setPlayerBodySpriteToDribble; branch if ball not in a player possession
    and #PLAYER_POSSESSION_MASK      ; keep player index holding ball
-   stx tmpPlayerWithBall            ; move player index 
+   stx tmpPlayerWithBall            ; move player index
    cmp tmpPlayerWithBall
    bne .setPlayerBodySpriteToDribble; branch if current player not have ball
    lda ballBounceHeight
@@ -1481,11 +1481,11 @@ SetupPlayerGraphics
    bcs .setPlayerBodySpriteToShooting_01
    ldy #<PlayerShootingAnimation_00
    bne .setPlayerBodySpritePointerLSB;unconditional branch
-   
+
 .setPlayerBodySpriteToShooting_01
    ldy #<PlayerShootingAnimation_01
    bne .setPlayerBodySpritePointerLSB;unconditional branch
-       
+
 .setPlayerBodySpriteToDribble
    ldy #<PlayerDribbleAnimation
 .setPlayerBodySpritePointerLSB
@@ -1594,7 +1594,7 @@ SetupPlayerGraphics
    dex
    beq .determinePlayerReflectState
    bne DetermineJumpingPlayer       ; unconditional branch
-       
+
 .setPlayerReflectForBallPossession
    bne .setPlayer2ReflectForBallPossession; branch if player 2 has possession
    sty player1HorizontalDirection
@@ -1606,7 +1606,7 @@ SetupPlayerGraphics
 .setPlayer2ReflectValue
    sty player2ReflectValue
    jmp DetermineJumpingPlayer
-       
+
 .setPlayer2ReflectForBallPossession
    iny                              ; y = 0 (i.e. NO_REFLECT)
    sty player2ReflectValue
@@ -1630,11 +1630,11 @@ DetermineJumpingPlayer
    bcs .playerDecendingJumpingArch  ; branch if player reached arch apex
    lda #<-3
    bne .changePlayerJumpingVertical ; move player up to arch apex
-       
+
 .playerDecendingJumpingArch
    lda #3
    bne .changePlayerJumpingVertical ; unconditional branch
-       
+
 .clearPlayerJumpingValue
    lda #0
    sta playerJumpingValues,x
@@ -1645,7 +1645,7 @@ DetermineJumpingPlayer
    dex
    beq .determineJumpingPlayer
    jmp DisplayKernel
-       
+
 PlayerSprites
 PlayerLegSprites
 PlayerLegsRunning
@@ -1657,7 +1657,7 @@ PlayerLegsRunning
    .byte $E0 ; |XXX.....|
    .byte $C0 ; |XX......|
    .byte $E0 ; |XXX.....|
-PlayerLegsStationary   
+PlayerLegsStationary
    .byte $F0 ; |XXXX....|
    .byte $C0 ; |XX......|
    .byte $C0 ; |XX......|
@@ -1693,13 +1693,13 @@ PlayerShootingAnimation_01
    .byte $E4 ; |XXX..X..|
    .byte $F4 ; |XXXX.X..|
    .byte $E6 ; |XXX..XX.|
-   
+
 ShootingBallBounceHeightValues
    .byte 26, 26, 28, 30, 32, 34, 34, 34
-       
+
 UnderBasketHorizontalPosition
    .byte XMIN - 1, XMAX - 7
-       
+
 NumberFonts
 zero
    .byte $EE ; |XXX.XXX.|
@@ -1768,7 +1768,7 @@ colon
    .byte $04 ; |.....X..|
 ;
 ; last byte shared with table below
-;   
+;
 BasketGraphics
    .byte $00 ; |........|
 Blank
@@ -1788,7 +1788,7 @@ Blank
    .byte $80 ; |X.......|
    .byte $80 ; |X.......|
    .byte $80 ; |X.......|
-   
+
 BallAndPlayerHorizOffsetValues
    .byte 0, 0, 0, 0, 0, 0, 2, 4
 
@@ -1814,6 +1814,6 @@ PositionChangeValues
 
    .org ROM_BASE + 2048 - 4, 234
    .word Start
-   
+
 BallHorizPositionOffsetValues
    .byte 3, -9

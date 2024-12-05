@@ -16,7 +16,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1979, ATARI, INC.                                  =
+; = THE ASSEMBLED CODE IS ï¿½ 1979, ATARI, INC.                                  =
 ; =                                                                            =
 ; ==============================================================================
 ;
@@ -34,20 +34,20 @@ TIA_BASE_READ_ADDRESS = $30         ; set the read address base so this
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -90,13 +90,13 @@ COMPILE_REGION          = NTSC      ; change to compile for different regions
       err
 
    ENDIF
-   
+
 ;===============================================================================
 ; F R A M E  T I M I N G S
 ;===============================================================================
 
    IF COMPILE_REGION = NTSC
-   
+
 VBLANK_TIME             = 55
 OVERSCAN_TIME           = 2
 STATUS_KERNEL_TIME      = 25
@@ -125,9 +125,9 @@ FLIGHT_SOUND_RANGE_02   = H_KERNEL - 24
 FLIGHT_SOUND_RANGE_03   = H_KERNEL - 40
 FLIGHT_SOUND_RANGE_04   = H_KERNEL - 56
 FLIGHT_SOUND_RANGE_05   = H_KERNEL - 70
-      
+
    ELSE
-   
+
 VBLANK_TIME             = 56
 OVERSCAN_TIME           = 16
 STATUS_KERNEL_TIME      = 24
@@ -1568,7 +1568,7 @@ StatusKernel SUBROUTINE
    inc secondsMSBOffset       ; 5
    inc secondsLSBOffset       ; 5
    dex                        ; 2
-   bpl StatusKernel           ; 2³
+   bpl StatusKernel           ; 2ï¿½
    sta WSYNC
 ;--------------------------------------
    lda #0                     ; 2
@@ -1587,22 +1587,22 @@ StatusKernel SUBROUTINE
    ldx #DOUBLE_SIZE           ; 2
    lda currentObjectId        ; 3         get the current object being shown
    cmp #<HelicopterDS         ; 2
-   beq .setSizeOfObject       ; 2³
+   beq .setSizeOfObject       ; 2ï¿½
    cmp #<BridgeCompleteDS     ; 2
-   beq .setSizeOfObject       ; 2³
+   beq .setSizeOfObject       ; 2ï¿½
    cmp #<BridgePiece0DS       ; 2
-   beq .setSizeOfObject       ; 2³
+   beq .setSizeOfObject       ; 2ï¿½
    cmp #<BridgePiece1DS       ; 2
-   beq .setSizeOfObject       ; 2³
+   beq .setSizeOfObject       ; 2ï¿½
    cmp #<BridgePiece2DS       ; 2
-   beq .setSizeOfObject       ; 2³
+   beq .setSizeOfObject       ; 2ï¿½
    ldx #ONE_COPY              ; 2
 .setSizeOfObject
    stx NUSIZ0                 ; 3
    lda #NO_REFLECT            ; 2
    ldx currentObjectId        ; 3         get the current object being shown
    cpx #<BridgePiece0DS       ; 2         if the object is a human then
-   bcs .setObjectReflectState ; 2³        don't reflect the player
+   bcs .setObjectReflectState ; 2ï¿½        don't reflect the player
    lda playerDirection        ; 3
    asl                        ; 2
 .setObjectReflectState
@@ -1615,7 +1615,7 @@ PositionObjectsOnScreen
 .determineCoarsePosition
    iny                        ; 2
    sbc #15                    ; 2
-   bcs .determineCoarsePosition;2³
+   bcs .determineCoarsePosition;2ï¿½
    eor #$FF                   ; 2
    sbc #7 - 1                 ; 2         carry clear
    asl                        ; 2
@@ -1626,15 +1626,15 @@ PositionObjectsOnScreen
 ;--------------------------------------
 .coarseMoveObject
    dey                        ; 2
-   bpl .coarseMoveObject      ; 2³
+   bpl .coarseMoveObject      ; 2ï¿½
    sta RESP0,x                ; 4
    sta HMP0,x                 ; 4
    lda objectHorizPos         ; 3
    dex                        ; 2
-   bpl PositionObjectsOnScreen; 2³
+   bpl PositionObjectsOnScreen; 2ï¿½
 .waitTime
    lda INTIM                  ; 4
-   bne .waitTime              ; 2³        wait for status kernel to end
+   bne .waitTime              ; 2ï¿½        wait for status kernel to end
    sta WSYNC
 ;--------------------------------------
    sta HMOVE                  ; 3
@@ -1659,43 +1659,43 @@ PositionObjectsOnScreen
    cmp playerVertPos          ; 3         see if player is in scanline zone
    sta WSYNC
 ;--------------------------------------
-   bpl .skipPlayerDraw        ; 2³
+   bpl .skipPlayerDraw        ; 2ï¿½
    ldy playerGraphicsOffset   ; 3         get player graphic offset for read
    lda (playerColorPtrs),y    ; 5
    sta COLUP1                 ; 3 = @13
    lda (playerGraphicsPtrs),y ; 5
    sta GRP1                   ; 3 = @21   draw player Clark Kent/Superman
-   beq .skipPlayerDraw        ; 2³
+   beq .skipPlayerDraw        ; 2ï¿½
    inc playerGraphicsOffset   ; 5         increment offset for next scanline
 .skipPlayerDraw
    ldx #0                     ; 2
    ldy #0                     ; 2
    lda currentScanline        ; 3         get current scanline
    cmp objectVertPos          ; 3         see if object is in scanline zone
-   bpl .skipObjectDraw        ; 2³
+   bpl .skipObjectDraw        ; 2ï¿½
    ldy objectGraphicsOffset   ; 3         get object's graphic offset for read
    lda (characterColorPtrs),y ; 5
    tax                        ; 2
    lda (characterGraphicPtrs),y; 5
    tay                        ; 2
-   beq .skipObjectDraw        ; 2³
+   beq .skipObjectDraw        ; 2ï¿½
    inc objectGraphicsOffset   ; 5         increment offset for next scanline
 .skipObjectDraw
    lda currentScanline        ; 3         get current scanline
    and #$0F                   ; 2
-   bne .drawPlayfieldGraphics ; 2³
+   bne .drawPlayfieldGraphics ; 2ï¿½
    sta WSYNC
 ;--------------------------------------
    sty GRP0                   ; 3 = @03   draw object
    stx COLUP0                 ; 3 = @06
    ldy playfieldGraphicsOffset; 3         get offset for playfield graphics
-   bpl .setupPlayfieldValues  ; 2³
+   bpl .setupPlayfieldValues  ; 2ï¿½
    ldy #0                     ; 2
    sty pf0Graphics            ; 3
    sty pf1Graphics            ; 3
    lda roomGraphicPtrs        ; 3         get the graphic pointer LSB
    cmp #<BridgeRoom           ; 2
-   bne .setPF2Graphics        ; 2³
+   bne .setPF2Graphics        ; 2ï¿½
    ldy #%11000000             ; 2         draw gap for bridge chasm
 .setPF2Graphics
    sty pf2Graphics            ; 3
@@ -1716,7 +1716,7 @@ PositionObjectsOnScreen
    dec currentScanline        ; 5         reduce scanline
    lda currentScanline        ; 3         get current scanline
    cmp #8                     ; 2
-   bpl .kernelLoop            ; 2³
+   bpl .kernelLoop            ; 2ï¿½
    jmp Overscan               ; 3
 
 .drawPlayfieldGraphics
@@ -2634,7 +2634,7 @@ PlayAudioChannel1Sounds
    sta soundPriority                ; a = 0
    rts
 
-PlaySoundForClarkKentInDailyPlanet 
+PlaySoundForClarkKentInDailyPlanet
    lda soundPriority                ; get sound priority value
    bmi .playEndingGameSound         ; branch if made it to Daily Planet
    lda #48
@@ -2663,7 +2663,7 @@ PlaySoundForClarkKentInDailyPlanet
 .playSecondGameOverTone
    lda #6
    bne .decrementSoundDelayTimer    ; unconditional branch
-   
+
 .playLastGameOverTone
    lda #10
    bne .setChannel_01AudioFrequency ; unconditional branch
@@ -2698,7 +2698,7 @@ SetPlayerPointersForWalking
    beq .animatePlayer               ; branch if inside a room
    dex
    bpl .checkForInsideRoom
-   lda #FLIGHT_SOUND_RANGE_05   
+   lda #FLIGHT_SOUND_RANGE_05
    cmp playerVertPos
    bmi .checkPlayerLowerVertLimit
    sta playerVertPos
@@ -2724,17 +2724,17 @@ SetPlayerPointersForWalking
    lda #<BridgeRoomDS               ; get the Bridge Room LSB
    cmp playerCurrentRoom            ; see if player in Bridge Room
    bne .checkPlayerInPhoneBoothRoom
-   
+
    IF COMPILE_REGION = PAL50
-   
+
    lda #68
-   
+
    ELSE
-   
+
    lda #54
-   
+
    ENDIF
-   
+
    cmp playerHorizPos               ; compare with player horizontal position
    bcs .checkForBridgeComplete      ; branch if player to the left of gap
    sta playerVertPos                ; set vertical position
@@ -2830,7 +2830,7 @@ SetPlayerPointersForFlying
    sec
    sbc #4                           ; subtract to make Superman decend
    sta playerVertPos
-   cmp #FLIGHT_SOUND_RANGE_05   
+   cmp #FLIGHT_SOUND_RANGE_05
    bmi .skipSetSupermanToWalk
    cmp #SUPERMAN_WALKING_VERT_MAX
    bpl .skipSetSupermanToWalk
@@ -3457,14 +3457,14 @@ Gangster1Matrix
    .byte 0
 
    IF COMPILE_REGION = PAL50
-   
+
    .byte $B4, $CA                   ; usused...here to assemble to exact ROM
-      
+
    ELSE
-   
+
    .org ROM_BASE + 4096 - 4, 0
-   
+
    ENDIF
-   
+
    .word Start
    .word 0

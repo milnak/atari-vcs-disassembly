@@ -25,7 +25,7 @@
 ;   identified them all correctly.
 
    processor 6502
-      
+
 ;
 ; NOTE: You must compile this with vcs.h version 105 or greater.
 ;
@@ -47,7 +47,7 @@ PAL                     = 1
 
 COMPILE_VERSION         = NTSC      ; change this to compile for different
                                     ; regions
-                                    
+
 ;============================================================================
 ; T I A - C O N S T A N T S
 ;============================================================================
@@ -111,7 +111,7 @@ BLACK          =  $00
 WHITE          =  $0E
 
    IF COMPILE_VERSION = NTSC
-   
+
 VBLANK_TIME    = $2C
 OVERSCAN_TIME  = $24
 
@@ -151,7 +151,7 @@ ROBOT_MISSILE_DELAY_6      = $B0    ; move 22 out of 32 frames
 ROBOT_MISSILE_DELAY_7      = $D0    ; move 26 out of 32 frames
 
    ELSE
-   
+
 VBLANK_TIME    = $36
 OVERSCAN_TIME  = $2B
 
@@ -261,24 +261,24 @@ YROBOT_MISSILE_BOX         = 6
    MAC SLEEP_3
       lda playerGraphicPointer
    ENDM
-      
+
    MAC SLEEP_4
       nop
       nop
    ENDM
-      
+
    MAC SLEEP_8
       nop
       SLEEP_3
       SLEEP_3
    ENDM
-   
+
    MAC SLEEP_9
       SLEEP_3
       SLEEP_3
       SLEEP_3
    ENDM
-   
+
 ;============================================================================
 ; Z P - V A R I A B L E S
 ;============================================================================
@@ -378,22 +378,22 @@ robotCoarsePos          = $FE       ; value to coarse move robot in kernel
 
 Start
    jmp ColdStart
-   
+
 .waste15Cycles
    SLEEP_9                    ; 9
    jmp .drawMazeData          ; 3
-       
+
 .waste10Cycles
    SLEEP_4                    ; 4
    jmp .drawMazeData          ; 3
-       
+
 ReadCollisionsForSection
    lda CXP1FB                 ; 3         read player1/PF collision
    ora CXM0P                  ; 3         or player0 missile collisions
-   ora CXPPMM                 ; 3         or player/player and 
+   ora CXPPMM                 ; 3         or player/player and
    and #%10000000             ; 2         mask ball, M0/M0, M0/P0 collisions
    bit CXM1P                  ; 3
-   bvc .setCollisions         ; 2³
+   bvc .setCollisions         ; 2ï¿½
    ora #1                     ; 2         show a robot shot this robot
 .setCollisions
    sta playerCollisions,x     ; 4
@@ -406,9 +406,9 @@ ReadCollisionsForSection
    sta ENAM0                  ; 3 = @17
    SLEEP_8                    ; 8
    cpy player0Scanline        ; 3 = @28
-   bcc .waste15Cycles         ; 2³
+   bcc .waste15Cycles         ; 2ï¿½
    cpy playerUpperBoundary    ; 3
-   bcs .waste10Cycles         ; 2³
+   bcs .waste10Cycles         ; 2ï¿½
    lda (playerGraphicPointer),y; 5
    sta player0Graphic         ; 3
 .drawMazeData
@@ -429,11 +429,11 @@ ReadCollisionsForSection
    lda robotGraphics          ; 3
    sta GRP1                   ; 3 = @10   draw Robot
    ldx robotCoarsePos         ; 3
-   bmi CoarseMoveRobotOnRight ; 2³
+   bmi CoarseMoveRobotOnRight ; 2ï¿½
    SLEEP_3                    ; 3
 .coarseMoveRobot
    dex                        ; 2
-   bpl .coarseMoveRobot       ; 2³
+   bpl .coarseMoveRobot       ; 2ï¿½
    sta RESP1                  ; 3
    lda (robotMissilePointer),y; 5
    sta ENAM1                  ; 3
@@ -443,7 +443,7 @@ ReadCollisionsForSection
    lda RobotGraphics,x        ; 4
    sta robotGraphics          ; 3
    jmp NextRobotKernelSection ; 3
-       
+
 CoarseMoveRobotOnRight SUBROUTINE
    lda (robotMissilePointer),y; 5
    sta ENAM1                  ; 3 = @24
@@ -455,7 +455,7 @@ CoarseMoveRobotOnRight SUBROUTINE
    ldx robotCoarsePos         ; 3 = @43
 .coarseMoveRobot
    inx                        ; 2
-   bmi .coarseMoveRobot       ; 2³
+   bmi .coarseMoveRobot       ; 2ï¿½
    sta RESP1                  ; 3
 NextRobotKernelSection
    sta WSYNC
@@ -468,9 +468,9 @@ JumpIntoGameKernel
    sta ENAM0                  ; 3 = @17
    SLEEP_8                    ; 8
    cpy player0Scanline        ; 3 = @28
-   bcc .waste12Cycles         ; 2³+1
+   bcc .waste12Cycles         ; 2ï¿½+1
    cpy playerUpperBoundary    ; 3
-   bcs .waste7Cycles          ; 2³+1
+   bcs .waste7Cycles          ; 2ï¿½+1
    lda (playerGraphicPointer),y; 5
    sta player0Graphic         ; 3
 .drawMazeData
@@ -495,7 +495,7 @@ JumpIntoGameKernel
    ldx kernelSection          ; 3
    tya                        ; 2
    cmp robotVertPos,x         ; 4
-   bne DoneRobotKernelSection ; 2³
+   bne DoneRobotKernelSection ; 2ï¿½
    lda robotFineHoriz,x       ; 4
    sta HMP1                   ; 3 = @36
    lda robotCoarseHoriz,x     ; 4
@@ -503,14 +503,14 @@ JumpIntoGameKernel
    lda #0                     ; 2
    sta robotGraphics          ; 3
    jmp ReadCollisionsForSection; 3
-       
+
 DoneRobotKernelSection
-   bcc .skipRobotDraw         ; 2³
+   bcc .skipRobotDraw         ; 2ï¿½
    sec                        ; 2         not needed -- carry already set
    sbc #MAX_ROBOTS+1          ; 2
-   bmi .drawNextRobotLine     ; 2³
+   bmi .drawNextRobotLine     ; 2ï¿½
    cmp robotVertPos,x         ; 4
-   bcc .drawNextRobotLine     ; 2³
+   bcc .drawNextRobotLine     ; 2ï¿½
    inc kernelSection          ; 5
 .drawNextRobotLine
    inc robotPointers,x        ; 6         increment robot pointer offset
@@ -522,21 +522,21 @@ DoneRobotKernelSection
    sta WSYNC
 ;--------------------------------------
    jmp JumpIntoGameKernel     ; 3
-       
+
 .skipRobotDraw
    cpy #(H_KERNEL / 2) - 1    ; 2
-   bcs LastKernelSection      ; 2³+1
+   bcs LastKernelSection      ; 2ï¿½+1
    lda #0                     ; 2
    jmp .setRobotGraphics      ; 3         could use unconditional branch
-       
+
 .waste12Cycles
    SLEEP_8                    ; 8
    jmp .drawMazeData          ; 3
-       
+
 .waste7Cycles
    SLEEP_3                    ; 3
    jmp .drawMazeData          ; 3
-       
+
 LastKernelSection
    sta WSYNC
 ;--------------------------------------
@@ -545,7 +545,7 @@ LastKernelSection
    lda (playerMissilePointer),y;5
    sta ENAM0                  ; 3 = @14
    cpy playerUpperBoundary    ; 3
-   bcs .skipPlayerGraphicSet  ; 2³
+   bcs .skipPlayerGraphicSet  ; 2ï¿½
    lda (playerGraphicPointer),y;5
    sta player0Graphic         ; 3
 .skipPlayerGraphicSet
@@ -558,7 +558,7 @@ LastKernelSection
    lda #%00000111             ; 2
    ldx playerStartingLocation ; 3
    cpx #PLAYER_ENTERING_SOUTH ; 2
-   bne .setPF2ForNextScanline ; 2³
+   bne .setPF2ForNextScanline ; 2ï¿½
    lda #%11111111             ; 2
 .setPF2ForNextScanline
    sta PF2                    ; 3 = @24
@@ -576,10 +576,10 @@ LastKernelSection
 ;--------------------------------------
    lda CXP1FB                 ; 3         read player1/PF collision
    ora CXM0P                  ; 3         or player0 missile collisions
-   ora CXPPMM                 ; 3         or player/player and 
+   ora CXPPMM                 ; 3         or player/player and
    and #%10000000             ; 2         mask ball, M0/M0, M0/P0 collisions
    bit CXM1P                  ; 3
-   bvc .setCollisions         ; 2³
+   bvc .setCollisions         ; 2ï¿½
    ora #1                     ; 2         show a robot shot this robot
 .setCollisions
    ldx kernelSection          ; 3
@@ -608,7 +608,7 @@ ScoreKernel
 ;--------------------------------------
 .wait34Cycles
    dex                        ; 2
-   bpl .wait34Cycles          ; 2³
+   bpl .wait34Cycles          ; 2ï¿½
    nop                        ; 2
    sta RESP0                  ; 3 = @39
    sta RESP1                  ; 3 = @42   player 1 @ pixel 126
@@ -641,7 +641,7 @@ ScoreKernel
    sty GRP1                   ; 3 = @50
    sta GRP0                   ; 3 = @53
    dec loopCount              ; 5
-   bpl .drawLoop              ; 2³
+   bpl .drawLoop              ; 2ï¿½
    lda #0                     ; 2
    sta GRP0                   ; 3 = @65
    sta GRP1                   ; 3 = @68
@@ -649,25 +649,25 @@ ScoreKernel
    sta NUSIZ0                 ; 3 = @74
 ;--------------------------------------
    sta NUSIZ1                 ; 3 = @01
-   
+
    IF COMPILE_VERSION = NTSC
-   
+
       sta WSYNC
       sta WSYNC
       sta WSYNC
       sta WSYNC
       sta WSYNC
-      
+
    ELSE
-   
+
       ldx #20
 .skip21Scanlines
       sta WSYNC
       dex
       bpl .skip21Scanlines
-      
+
    ENDIF
-   
+
    lda #3
    sta VBLANK                       ; disable TIA (D1 = 1)
    lda #OVERSCAN_TIME
@@ -675,7 +675,7 @@ ScoreKernel
    lda gameState                    ; get the current game state
    bpl .skipPlayerExitingRoom       ; branch if not exiting room
    jmp SetupForPlayerExitingRoom
-       
+
 .skipPlayerExitingRoom
    ldx #START_GAME_RAM              ; set x to point to start of game RAM
    lda numberOfLives                ; get number of lives remaining
@@ -690,7 +690,7 @@ ReadConsoleSwitches
    ldy frameCount                   ; get frame count for random seed MSB
    lda #0
    jmp ClearRAM                     ; clear game RAM (remember x set to start
-                                    ; of game RAM)       
+                                    ; of game RAM)
 .skipGameReset
    lda gameSelection                ; get current game selection
    bne .checkSelectSwitchDown
@@ -741,7 +741,7 @@ ColorForAttractMode
    dex
    bpl .attractModeLoop
    jmp DetermineEvilOttoParameters
-       
+
 .skipAttractModeColorCycling
    lda initRobotDelay               ; get starting robot delay
    cmp #$FF
@@ -749,7 +749,7 @@ ColorForAttractMode
    sec                              ; set carry
    ror initRobotDelay               ; shift bits right and move carry into D7
    jmp DetermineEvilOttoParameters
-       
+
 DetermineToTurnOffMissiles
    ldx #0
    ldy #3
@@ -822,13 +822,13 @@ DeterminePlayerSpriteAnimation
    ldy #3
    dec numberOfLives
    jmp IncrementGameLevel
-       
+
 DetermineDeathAnimationSprite
    inc playerAnimationIndex         ; increment animation index
-   ldx #<PlayerStationary-PlayerSprites
+   ldx #<(PlayerStationary-PlayerSprites)
    and #2
    beq .setDeathAudioFrequency
-   ldx #<PlayerDeath-PlayerSprites  ; pointer to death animation sprite
+   ldx #<(PlayerDeath-PlayerSprites) ; pointer to death animation sprite
    lda #1
 .setDeathAudioFrequency
    sta AUDF0
@@ -836,7 +836,7 @@ DetermineDeathAnimationSprite
    lda #14
    sta AUDV0
    jmp DeterminePlayerMissileActive
-       
+
 CheckPlayerOttoCollision
    lda evilOttoLaunchTimer          ; get Otto launch timer
    cmp #3                           ; don't check Otto's movement if not
@@ -878,7 +878,7 @@ CheckPlayerHarmfulCollisions
    sta AUDC0
    sta audioIndex
    jmp DetermineDeathAnimationSprite
-       
+
 ReadJoystickValues
    lda #0
    sta temp02
@@ -902,7 +902,7 @@ ReadJoystickValues
    bne CheckForFireButtonPressed    ; branch if not rolled over from 255
    lda gameSelection                ; get current game selection
    jmp SetGameSelection             ; make game go into attract mode
-       
+
 .setPlayerDirection
    sta playerDirection              ; save as player direction
 CheckForFireButtonPressed
@@ -1101,7 +1101,7 @@ DetermineOttoPosition
    bcs DetermineOttoHorizPosition
    lda tempOttoVertPos
    sta evilOttoVertPos
-   lda #<EvilOttoSprite_1 - EvilOttoSprites + 2
+   lda #<(EvilOttoSprite_1 - EvilOttoSprites + 2)
    jmp .setEvilOttoGraphicLSB       ; could use unconditional branch
 
 DetermineOttoHorizPosition
@@ -1114,7 +1114,7 @@ DetermineOttoHorizPosition
 .moveOttoLeft
    dec evilOttoHorizPos             ; move Otto left
 .setFullEvilOttoSprite
-   lda #<EvilOttoSprite_0 - EvilOttoSprites + 1
+   lda #<(EvilOttoSprite_0 - EvilOttoSprites + 1)
 .setEvilOttoGraphicLSB
    sta playerGraphicLSB
    lda evilOttoVertPos
@@ -1123,13 +1123,13 @@ DetermineOttoHorizPosition
    sta playerGraphicPointer+1
    lda evilOttoHorizPos
    jmp CalcOttoXPos
-       
+
 .determineToBounceOttoUp
    cmp tempOttoVertPos
    bcc DetermineOttoPosition
    ldx #-4                          ; set Otto vertical delta to move up
    jmp .setOttoVerticalDelta        ; 4 pixels
-       
+
 CalcPlayerXPos
    lda playerHorizPos               ; get the player's horizontal position
 CalcOttoXPos
@@ -1190,7 +1190,7 @@ CheckToShowLevelBonus
    lda NumberTable,x                ; load the number pointer
    sta digitPointer
    jmp .skipBCDToDigits
-       
+
 BCDToDigits
    ldy #2
    lda #10
@@ -1251,7 +1251,7 @@ BCDToDigits
    cpy #ROBOT_DEATH_ANIM_OFFSET     ; see if the robot is dieing
    bcc .skipRobotDieingCheck        ; branch if robot not dieing
    jmp CheckForRobotDieing
-       
+
 .skipRobotDieingCheck
    jsr DetermineTimeToMoveRobot
    bcs .jmpToNextRobotMovement
@@ -1263,11 +1263,11 @@ BCDToDigits
    lda RobotAnimationTable,y
    sta robotAnimationIndex,x
    jmp .nextRobotMovement
-       
+
 .setAnimationIndexToStand
    ldy #ROBOT_STAND_ANIM_OFFSET
    jmp .setRobotAnimIndexFromTable  ; could use unconditional branch
-       
+
 .doRobotHorizMovement
    cpy #ROBOT_STAND_ANIM_OFFSET+8
    bne CheckRobotHorizontalMovement
@@ -1310,7 +1310,7 @@ CheckRobotHorizontalMovement
    beq .setAnimationIndexToStand
    dec robotHorizPos,x              ; move robot to the left
    jmp .setRobotAnimIndexFromTable
-       
+
 .checkToMoveRobotRight
    cpy #ROBOT_UP_ANIM_OFFSET
    bcs CheckRobotVerticalMovement
@@ -1319,7 +1319,7 @@ CheckRobotHorizontalMovement
    bcs .setAnimationIndexToStand
    inc robotHorizPos,x              ; move robot to the right
    jmp .setRobotAnimIndexFromTable
-       
+
 CheckRobotVerticalMovement
    cpy #ROBOT_DOWN_ANIM_OFFSET
    bcs .checkToMoveRobotDown
@@ -1382,7 +1382,7 @@ CheckForRobotDieing
    jsr IncrementScore
    inc numberRobotsKilled
    jmp .robotMovementLoop
-       
+
 .nextRobotMovement
    inx
    cpx #MAX_ROBOTS
@@ -1390,20 +1390,20 @@ CheckForRobotDieing
    jmp .robotMovementLoop
 
    IF COMPILE_VERSION = NTSC
-   
+
 .doneRobotMovementLoop
    lda robotVertPos+MAX_ROBOTS-1
    cmp #$7F
    bne .jmpCalcRobotMissileXPos
    lda initRobotDelay
-   
+
    ELSE
-   
+
 .doneRobotMovementLoop
    lda initRobotDelay
-   
+
    ENDIF
-   
+
    cmp #$FF
    beq DetermineToFireRobotMissile
 .jmpCalcRobotMissileXPos
@@ -1619,24 +1619,24 @@ SetRobotVariables
    lda initRobotDelay
    cmp #$FF
    beq DetermineRobotColor
-   
+
    IF COMPILE_VERSION = NTSC
-   
+
       tya                              ; a = 0
-      
+
    ENDIF
-   
+
    sty COLUP0                       ; set player's color to BLACK
    jmp .setRobotColor               ; could use unconditional branch
-       
+
 DetermineRobotColor
    lda gameLevel                    ; get the current game level
    lsr                              ; divide value by 2
    and #7                           ; make value 0 <= x <= 7
    tax                              ; move to x for robot color lookup
-   
+
    IF COMPILE_VERSION = NTSC
-   
+
       lda RobotColorTable,x            ; get the color for robots
 .setRobotColor
       sta COLUP1
@@ -1658,9 +1658,9 @@ DisplayKernel SUBROUTINE
       sta HMOVE
       sta WSYNC
       sta VBLANK                       ; enable TIA (D1 = 0)
-      
+
    ELSE
-   
+
       ldy RobotColorTable,x            ; get the color for robots
       lda SWCHB
       and #BW_MASK
@@ -1694,7 +1694,7 @@ DisplayKernel SUBROUTINE
       sta PF2
 
    ENDIF
-  
+
    sta WSYNC
    sta HMCLR                        ; clear all horizontal motions
    sta CXCLR                        ; clear all collisions
@@ -1708,7 +1708,7 @@ DisplayKernel SUBROUTINE
    sta WSYNC
    sta WSYNC
    jmp JumpIntoGameKernel
-       
+
 IncrementGameLevel
    sty tempPlayerExitingPos         ; save the player's exiting position
    inc gameLevel
@@ -1755,7 +1755,7 @@ IncrementGameLevel
    lda #$FF
    sta gameState
    jmp DetermineEvilOttoParameters
-       
+
 SetupForPlayerExitingRoom
    ldy tempPlayerExitingPos
    cpy #PLAYER_ENTERING_SOUTH
@@ -1770,7 +1770,7 @@ SetupForPlayerExitingRoom
    cmp lowerPlayfieldLimit
    bcs SetupForNewScreen
    jmp DetermineEvilOttoParameters
-       
+
 SetupForNewScreen
    lda #%00000010
    sta gameState
@@ -1800,21 +1800,21 @@ SetupForNewScreen
    tay
    lda MazeOffsetTable,y
    sta mazeOffset
-   
+
    IF COMPILE_VERSION = NTSC
-   
+
       jsr ResetRobotsForNewBoard
       jmp DetermineEvilOttoParameters
-       
+
 DisplayLivesKernel SUBROUTINE
 ; NOTE: we are still in vertical blank here...
       lda #0
       sta PF0                          ; clear playfield registers
       sta PF1
       sta PF2
-   
+
    ELSE
-   
+
 ResetRobotsForNewBoard
       ldx #MAX_ROBOTS-1
       lda #0
@@ -1838,7 +1838,7 @@ ResetRobotsForNewBoard
       dex
       bpl .nextRobot
       jmp DetermineEvilOttoParameters
-      
+
 DisplayLivesKernel SUBROUTINE
       lda #0
 
@@ -1861,23 +1861,23 @@ DisplayLivesKernel SUBROUTINE
 .waitTime
    ldx INTIM
    bne .waitTime
-   
+
    IF COMPILE_VERSION = NTSC
-   
+
       stx WSYNC
       stx VBLANK                       ; enable TIA (D1 = 0)
-      
+
    ELSE
-   
+
       stx VBLANK                       ; enable TIA (D1 = 0)
       ldx #21
 .skip22Scanlines
       sta WSYNC
       dex
       bne .skip22Scanlines
-      
+
    ENDIF
-   
+
    lda upperPlayfieldLimit
    beq DrawUpperPlayfieldBoarder
 ClearUpperPlayfield
@@ -1891,12 +1891,12 @@ ClearUpperPlayfield
 ;--------------------------------------
    inx                        ; 2
    cpx upperPlayfieldLimit    ; 3
-   bne ClearUpperPlayfield    ; 2³
+   bne ClearUpperPlayfield    ; 2ï¿½
 DrawUpperPlayfieldBoarder
    cpx lowerPlayfieldLimit    ; 3
-   beq ClearLowerPlayfield    ; 2³
+   beq ClearLowerPlayfield    ; 2ï¿½
    cpx #2                     ; 2
-   bcs DrawShrinkingPlayfield ; 2³
+   bcs DrawShrinkingPlayfield ; 2ï¿½
    sta WSYNC
 ;--------------------------------------
    lda #%11100000             ; 2
@@ -1909,10 +1909,10 @@ DrawUpperPlayfieldBoarder
    sta WSYNC
 ;--------------------------------------
    jmp DrawUpperPlayfieldBoarder; 3         could use unconditional branch
-       
+
 DrawShrinkingPlayfield
    cpx #86                    ; 2
-   bcs DrawLowerPlayfieldBoarder; 2³
+   bcs DrawLowerPlayfieldBoarder; 2ï¿½
    sta WSYNC
 ;--------------------------------------
    txa                        ; 2
@@ -1931,10 +1931,10 @@ DrawShrinkingPlayfield
    sta WSYNC
 ;--------------------------------------
    cpx lowerPlayfieldLimit    ; 3
-   bne DrawShrinkingPlayfield ; 2³
+   bne DrawShrinkingPlayfield ; 2ï¿½
 ClearLowerPlayfield
    cpx #(H_KERNEL / 2)        ; 2
-   beq .jumpToScoreKernel     ; 2³
+   beq .jumpToScoreKernel     ; 2ï¿½
    sta WSYNC
 ;--------------------------------------
    lda #0                     ; 2
@@ -1945,7 +1945,7 @@ ClearLowerPlayfield
 ;--------------------------------------
    inx                        ; 2
    jmp ClearLowerPlayfield    ; 3         could use unconditional branch
-       
+
 .jumpToScoreKernel
    jmp ScoreKernel            ; 3
 
@@ -1958,7 +1958,7 @@ DrawLowerPlayfieldBoarder
    sta PF1                    ; 3 = @10
    lda #%00000111             ; 2
    jmp .jumpIntoShrinkingPF   ; 3         could use unconditional branch
-       
+
 ColdStart
    ldy INTIM                        ; this is used for random number seed
    ldx #$FF
@@ -2004,10 +2004,10 @@ ClearRAM
    sta gameVariation                ; selection
    inc attractModeTimer
    jmp IncrementGameLevel
-       
+
 CopyrightLiteral
    .word Blank,Copyright_0,Copyright_1,Copyright_2,Copyright_3,Copyright_4
-   
+
 CalculateP0GraphicPointers
    sta VDELP0                       ; VDEL the player if on an odd line (2LK)
    lsr                              ; divide by 2 for a 2LK
@@ -2078,12 +2078,12 @@ NextRandom SUBROUTINE
    lsr temp01                       ; divide temp01 by 2
    lda temp01                       ; and load accumulator with new value
    jmp .recomputeRandom
-       
+
 .leaveRoutine
    rts
 
    IF COMPILE_VERSION = NTSC
-   
+
 ResetRobotsForNewBoard
       ldx #MAX_ROBOTS-1
       lda #0
@@ -2107,7 +2107,7 @@ ResetRobotsForNewBoard
       dex
       bpl .nextRobot
       rts
-      
+
    ENDIF
 
 DetermineTimeToMoveRobot
@@ -2198,11 +2198,11 @@ MazePFData_0
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
-   
+
    REPEAT 16
       .byte $00 ; |........|
    REPEND
-   
+
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
@@ -2230,11 +2230,11 @@ MazePF0Data_1
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
-   
+
    REPEAT 16
       .byte $00 ; |........|
    REPEND
-   
+
    .byte $E0 ; |XXX.....|
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
@@ -2262,11 +2262,11 @@ MazePF0Data_2
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
-   
+
    REPEAT 16
       .byte $00 ; |........|
    REPEND
-   
+
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
@@ -2294,11 +2294,11 @@ MazePF0Data_3
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
-   
+
    REPEAT 16
       .byte $00 ; |........|
    REPEND
-   
+
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
    .byte $20 ; |..X.....|
@@ -2326,26 +2326,26 @@ MazePF0Data_3
    .byte $FF ; |XXXXXXXX|
 
    IF COMPILE_VERSION = NTSC
-   
+
       REPEAT 88
          .byte $00 ; |........|
       REPEND
-      
+
    ELSE
-       
+
       REPEAT 80
          .byte $00 ; |........|
       REPEND
 
 PALRobotBWValues
    .byte BLACK2+8,BLACK+8,BLACK2+12,BLACK2+4,BLACK+12,BLACK2,BLACK2+8,BLACK+4
-       
+
    ENDIF
-   
+
 NumberTable
    .byte <zero,<one,<two,<three,<four
    .byte <five,<six,<seven,<eight,<nine,<Blank
-   
+
 NumberFonts
 zero
    .byte $7E ; |.XXXXXX.|
@@ -2483,10 +2483,10 @@ Copyright_4
    .byte $55 ; |.X.X.X.X|
    .byte $55 ; |.X.X.X.X|
    .byte $99 ; |X..XX..X|
-   
+
 MissileVerticalLimitsTable
    .byte XMIN, XMIN+1, XMAX-1, XMAX
-   
+
 InitRobotMissileYOffset
    .byte 0                          ; not moving
    .byte 7                          ; missile traveling right
@@ -2499,7 +2499,7 @@ InitRobotMissileYOffset
    .byte 1                          ; missile traveling north
    .byte 6                          ; north and right
    .byte 0                          ; north and left
-       
+
 InitRobotMissileXOffset
    .byte 3                          ; not moving
    .byte 9                          ; traveling right
@@ -2512,7 +2512,7 @@ InitRobotMissileXOffset
    .byte 4                          ; traveling north
    .byte 3                          ; north and right
    .byte 3                          ; north and left
-       
+
 RobotMotionDelayTable
    .byte ROBOT_MOVE_DELAY_0
    .byte ROBOT_MOVE_DELAY_1
@@ -2524,41 +2524,41 @@ RobotMotionDelayTable
    .byte ROBOT_MOVE_DELAY_7
 
 PlayerHorizAnimationTable
-   .byte <PlayerStationary-PlayerSprites
-   .byte <PlayerRunning0-PlayerSprites
-   .byte <PlayerRunning1-PlayerSprites
-   .byte <PlayerDeath-PlayerSprites
-          
+   .byte <(PlayerStationary-PlayerSprites)
+   .byte <(PlayerRunning0-PlayerSprites)
+   .byte <(PlayerRunning1-PlayerSprites)
+   .byte <(PlayerDeath-PlayerSprites)
+
 VerticalPixelOffsets
    .byte 0, -1, 1, 0, 0, -1, 1, 0, 0, -1, 1, 0, 0, 0, 0, 0
-   
+
 HorizontalPixelOffsets
    .byte 0, 0, 0, 0, -1, -1, -1, -1, 1, 1, 1, 1, 0, 0, 0, 0
-       
+
 RobotColorTable
    .byte YELLOW+10,RED_4+6,BLACK+12,LT_GREEN,RED_2+12
    .byte GREEN_BLUE,BROWN+12,PURPLE+8
-   
+
 PlayerShootingAnimationTable
-   .byte <PlayerFireHoriz-PlayerSprites
-   .byte <PlayerFireUp-PlayerSprites
-   .byte <PlayerFireDown-PlayerSprites
-   .byte <PlayerFireHoriz-PlayerSprites
-       
+   .byte <(PlayerFireHoriz-PlayerSprites)
+   .byte <(PlayerFireUp-PlayerSprites)
+   .byte <(PlayerFireDown-PlayerSprites)
+   .byte <(PlayerFireHoriz-PlayerSprites)
+
 InitMissileYOffsetTable
    .byte 0, 2, 7, 0, 5, 5, 7, 0, 5, 5, 7
-       
+
 InitMissileXOffsetTable
    .byte 0, 7, 8, 0, 0, 0, 0, 0, 6, 6, 6
-       
+
 AttractModeColors
    .byte RED_3
    .byte BLACK+1
    .byte BROWN_2+2
-   
+
 AudioFrequencyTable
    .byte $84,$00,$1F,$10,$02,$0A,$11,$18
-       
+
 MazePF1Data
 MazePF1Data_0
    .byte $00 ; |........|
@@ -2665,7 +2665,7 @@ MazePF1Data_3
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-       
+
    BOUNDARY (H_KERNEL - 7)
 
 PlayerSprites
@@ -2761,9 +2761,9 @@ PlayerFireUp
    .byte $18 ; |...XX...|
    .byte $1C ; |...XXX..|
    .byte $00 ; |........|
-       
+
    BOUNDARY 0
-   
+
 MazePF2Data
 MazePF2Data_0
    .byte $00 ; |........|
@@ -2897,13 +2897,13 @@ MazePF2Data_2
 MazePF2Data_3
    .byte $04 ; |.....X..|
    .byte $04 ; |.....X..|
-   
+
    REPEAT 40
       .byte $00 ; |........|
    REPEND
-   
+
    BOUNDARY (H_KERNEL - 7)
-   
+
 EvilOttoSprites
 EvilOttoSprite_0
    .byte $00 ; |........|
@@ -2990,68 +2990,68 @@ MoveObjectHorizontally
 
 RobotAnimationTableOffsets
 StandingAnimationOffset
-   .byte <StandingAnimation0-RobotGraphics
-   .byte <StandingAnimation0-RobotGraphics
-   .byte <StandingAnimation1-RobotGraphics
-   .byte <StandingAnimation2-RobotGraphics
-   .byte <StandingAnimation3-RobotGraphics
-   .byte <StandingAnimation4-RobotGraphics
-   .byte <StandingAnimation5-RobotGraphics
-   .byte <StandingAnimation6-RobotGraphics
-   .byte <StandingAnimation7-RobotGraphics
+   .byte <(StandingAnimation0-RobotGraphics)
+   .byte <(StandingAnimation0-RobotGraphics)
+   .byte <(StandingAnimation1-RobotGraphics)
+   .byte <(StandingAnimation2-RobotGraphics)
+   .byte <(StandingAnimation3-RobotGraphics)
+   .byte <(StandingAnimation4-RobotGraphics)
+   .byte <(StandingAnimation5-RobotGraphics)
+   .byte <(StandingAnimation6-RobotGraphics)
+   .byte <(StandingAnimation7-RobotGraphics)
 WalkingLeftAnimationOffset
-   .byte <WalkingLeftAnimation0-RobotGraphics
-   .byte <WalkingLeftAnimation1-RobotGraphics
-   .byte <WalkingLeftAnimation1-RobotGraphics
+   .byte <(WalkingLeftAnimation0-RobotGraphics)
+   .byte <(WalkingLeftAnimation1-RobotGraphics)
+   .byte <(WalkingLeftAnimation1-RobotGraphics)
 WalkingRightAnimationOffset
-   .byte <WalkingRightAnimation0-RobotGraphics
-   .byte <WalkingRightAnimation1-RobotGraphics
-   .byte <WalkingRightAnimation1-RobotGraphics
+   .byte <(WalkingRightAnimation0-RobotGraphics)
+   .byte <(WalkingRightAnimation1-RobotGraphics)
+   .byte <(WalkingRightAnimation1-RobotGraphics)
 WalkingUpAnimationOffset
-   .byte <WalkingUpAnimation0-RobotGraphics
-   .byte <StandingAnimation0-RobotGraphics
-   .byte <WalkingUpAnimation1-RobotGraphics
-   .byte <StandingAnimation0-RobotGraphics
+   .byte <(WalkingUpAnimation0-RobotGraphics)
+   .byte <(StandingAnimation0-RobotGraphics)
+   .byte <(WalkingUpAnimation1-RobotGraphics)
+   .byte <(StandingAnimation0-RobotGraphics)
 WalkingDownAnimationOffset
-   .byte <StandingAnimation4-RobotGraphics
-   .byte <WalkingDownAnimation1-RobotGraphics
-   .byte <StandingAnimation4-RobotGraphics
-   .byte <WalkingDownAnimation0-RobotGraphics
+   .byte <(StandingAnimation4-RobotGraphics)
+   .byte <(WalkingDownAnimation1-RobotGraphics)
+   .byte <(StandingAnimation4-RobotGraphics)
+   .byte <(WalkingDownAnimation0-RobotGraphics)
 DeathAnimationOffset
-   .byte <DeathAnimation0-RobotGraphics
-   .byte <DeathAnimation1-RobotGraphics
-   .byte <DeathAnimation2-RobotGraphics
-   .byte <DeathAnimation2-RobotGraphics
-   
+   .byte <(DeathAnimation0-RobotGraphics)
+   .byte <(DeathAnimation1-RobotGraphics)
+   .byte <(DeathAnimation2-RobotGraphics)
+   .byte <(DeathAnimation2-RobotGraphics)
+
 RobotAnimationTable
-   .byte <StandingAnimationOffset-RobotAnimationTableOffsets+1
-   .byte <StandingAnimationOffset-RobotAnimationTableOffsets+2
-   .byte <StandingAnimationOffset-RobotAnimationTableOffsets+3
-   .byte <StandingAnimationOffset-RobotAnimationTableOffsets+4
-   .byte <StandingAnimationOffset-RobotAnimationTableOffsets+5
-   .byte <StandingAnimationOffset-RobotAnimationTableOffsets+6
-   .byte <StandingAnimationOffset-RobotAnimationTableOffsets+7
-   .byte <StandingAnimationOffset-RobotAnimationTableOffsets+8
-   .byte <StandingAnimationOffset-RobotAnimationTableOffsets
-   
-   .byte <WalkingLeftAnimationOffset-RobotAnimationTableOffsets+1
-   .byte <WalkingLeftAnimationOffset-RobotAnimationTableOffsets+2
-   .byte <WalkingLeftAnimationOffset-RobotAnimationTableOffsets
-   
-   .byte <WalkingRightAnimationOffset-RobotAnimationTableOffsets+1
-   .byte <WalkingRightAnimationOffset-RobotAnimationTableOffsets+2
-   .byte <WalkingRightAnimationOffset-RobotAnimationTableOffsets
-   
-   .byte <WalkingUpAnimationOffset-RobotAnimationTableOffsets+1
-   .byte <WalkingUpAnimationOffset-RobotAnimationTableOffsets+2
-   .byte <WalkingUpAnimationOffset-RobotAnimationTableOffsets+3
-   .byte <WalkingUpAnimationOffset-RobotAnimationTableOffsets
-   
-   .byte <WalkingDownAnimationOffset-RobotAnimationTableOffsets+1
-   .byte <WalkingDownAnimationOffset-RobotAnimationTableOffsets+2
-   .byte <WalkingDownAnimationOffset-RobotAnimationTableOffsets+3
-   .byte <WalkingDownAnimationOffset-RobotAnimationTableOffsets
-       
+   .byte <(StandingAnimationOffset-RobotAnimationTableOffsets+1)
+   .byte <(StandingAnimationOffset-RobotAnimationTableOffsets+2)
+   .byte <(StandingAnimationOffset-RobotAnimationTableOffsets+3)
+   .byte <(StandingAnimationOffset-RobotAnimationTableOffsets+4)
+   .byte <(StandingAnimationOffset-RobotAnimationTableOffsets+5)
+   .byte <(StandingAnimationOffset-RobotAnimationTableOffsets+6)
+   .byte <(StandingAnimationOffset-RobotAnimationTableOffsets+7)
+   .byte <(StandingAnimationOffset-RobotAnimationTableOffsets+8)
+   .byte <(StandingAnimationOffset-RobotAnimationTableOffsets)
+
+   .byte <(WalkingLeftAnimationOffset-RobotAnimationTableOffsets+1)
+   .byte <(WalkingLeftAnimationOffset-RobotAnimationTableOffsets+2)
+   .byte <(WalkingLeftAnimationOffset-RobotAnimationTableOffsets)
+
+   .byte <(WalkingRightAnimationOffset-RobotAnimationTableOffsets+1)
+   .byte <(WalkingRightAnimationOffset-RobotAnimationTableOffsets+2)
+   .byte <(WalkingRightAnimationOffset-RobotAnimationTableOffsets)
+
+   .byte <(WalkingUpAnimationOffset-RobotAnimationTableOffsets+1)
+   .byte <(WalkingUpAnimationOffset-RobotAnimationTableOffsets+2)
+   .byte <(WalkingUpAnimationOffset-RobotAnimationTableOffsets+3)
+   .byte <(WalkingUpAnimationOffset-RobotAnimationTableOffsets)
+
+   .byte <(WalkingDownAnimationOffset-RobotAnimationTableOffsets+1)
+   .byte <(WalkingDownAnimationOffset-RobotAnimationTableOffsets+2)
+   .byte <(WalkingDownAnimationOffset-RobotAnimationTableOffsets+3)
+   .byte <(WalkingDownAnimationOffset-RobotAnimationTableOffsets)
+
 RobotGraphics
 RobotStandingAnimation
 StandingAnimation0
@@ -3134,7 +3134,7 @@ StandingAnimation7
    .byte $24 ; |..X..X..|
    .byte $66 ; |.XX..XX.|
    .byte $00 ; |........|
-   
+
 RobotWalkingAnimation
 WalkingLeftAnimation0
    .byte $3C ; |..XXXX..|
@@ -3176,7 +3176,7 @@ WalkingRightAnimation1
    .byte $18 ; |...XX...|
    .byte $1C ; |...XXX..|
    .byte $00 ; |........|
-   
+
 WalkingUpAnimation0
    .byte $3C ; |..XXXX..|
    .byte $7E ; |.XXXXXX.|
@@ -3197,7 +3197,7 @@ WalkingUpAnimation1
    .byte $24 ; |..X..X..|
    .byte $26 ; |..X..XX.|
    .byte $60 ; |.XX.....|
-   
+
 WalkingDownAnimation0
    .byte $3C ; |..XXXX..|
    .byte $66 ; |.XX..XX.|
@@ -3218,7 +3218,7 @@ WalkingDownAnimation1
    .byte $24 ; |..X..X..|
    .byte $26 ; |..X..XX.|
    .byte $60 ; |.XX.....|
-   
+
 RobotDeathAnimation
 DeathAnimation0
    .byte $00 ; |........|
@@ -3250,23 +3250,23 @@ DeathAnimation2
    .byte $81 ; |X......X|
    .byte $42 ; |.X....X.|
    .byte $00 ; |........|
-   
+
 MazeOffsetTable
 .init_maze_offset SET 0
    REPEAT 4
    .byte .init_maze_offset * [(H_KERNEL / 2) - 4] / 2
 .init_maze_offset SET .init_maze_offset + 1
    REPEND
-   
+
 StartingLocationValues
    .byte PLAYER_ENTERING_SOUTH
    .byte PLAYER_ENTERING_NORTH
    .byte PLAYER_ENTERING_EAST
    .byte PLAYER_ENTERING_WEST
-       
+
 InitHorizontalPosition
    .byte XMAX_PLAYER / 2, XMAX_PLAYER / 2, XMIN + 6, XMAX_PLAYER - 7
-   
+
 InitVerticalPosition
    .byte YMIN + 8, 142
    .byte [(H_KERNEL / 2) - (H_PLAYER + 2)], [(H_KERNEL / 2) - (H_PLAYER + 2)]
@@ -3280,8 +3280,8 @@ RobotMissileDelayTable
    .byte ROBOT_MISSILE_DELAY_5
    .byte ROBOT_MISSILE_DELAY_6
    .byte ROBOT_MISSILE_DELAY_7
-   
+
    BOUNDARY 252
-   
+
    .word Start
    .word 0

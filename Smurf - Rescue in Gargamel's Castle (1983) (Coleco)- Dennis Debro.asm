@@ -29,7 +29,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1982, COLECO, INC.                                 =
+; = THE ASSEMBLED CODE IS ï¿½ 1982, COLECO, INC.                                 =
 ; =                                                                            =
 ; ==============================================================================
 ;
@@ -51,20 +51,20 @@ TIA_BASE_READ_ADDRESS = $30         ; set the read address base so this runs on
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -110,13 +110,13 @@ COMPILE_REGION         = NTSC       ; change to compile for different regions
    ENDIF
 
    IFNCONST ORIGINAL_ROM
-   
+
 ORIGINAL_ROM            = TRUE
 
    ENDIF
 
    IF COMPILE_REGION = PAL60
-   
+
 ORIGINAL_ROM            = FALSE
 
    ENDIF
@@ -148,7 +148,7 @@ H_KERNEL                = 165
 H_DRAW_RIVER_ROOM_KERNEL = H_KERNEL - 107
 
    ELSE
-   
+
 FPS                     = 50        ; ~50 frames per second
 VBLANK_TIME             = 71
 OVERSCAN_TIME           = 81
@@ -167,7 +167,7 @@ BLACK                   = $00
 WHITE                   = $0E
 
    IF COMPILE_REGION = NTSC
-   
+
 YELLOW                  = $10
 LT_RED                  = $20
 RED                     = $30
@@ -379,7 +379,7 @@ SOUND_ONE_CHANNEL       = 0 << 5
 MAX_VOLUME              = 15
 
    ELSE
-   
+
 MAX_VOLUME              = 10
 
    ENDIF
@@ -461,7 +461,7 @@ GS_FALLING_FROM_COLLISION = 20
    MAC SLEEP_6
       lda (VSYNC,x)
    ENDM
-   
+
    MAC SLEEP_12
       SLEEP_6
       SLEEP_6
@@ -497,7 +497,7 @@ FREE_BYTES SET FREE_BYTES + 1
      REPEND
 
    ENDM
-   
+
 ;===============================================================================
 ; Z P - V A R I A B L E S
 ;===============================================================================
@@ -644,7 +644,7 @@ Bank0Start
    bne .clearLoop
    cld
    jmp JumpToCurrentGameStateRoutine
-    
+
 NumberFonts
 zero
    .byte $00 ; |........|
@@ -807,7 +807,7 @@ LivesIndicator
    .byte $F0 ; |XXXX....|
    .byte $6C ; |.XX.XX..|
    .byte $38 ; |..XXX...|
-    
+
 JumpToCurrentGameStateRoutine
    lda gameState                    ; get current game state
    asl                              ; multiply by 2
@@ -868,7 +868,7 @@ SmurfFallingFromCollision
    lda #GS_SET_SMURF_DEATH_VALUES
    sta gameState
    bne .newFrame                    ; unconditional branch
-    
+
 .smurfFallingFromCollision
    lda smurfVertPosition            ; get Smurf vertical position
    sec
@@ -879,7 +879,7 @@ SmurfFallingFromCollision
 .setFallingSmurfVerticalPosition
    sta smurfVertPosition
    jmp NewFrame
-    
+
 GameProcessing
    lda CXPPMM                       ; check player collision register
    nop
@@ -892,7 +892,7 @@ GameProcessing
    jsr RemoveSmurfAttributeValue    ; remove SMURF_JUMPING value
 .newFrame
    jmp NewFrame
-    
+
 .checkToPlayGameBackgroundMusic
    ldx currentlyPlayingAudio
    bne .checkSmurfEnergyLevel       ; branch if currently playing audio
@@ -1407,7 +1407,7 @@ PlaySmurfRescuedSmurfetteTune
 ;
 ; The following bytes are never executed. It looks to have been a way for the
 ; player to bypass listenting to the entire tune for rescuing Smurfette.
-; 
+;
    .byte $A6,$3C,$A5,$B5,$10,$02,$A6,$3D,$8A,$30,$1C,$10,$18
 
 GameOverState
@@ -1645,7 +1645,7 @@ PositionObjectHorizontally_BANK0
    sec                        ; 2
 .coarsePositionObject
    sbc #15                    ; 2         divide position by 15
-   bcs .coarsePositionObject  ; 2³
+   bcs .coarsePositionObject  ; 2ï¿½
    eor #15                    ; 2         4-bit 1's complement for fine motion
    asl                        ; 2         shift remainder to upper nybbles
    asl                        ; 2
@@ -1688,7 +1688,7 @@ HorizPositionSmurfAndObstacle_BANK0
    sta smurfGraphicPointer,x  ; 4
    dey                        ; 2
    dex                        ; 2
-   bpl .setSmurfAnimationDataPointerValues;2³
+   bpl .setSmurfAnimationDataPointerValues;2ï¿½
    sta WSYNC
 ;--------------------------------------
    sta CXCLR                  ; 3 = @03
@@ -1699,9 +1699,9 @@ HorizPositionSmurfAndObstacle_BANK0
    sec                        ; 2
    ldy smurfAnimationIndex    ; 3
    sbc SmurfSpriteOffset_BANK0,y;4        subtract sprite height for offset
-   bmi .setSmurfSkipDrawIdx   ; 2³
+   bmi .setSmurfSkipDrawIdx   ; 2ï¿½
    cmp #H_SMURF - 5           ; 2
-   bcc .setSmurfSkipDrawIdx   ; 2³
+   bcc .setSmurfSkipDrawIdx   ; 2ï¿½
    lda #H_SMURF - 5           ; 2
 .setSmurfSkipDrawIdx
     tay                       ; 2
@@ -1710,31 +1710,31 @@ HorizPositionSmurfAndObstacle_BANK0
 SmurfAnimationDataPointers_BANK0
    .word NullSprite
    .word NullSpriteColor
-   
+
    .word SmurfSpriteStationary
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteWalking_00
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteWalking_01
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteWalking_02
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteStationary
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteDucking
    .word SmurfSpriteDuckingColors
-   
+
    .word SmurfSpriteSitting
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteJumping
    .word SmurfSpriteColors
-   
+
 KernelHeightOffset_BANK0
    .byte 72                         ; ID_ROOM_MUSHROOM_HOUSE
    .byte 73                         ; ID_ROOM_WOODS
@@ -1784,18 +1784,18 @@ DetermineToPlayAudioSounds
    lda audioDurationValues,x        ; get audio duration value
    beq .checkToPlayNextAudioFrequency;branch if done
    dec audioDurationValues,x        ; decrement audio duration value
-   
+
    IF COMPILE_REGION = PAL50
-   
+
       and #1
-      
+
    ELSE
 
       and #3
       cmp #3
 
    ENDIF
-   
+
    bne .setToPlayBackgroundMusic
    ldy audioVolumeValues,x          ; get audio volume value
    dey
@@ -1865,7 +1865,7 @@ PlayGameAudioSounds
    asl
    asl
    and #$3F
-   bne .setAudioIndexAndDurationValues   
+   bne .setAudioIndexAndDurationValues
 .determineAudioDurationValue
    and #AUDIO_DURATION_MASK
    bmi .shiftAudioDurationValue
@@ -1876,7 +1876,7 @@ PlayGameAudioSounds
    lsr
 .setAudioIndexAndDurationValues
    sty audioIndexValues,x
-   
+
    IF COMPILE_REGION = PAL50
 
       cpx #2
@@ -1888,7 +1888,7 @@ PlayGameAudioSounds
 .setAudioDurationValue
       sta audioDurationValues,x
       jmp .setToPlayBackgroundMusic
-      
+
    ELSE
 
       sta audioDurationValues,x
@@ -2608,7 +2608,7 @@ DisplayKernel SUBROUTINE
    stx NUSIZ1                 ; 3 = @41
 .sixDigitDisplayKernel
    lda (graphicPointers + 10),y;5
-   sta tmpCharHolder          ; 3        
+   sta tmpCharHolder          ; 3
    sta WSYNC
 ;--------------------------------------
    lda (graphicPointers),y    ; 5
@@ -2628,7 +2628,7 @@ DisplayKernel SUBROUTINE
    sty GRP0                   ; 3 = @54
    ldy tmpSixDigitDisplayLoop ; 3
    dey                        ; 2
-   bpl .sixDigitDisplayKernel ; 2³
+   bpl .sixDigitDisplayKernel ; 2ï¿½
    sta WSYNC
 ;--------------------------------------
    iny                        ; 2         y = 0
@@ -2639,7 +2639,7 @@ DisplayKernel SUBROUTINE
    sty PF1                    ; 3 = @17
    sty PF2                    ; 3 = @20
    ldx currentRemainingLives  ; 3         get current remaining lives
-   lda RemainingLivesNUSIZValues,x;4        
+   lda RemainingLivesNUSIZValues,x;4
    sta NUSIZ1                 ; 3 = @30
    lsr                        ; 2
    lsr                        ; 2
@@ -2650,13 +2650,13 @@ DisplayKernel SUBROUTINE
    sta NUSIZ0                 ; 3 = @03
    lda #<BlankLivesIndicator  ; 2
    cpx #1                     ; 2
-   bcc .setLivesIndicatorPtr_00;2³
+   bcc .setLivesIndicatorPtr_00;2ï¿½
    lda #<LivesIndicator       ; 2
 .setLivesIndicatorPtr_00
    sta livesIndicatorGraphicPtr_00;3
    lda #<BlankLivesIndicator  ; 2
    cpx #2                     ; 2
-   bcc .setLivesIndicatorPtr_01;2³
+   bcc .setLivesIndicatorPtr_01;2ï¿½
    lda #<LivesIndicator       ; 2
 .setLivesIndicatorPtr_01
    sta livesIndicatorGraphicPtr_01;3
@@ -2673,16 +2673,16 @@ DisplayKernel SUBROUTINE
    sta GRP1                   ; 3 = @22
    lda #WHITE                 ; 2
    cpy #7                     ; 2
-   bcs .nextRemainingLivesLine; 2³
+   bcs .nextRemainingLivesLine; 2ï¿½
    lda #COLOR_SMURF_BLUE      ; 2         set color to Smurf blue
 .nextRemainingLivesLine
    dey                        ; 2
-   bpl .drawRemainingLivesKernel;2³
+   bpl .drawRemainingLivesKernel;2ï¿½
    lda currentRoomNumber      ; 3         get current room number
    cmp #ID_ROOM_RIVER_00      ; 2
-   bcs .jmpToDisplayKernelDriver;2³       branch if not first two rooms
+   bcs .jmpToDisplayKernelDriver;2ï¿½       branch if not first two rooms
    lda screenTransitionTimer  ; 3
-   beq DrawTreesKernel        ; 2³
+   beq DrawTreesKernel        ; 2ï¿½
 .jmpToDisplayKernelDriver
    jmp JumpToDisplayKernel_BANK0;3
 
@@ -2695,14 +2695,14 @@ DrawTreesKernel
    lda #0                     ; 2
    tay                        ; 2
    ldx stationaryObstacleMask ; 3
-   beq .setStationaryObjectSizeAndColor;2³ branch if not showing fence
+   beq .setStationaryObjectSizeAndColor;2ï¿½ branch if not showing fence
    lda #WHITE                 ; 2
    ldy #DOUBLE_SIZE           ; 2
 .setStationaryObjectSizeAndColor
    sty NUSIZ1                 ; 3
    sta COLUP1                 ; 3
    lda currentRoomNumber      ; 3         get current room number
-   bne .colorTreeLeaves       ; 2³        branch if not ID_ROOM_MUSHROOM_HOUSE
+   bne .colorTreeLeaves       ; 2ï¿½        branch if not ID_ROOM_MUSHROOM_HOUSE
    lda #QUAD_SIZE             ; 2
    sta NUSIZ1                 ; 3         set size for Mushroom house
 .colorTreeLeaves
@@ -2719,13 +2719,13 @@ DrawTreesKernel
    lda #COLOR_TREE_LEAVES + 10; 2
    sta COLUBK                 ; 3 = @12
    dex                        ; 2
-   bne .drawTreeLeafSection   ; 2³
+   bne .drawTreeLeafSection   ; 2ï¿½
    dey                        ; 2
-   bpl .drawTreeLeaves        ; 2³
+   bpl .drawTreeLeaves        ; 2ï¿½
    ldx #7                     ; 2
 .wait39Cycles
    dex                        ; 2
-   bpl .wait39Cycles          ; 2³
+   bpl .wait39Cycles          ; 2ï¿½
    lda #COLOR_TREE_LEAVES + 8 ; 2
    ldx #COLOR_TREE_LEAVES + 10; 2
    stx COLUPF                 ; 3 = @68
@@ -2741,32 +2741,32 @@ DrawTreesKernel
    lda TreePF2Graphics,x      ; 4
    sta PF2                    ; 3 = @24
    cpx #H_TREE_KERNEL - 9     ; 2
-   bne .drawTreeKernelLayer_00; 2³
+   bne .drawTreeKernelLayer_00; 2ï¿½
    lda #LT_BROWN + 6          ; 2
    sta COLUPF                 ; 3 = @33   color tree limbs and trunk
 .drawTreeKernelLayer_00
    cpx #H_TREE_KERNEL - 18    ; 2
-   bcc .drawTreeKernelLayer_01; 2³
+   bcc .drawTreeKernelLayer_01; 2ï¿½
    lda #COLOR_TREE_LEAVES + 8 ; 2
    bcs .nextTreeLimb          ; 3         unconditional branch
 
 .drawTreeKernelLayer_01
    cpx #H_TREE_KERNEL - 30    ; 2
-   bcc .drawTreeKernelLayer_02; 2³
+   bcc .drawTreeKernelLayer_02; 2ï¿½
    lda #COLOR_TREE_LEAVES + 6 ; 2
    bcs .nextTreeLimb          ; 3         unconditional branch
 
 .drawTreeKernelLayer_02
    lda #COLOR_TREE_LEAVES + 4 ; 2
    cpx #H_TREE_KERNEL - 36    ; 2
-   bcs .nextTreeLimb          ; 2³
+   bcs .nextTreeLimb          ; 2ï¿½
    lda #COLOR_TREE_SKY        ; 2         color sky
 .nextTreeLimb
    dex                        ; 2
-   bmi .doneDrawTrees         ; 2³
-   bne .drawTreeLimbs         ; 2³
+   bmi .doneDrawTrees         ; 2ï¿½
+   bne .drawTreeLimbs         ; 2ï¿½
    lda #COLOR_TREE_SKY        ; 2         color sky
-   bne .drawTreeLimbs         ; 2³
+   bne .drawTreeLimbs         ; 2ï¿½
 
 .doneDrawTrees
    jmp JumpToDisplayKernel_BANK0;3
@@ -2960,17 +2960,17 @@ SmurfDeathAudioValues
    .byte  3 << 4 |  5,  3 << 4 |  6,  3 << 4 |  7,  3 << 4 |  8, END_AUDIO_TUNE
 SmurfJumpingAudioValues
    .byte SOUND_HIGH_PRIORITY | $70 | 1  ; saw waveform
-   
+
    IF COMPILE_REGION = PAL50
 
    .byte  0 << 4 | 12,  0 << 4 | 11,  2 << 4 | 10,  2 << 4 |  9,  2 << 4 |  8
    .byte  2 << 4 |  7,  0 << 4 |  6,  0 << 4 |  5, END_AUDIO_TUNE
-   
+
    ELSE
 
    .byte  2 << 4 | 12,  2 << 4 | 11,  2 << 4 | 10,  2 << 4 |  9,  2 << 4 |  8
    .byte  2 << 4 |  7,  2 << 4 |  6,  0 << 4 |  5, END_AUDIO_TUNE
-   
+
    ENDIF
 
 FlyingObjectFlappingAudioValues
@@ -3007,27 +3007,27 @@ ExtraLifeAudioValues
 ExtraLifeLeftChannelAudioValues
    .byte SOUND_HIGH_PRIORITY | $50 | SOUND_TWO_CHANNELS | 12;lower pitch square wave
    .byte <[ExtraLifeRightChannelAudioValues - BackgroundMusicAudioValues]
-   
+
    IF COMPILE_REGION = PAL50
 
    .byte  7 << 4 | 15,  7 << 4 |  7,  7 << 4 |  2, 28 << 3 | 15,  7 << 4 |  2
    .byte 28 << 3 | 15, END_AUDIO_TUNE
-   
+
    ELSE
-   
+
    .byte 24 << 3 | 31,  7 << 4 |  7, 24 << 3 | 18,  6 << 4 | 15, 24 << 3 | 18
    .byte 28 << 3 | 15, END_AUDIO_TUNE
-   
+
    ENDIF
-   
+
 ExtraLifeRightChannelAudioValues
    .byte SOUND_LOW_PRIORITY | SOUND_ONE_CHANNEL | 12; lower pitch square wave
-   
+
    IF COMPILE_REGION = PAL50
 
    .byte  7 << 4 | 15,  7 << 4 |  7,  7 << 4 |  2, 28 << 3 | 15,  7 << 4 |  2
    .byte 28 << 3 | 15, END_AUDIO_TUNE
-   
+
    ELSE
 
    .byte 24 << 3 | 31,  7 << 4 |  7, 24 << 3 | 18,  6 << 4 | 15, 24 << 3 | 18
@@ -3039,9 +3039,9 @@ GameBackgroundMusicAudioValues
 GameBackgroundMusicLeftChannelAudioValues
    .byte SOUND_HIGH_PRIORITY | $50 | SOUND_TWO_CHANNELS | 4;high pitch pure tone
    .byte <[GameBackgroundMusicRightChannelAudioValues - BackgroundMusicAudioValues]
-   
+
    IF COMPILE_REGION = PAL50
-   
+
    .byte 20 << 3 | 31, 20 << 3 | 31, 24 << 3 | 23,  7 << 4 |  7, 20 << 3 | 23
    .byte 20 << 3 | 20, 20 << 3 | 18, 20 << 3 | 23, 20 << 3 | 18, 20 << 3 | 17
    .byte 28 << 3 | 15,  6 << 4 | 15, 20 << 3 | 15, 20 << 3 | 17, 24 << 3 | 18
@@ -3052,7 +3052,7 @@ GameBackgroundMusicLeftChannelAudioValues
    .byte AUDIO_WAIT | 0 >> 2
    .byte  7 << 4 |  4, 20 << 3 | 20, 20 << 3 | 24, 24 << 3 | 31
    .byte AUDIO_WAIT | 60 >> 2, END_AUDIO_TUNE
-   
+
    ELSE
 
    .byte 16 << 3 | 31, 16 << 3 | 31, 24 << 3 | 23,  7 << 4 |  7, 16 << 3 | 23
@@ -3063,12 +3063,12 @@ GameBackgroundMusicLeftChannelAudioValues
    .byte 16 << 3 | 23, 16 << 3 | 20, 16 << 3 | 18, 16 << 3 | 20, 16 << 3 | 23
    .byte 24 << 3 | 20,  7 << 4 |  4, 16 << 3 | 20, 16 << 3 | 24, 24 << 3 | 31
    .byte AUDIO_WAIT | 60 >> 2, AUDIO_WAIT | 16 >> 2, END_AUDIO_TUNE
-   
+
    ENDIF
-   
+
 GameBackgroundMusicRightChannelAudioValues
    .byte SOUND_LOW_PRIORITY | SOUND_ONE_CHANNEL | 4;high pitch pure tone
-   
+
    IF COMPILE_REGION = PAL50
 
    .byte AUDIO_WAIT | 32 >> 2, AUDIO_WAIT | 0 >> 2
@@ -3092,7 +3092,7 @@ GameBackgroundMusicRightChannelAudioValues
    .byte AUDIO_WAIT | 32 >> 2, END_AUDIO_TUNE
 
    ELSE
-   
+
     .byte AUDIO_WAIT | 32 >> 2
     .byte 24 << 3 | 31
     .byte AUDIO_WAIT | 8 >> 2
@@ -3118,7 +3118,7 @@ SmurfThemeSongAudioValues
 SmurfThemeSongLeftChannelAudioValues
    .byte SOUND_HIGH_PRIORITY | $50 | SOUND_TWO_CHANNELS | 4;high pitch pure tone
    .byte <[SmurfThemeSongRightChannelAudioValues - BackgroundMusicAudioValues]
-   
+
    IF COMPILE_REGION = PAL50
 
    .byte AUDIO_WAIT | 60 >> 2
@@ -3156,7 +3156,7 @@ SmurfThemeSongLeftChannelAudioValues
 
 SmurfThemeSongRightChannelAudioValues
    .byte SOUND_LOW_PRIORITY | SOUND_ONE_CHANNEL | 12;lower pitch square wave
-   
+
    IF COMPILE_REGION = PAL50
 
    .byte AUDIO_WAIT | 60 >> 2
@@ -3191,14 +3191,14 @@ SmurfThemeSongRightChannelAudioValues
    .byte AUDIO_WAIT | 8 >> 2
    .byte 24 << 3 | 27,  7 << 4 |  8, 16 << 3 | 23, 16 << 3 | 20, 16 << 3 | 31
    .byte 16 << 3 | 20, 28 << 3 | 15, END_AUDIO_TUNE
-   
+
    ENDIF
 
 SmurfetteRescuedAudioValues
 SmurfetteRescuedLeftChannelAudioValues
    .byte SOUND_HIGH_PRIORITY | $50 | SOUND_TWO_CHANNELS | 4;high pitch pure tone
    .byte <[SmurfetteRescuedRightChannelAudioValues - BackgroundMusicAudioValues]
-   
+
    IF COMPILE_REGION = PAL50
 
    .byte 20 << 3 | 19
@@ -3260,12 +3260,12 @@ SmurfetteRescuedLeftChannelAudioValues
    .byte 24 << 3 |  9, 24 << 3 | 10
    .byte AUDIO_WAIT | 0 >> 2, AUDIO_WAIT | 0 >> 2
    .byte 28 << 3 | 11, END_AUDIO_TUNE
-   
+
    ENDIF
 
 SmurfetteRescuedRightChannelAudioValues
    .byte SOUND_LOW_PRIORITY | SOUND_ONE_CHANNEL | 4;high pitch pure tone
-   
+
    IF COMPILE_REGION = PAL50
 
    .byte AUDIO_WAIT | 44 >> 2
@@ -3446,17 +3446,17 @@ TreePF2Graphics
    .byte $01 ; |.......X|
    .byte $01 ; |.......X|
    .byte $01 ; |.......X|
-    
+
 TreeLeavesHeightValues
    .byte 4, 4, 6, 7, 4
-    
+
 TreeLeavesGraphics
    .byte $F8 ; |XXXXX...|
    .byte $F0 ; |XXXX....|
    .byte $E0 ; |XXX.....|
    .byte $C0 ; |XX......|
    .byte $80 ; |X.......|
-    
+
    IF ORIGINAL_ROM
 
       IF COMPILE_REGION = PAL50
@@ -3464,7 +3464,7 @@ TreeLeavesGraphics
    .byte $A0,$A8,$D3,$C8,$FF,$A0,$A0,$A0;unused bytes
 
       ELSE
-   
+
    .byte $A0                        ; unused byte
 
       ENDIF
@@ -3472,7 +3472,7 @@ TreeLeavesGraphics
    ENDIF
 
    FILL_BOUNDARY 228, 0
-   
+
 JumpToDisplayKernel_BANK0
    lda BANK0_REORG | BANK1STROBE
    lda BANK0_REORG | BANK0STROBE
@@ -3490,23 +3490,23 @@ JumpToDisplayKernel_BANK0
    jmp JumpToCurrentGameStateRoutine
 
    IF ORIGINAL_ROM
-   
+
       IF COMPILE_REGION = PAL50
-   
+
    .byte $B0,$FF,$D0,$A0            ; unused bytes
-   
+
       ELSE
-   
+
    .byte $A0,$A2,$BB,$A9            ; unused bytes
-   
+
       ENDIF
-   
+
    ENDIF
 
    FILL_BOUNDARY 252, 0
 
    echo "***", (FREE_BYTES)d, "BYTES OF BANK0 FREE"
-   
+
    .word Bank0Start                 ; RESET vector
    .word Bank1Start                 ; BRK vector
 
@@ -3517,7 +3517,7 @@ JumpToDisplayKernel_BANK0
    SEG Bank1
    .org BANK1_BASE
    .rorg BANK1_REORG
-   
+
 FREE_BYTES SET 0
 
 Bank1Start
@@ -3535,7 +3535,7 @@ Bank1Start
    ENDIF
 
 HorizonSunsetColorValues
-   
+
    IF COMPILE_REGION = NTSC
 
    .byte YELLOW + 14, YELLOW + 12, YELLOW + 14, YELLOW + 12, YELLOW + 14
@@ -3692,65 +3692,65 @@ MushroomHouseGraphic
    .byte $C0 ; |XX......|
    .byte $80 ; |X.......|
    .byte $80 ; |X.......|
-    
+
 SmurfAnimationDataPointers_BANK1
    .word NullSprite
    .word NullSpriteColor
-   
+
    .word SmurfSpriteStationary
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteWalking_00
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteWalking_01
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteWalking_02
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteStationary
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteDucking
    .word SmurfSpriteDuckingColors
-   
+
    .word SmurfSpriteSitting
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteJumping
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteKissing
    .word SmurfKissingColors
-   
+
    .word SmurfSpriteDrowning_00
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteDrowning_01
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteDrowning_02
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteDrowning_03
    .word SmurfSpriteColors
-   
+
    .word SmurfSpriteDrowning_04
    .word SmurfSpriteColors
 
    IF ORIGINAL_ROM
-   
+
       IF COMPILE_REGION = PAL50
-   
+
    .byte $A4,$D3,$A5,$BA,$CF,$E0,$AE,$A2,$A0,$97,$A0,$AF;unused bytes
-   
+
       ELSE
-   
+
    .byte $C6,$AF,$A0,$A0,$D2,$A0,$A0,$CF,$A2,$9E,$A0,$F0;unused bytes
-   
+
       ENDIF
-   
+
    ENDIF
 
    FILL_BOUNDARY 0, 0
@@ -3856,7 +3856,7 @@ RiverMountainTopPF1Graphics
    .byte $E0 ; |XXX.....|
    .byte $C0 ; |XX......|
    .byte $80 ; |X.......|
-    
+
 SmurfSpriteDrowning_00
    .byte $1C ; |...XXX..|
    .byte $3E ; |..XXXXX.|
@@ -3913,7 +3913,7 @@ GargamelTableColors
    .byte VIOLET + 4, VIOLET + 4, VIOLET + 4, VIOLET + 4, VIOLET + 4, VIOLET + 4
    .byte VIOLET + 6, VIOLET + 6, VIOLET + 6, VIOLET + 6, VIOLET + 6, VIOLET + 6
    .byte VIOLET + 6, VIOLET + 6
-    
+
 MushroomHouseTreeTrunkPF1Graphics
    .byte $80 ; |X.......|
    .byte $80 ; |X.......|
@@ -3942,7 +3942,7 @@ KernelHeightOffset_BANK1
    .byte 51                         ; ID_ROOM_SPIDER_CAVERN
    .byte 70                         ; ID_ROOM_RIVER_01
    .byte 1                          ; ID_ROOM_GARGAMELS_LAB
-   
+
 SmurfSpriteOffset_BANK1
    .byte H_SMURF - H_SMURF
    .byte H_SMURF - H_SMURF_STATIONARY
@@ -3961,19 +3961,19 @@ SmurfSpriteOffset_BANK1
    .byte H_SMURF - H_SMURF_DROWNING_04
 
    IF ORIGINAL_ROM
-   
+
       IF COMPILE_REGION = PAL50
 
    .byte $A0,$B0,$A0,$84,$A0,$A0,$D8,$A0; unused bytes
-   
+
       ELSE
-   
+
    .byte $A0,$C9,$A0,$80,$A0,$C9,$A0,$CC; unused bytes
-   
+
       ENDIF
 
    ENDIF
-   
+
    FILL_BOUNDARY 0, 0
 
 SmurfSpriteDuckingColors
@@ -4234,17 +4234,17 @@ BatSprite_01
    .byte SPRITE_END
 
    IF ORIGINAL_ROM
-   
+
       IF COMPILE_REGION = PAL50
 
    .byte $A0,$A0,$B9                ; unused bytes
-       
+
       ELSE
-   
+
    .byte $8A,$A0,$AC                ; unused bytes
 
       ENDIF
-   
+
    ENDIF
 
    FILL_BOUNDARY 0, 0
@@ -4316,7 +4316,7 @@ HawkSprite_02
    .byte $01 ; |.......X|
    .byte $01 ; |.......X|
    .byte SPRITE_END
-    
+
 GargamelLabLedgeColors
    .byte VIOLET + 4, YELLOW + 2, YELLOW + 2, YELLOW + 2, YELLOW + 4
    .byte YELLOW + 4, YELLOW + 4, YELLOW + 6, YELLOW + 6, YELLOW + 6, YELLOW + 6
@@ -4333,7 +4333,7 @@ GargamelLabLedgeGraphics
    .byte $FF ; |XXXXXXXX|
    .byte $FF ; |XXXXXXXX|
    .byte $FF ; |XXXXXXXX|
-    
+
    IF ORIGINAL_ROM
 
       IF COMPILE_REGION = PAL50
@@ -4341,15 +4341,15 @@ GargamelLabLedgeGraphics
    .byte $B8,$FF,$C8,$A2,$A0,$AA,$D4,$D5,$91,$A0,$A0,$A0,$E8,$A0;unused bytes
 
       ELSE
-   
+
    .byte $A0,$80,$D2,$A0,$85,$A0,$A0,$D3,$AD,$80,$A0,$A3,$A0,$86;unused bytes
-   
+
       ENDIF
-   
+
    ENDIF
-   
+
    FILL_BOUNDARY 98, 0
-    
+
 SmurfetteSprites
    .byte SPRITE_END
    .byte $36 ; |..XX.XX.|
@@ -4404,13 +4404,13 @@ RescuedSmurfetteSprite
    .byte $6E ; |.XX.XXX.|
    .byte $7C ; |.XXXXX..|
    .byte $38 ; |..XXX...|
-    
+
 SmurfetteHairBunGraphics
    .byte DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM
    .byte DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM
    .byte DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, -1, -1, -1, -1
    .byte DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM, DISABLE_BM
-    
+
 SmurfetteColors
    .byte BLACK, WHITE, WHITE, WHITE, COLOR_SMURF_BLUE, COLOR_SMURF_BLUE
    .byte COLOR_SMURF_BLUE, WHITE, WHITE, WHITE, WHITE, COLOR_SMURF_BLUE
@@ -4447,7 +4447,7 @@ FenceGraphic
    .byte $01 ; |.......X|
    .byte $01 ; |.......X|
    .byte SPRITE_END
-    
+
 GargarmelLabFloorColors
    .byte COLOR_LAB_FLOOR + 6, COLOR_LAB_FLOOR + 6, COLOR_LAB_FLOOR + 6
    .byte COLOR_LAB_FLOOR + 6, COLOR_LAB_FLOOR + 6, COLOR_LAB_FLOOR + 6
@@ -5115,7 +5115,7 @@ PositionObjectHorizontally_BANK1
    sec                        ; 2
 .coarsePositionObject
    sbc #15                    ; 2         divide position by 15
-   bcs .coarsePositionObject  ; 2³
+   bcs .coarsePositionObject  ; 2ï¿½
    eor #15                    ; 2         4-bit 1's complement for fine motion
    asl                        ; 2         shift remainder to upper nybbles
    asl                        ; 2
@@ -5162,7 +5162,7 @@ DrawTransitionScreenKernel
    sta WSYNC
 ;--------------------------------------
    dex                        ; 2
-   bne .drawTransitionScreenKernel;2³ + 1
+   bne .drawTransitionScreenKernel;2ï¿½ + 1
    ldy #OVERSCAN_TIME_SCREEN_TRANSITION;2
    jmp SetTimerForOverscanTime; 3
 
@@ -5176,7 +5176,7 @@ HorizPositionSmurfAndObstacle_BANK1
    sta NUSIZ0                 ; 3 = @24
    sta NUSIZ1                 ; 3 = @27
    lda roomObjectHorizPosition; 3
-   jsr PositionObjectHorizontally_BANK1;6        
+   jsr PositionObjectHorizontally_BANK1;6
    sta WSYNC
 ;--------------------------------------
    sta HMOVE                  ; 3 = @03
@@ -5196,7 +5196,7 @@ SetSmurfAnimationDataPointerValues SUBROUTINE
    sta smurfGraphicPointer,x  ; 4
    dey                        ; 2
    dex                        ; 2
-   bpl .setSmurfAnimationDataPointerValues;2³
+   bpl .setSmurfAnimationDataPointerValues;2ï¿½
    sta WSYNC
 ;--------------------------------------
    sta CXCLR                  ; 3 = @03   clear all collision registers
@@ -5207,9 +5207,9 @@ SetSmurfAnimationDataPointerValues SUBROUTINE
    sec                        ; 2
    ldy smurfAnimationIndex    ; 3
    sbc SmurfSpriteOffset_BANK1,y;4        subtract sprite height for offset
-   bmi .setSmurfSkipDrawIdx   ; 2³
+   bmi .setSmurfSkipDrawIdx   ; 2ï¿½
    cmp #H_SMURF - 5           ; 2
-   bcc .setSmurfSkipDrawIdx   ; 2³
+   bcc .setSmurfSkipDrawIdx   ; 2ï¿½
    lda #H_SMURF - 5           ; 2
 .setSmurfSkipDrawIdx
    tay                        ; 2
@@ -5224,13 +5224,13 @@ DrawSmurfKernel
    sta COLUP0                 ; 3 = @11
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextSmurfScanline     ; 2³
+   bmi .nextSmurfScanline     ; 2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextSmurfScanline     ; 2³
+   bne .nextSmurfScanline     ; 2ï¿½
    dey                        ; 2
 .nextSmurfScanline
    dex                        ; 2
-   bpl .drawSmurfKernel       ; 2³
+   bpl .drawSmurfKernel       ; 2ï¿½
    rts                        ; 6
 
 DrawSmurfAndRoomObstacleKernel
@@ -5241,25 +5241,25 @@ DrawSmurfAndRoomObstacleKernel
    lda (smurfColorPointer),y  ; 5
    sta COLUP0                 ; 3 = @11
    inc roomObstacleGraphicIndex;5
-   bmi .drawSmurf             ; 2³
+   bmi .drawSmurf             ; 2ï¿½
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @32
-   bne .getSmurfGraphicIndex  ; 2³
+   bne .getSmurfGraphicIndex  ; 2ï¿½
    dec roomObstacleGraphicIndex;5
 .getSmurfGraphicIndex
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurf
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextSmurfAndRoomObstacleScanline;2³
+   bmi .nextSmurfAndRoomObstacleScanline;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextSmurfAndRoomObstacleScanline;2³
+   bne .nextSmurfAndRoomObstacleScanline;2ï¿½
    dey                        ; 2
 .nextSmurfAndRoomObstacleScanline
    dex                        ; 2
-   bpl .drawSmurfAndRoomObstacleKernel;2³
+   bpl .drawSmurfAndRoomObstacleKernel;2ï¿½
    rts                        ; 6
 
 SpiderCavernDisplayKernel SUBROUTINE
@@ -5306,7 +5306,7 @@ SpiderCavernDisplayKernel SUBROUTINE
    lda SpiderCavernTopRightPF2Graphics,x;4
    sta PF2                    ; 3 = @49
    dex                        ; 2
-   bpl .drawTopSpiderCavern   ; 2³
+   bpl .drawTopSpiderCavern   ; 2ï¿½
    ldx #DK_PINK               ; 2
    stx COLUBK                 ; 3
    ldx #31                    ; 2
@@ -5333,13 +5333,13 @@ SpiderCavernDisplayKernel SUBROUTINE
    lda SpiderCavernBottomRightPF2Graphics,x;4
    sta PF2                    ; 3 = @61
    dex                        ; 2
-   bpl .drawSpiderWebKernel   ; 2³ + 1
+   bpl .drawSpiderWebKernel   ; 2ï¿½ + 1
    bmi .doneDrawSpiderWebKernel;3         unconditional branch
 
 .skipSpiderDrawSection_00
    lda roomObstacleGraphicIndex;3
    cmp #<-1                   ; 2
-   bne .drawSmurfGraphicSection_00;2³
+   bne .drawSmurfGraphicSection_00;2ï¿½
    lda #BLACK                 ; 2
    sta COLUP1                 ; 3 = @38
    beq .drawSmurfGraphicSection_00;3      unconditional branch
@@ -5347,7 +5347,7 @@ SpiderCavernDisplayKernel SUBROUTINE
 .skipSpiderDraw
    lda roomObstacleGraphicIndex;3 = @32
    cmp #<-1                   ; 2
-   bne .drawSmurfGraphic      ; 2³
+   bne .drawSmurfGraphic      ; 2ï¿½
    lda #BLACK                 ; 2
    sta COLUP1                 ; 3 = @41
    beq .drawSmurfGraphic      ; 3         unconditional branch
@@ -5377,25 +5377,25 @@ SpiderCavernDisplayKernel SUBROUTINE
    lda SpiderCavernBackgroundColors + 54,x;4
    sta COLUBK                 ; 3 = @18
    inc roomObstacleGraphicIndex;5
-   bmi .skipSpiderDrawSection_00;2³
+   bmi .skipSpiderDrawSection_00;2ï¿½
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @39
-   bne .getSmurfGraphicIndexSection_00;2³
+   bne .getSmurfGraphicIndexSection_00;2ï¿½
    dec roomObstacleGraphicIndex;5
 .getSmurfGraphicIndexSection_00
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfGraphicSection_00
    lda #0                     ; 2
    iny                        ; 2         increment Smurf graphic index value
-   bmi .nextSpiderCavernSection_00;2³
+   bmi .nextSpiderCavernSection_00;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextSpiderCavernSection_00;2³
+   bne .nextSpiderCavernSection_00;2ï¿½
    dey                        ; 2
 .nextSpiderCavernSection_00
    dex                        ; 2
-   bpl .drawSpiderCavernKernelSection_00;2³
+   bpl .drawSpiderCavernKernelSection_00;2ï¿½
    sta WSYNC
 ;--------------------------------------
    sta GRP0                   ; 3 = @03
@@ -5406,22 +5406,22 @@ SpiderCavernDisplayKernel SUBROUTINE
    lda #0                     ; 2
    sta PF2                    ; 3 = @21
    inc roomObstacleGraphicIndex;5
-   bmi .skipSpiderDraw        ; 2³
+   bmi .skipSpiderDraw        ; 2ï¿½
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @42
-   bne .getSmurfGraphicIndex  ; 2³
+   bne .getSmurfGraphicIndex  ; 2ï¿½
    dec roomObstacleGraphicIndex;5
 .getSmurfGraphicIndex
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfGraphic
    lda #0                     ; 2
    iny                        ; 2
-   bmi ColorSpiderCavernBackground;2³
+   bmi ColorSpiderCavernBackground;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne ColorSpiderCavernBackground;2³
-   dey                        ; 2    
+   bne ColorSpiderCavernBackground;2ï¿½
+   dey                        ; 2
 ColorSpiderCavernBackground SUBROUTINE
    ldx #53                    ; 2
 .colorSpiderCavernBackground
@@ -5433,31 +5433,31 @@ ColorSpiderCavernBackground SUBROUTINE
    lda SpiderCavernBackgroundColors,x;4
    sta COLUBK                 ; 3 = @18
    inc roomObstacleGraphicIndex;5
-   bmi .skipSpiderDraw        ; 2³
+   bmi .skipSpiderDraw        ; 2ï¿½
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @39
-   bne .getSmurfGraphicIndex  ; 2³
+   bne .getSmurfGraphicIndex  ; 2ï¿½
    dec roomObstacleGraphicIndex;5
 .getSmurfGraphicIndex
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfGraphic
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextScanlineColorSpiderCavernBackground;2³
+   bmi .nextScanlineColorSpiderCavernBackground;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextScanlineColorSpiderCavernBackground;2³
+   bne .nextScanlineColorSpiderCavernBackground;2ï¿½
    dey                        ; 2
 .nextScanlineColorSpiderCavernBackground
    dex                        ; 2
-   bpl .colorSpiderCavernBackground;2³
-   bmi .doneColorSpiderCavernBackground;2³ + 1 unconditional branch
+   bpl .colorSpiderCavernBackground;2ï¿½
+   bmi .doneColorSpiderCavernBackground;2ï¿½ + 1 unconditional branch
 
 .skipSpiderDraw
    lda roomObstacleGraphicIndex;3
    cmp #<-1                   ; 2
-   bne .drawSmurfGraphic      ; 2³
+   bne .drawSmurfGraphic      ; 2ï¿½
    lda #BLACK                 ; 2
    sta COLUP1                 ; 3 = @38
    beq .drawSmurfGraphic      ; 3         unconditional branch
@@ -5465,7 +5465,7 @@ ColorSpiderCavernBackground SUBROUTINE
 .skipSpiderDrawCavernBackground
    lda roomObstacleGraphicIndex;3
    cmp #<-1                   ; 2
-   bne .drawSmurfGraphicCavernBackground;2³ + 1
+   bne .drawSmurfGraphicCavernBackground;2ï¿½ + 1
    lda #BLACK                 ; 2
    sta COLUP1                 ; 3
    beq .drawSmurfGraphicCavernBackground;4 unconditional branch crosses page
@@ -5473,7 +5473,7 @@ ColorSpiderCavernBackground SUBROUTINE
 .skipDrawObstacleSpiderStairKernel
    lda roomObstacleGraphicIndex;3 = @30
    cmp #<-1                   ; 2
-   bne .drawSmurfSpiderCavernStairKernel;2³ + 1
+   bne .drawSmurfSpiderCavernStairKernel;2ï¿½ + 1
    lda #BLACK                 ; 2
    sta COLUP1                 ; 3 = @39
    beq .drawSmurfSpiderCavernStairKernel;4 unconditional branch crosses page
@@ -5489,21 +5489,21 @@ ColorSpiderCavernBackground SUBROUTINE
    lda #$F8                   ; 2
    sta PF1                    ; 3 = @21
    inc roomObstacleGraphicIndex;5
-   bmi .skipSpiderDrawCavernBackground;2³ + 1
+   bmi .skipSpiderDrawCavernBackground;2ï¿½ + 1
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @42
-   bne .getSmurfGraphicIndexCavernBackground;2³
+   bne .getSmurfGraphicIndexCavernBackground;2ï¿½
    dec roomObstacleGraphicIndex;5
 .getSmurfGraphicIndexCavernBackground
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfGraphicCavernBackground
    lda #0                     ; 2
    iny                        ; 2
-   bmi DrawSpiderCavernStairsKernel;2³
+   bmi DrawSpiderCavernStairsKernel;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne DrawSpiderCavernStairsKernel;2³
+   bne DrawSpiderCavernStairsKernel;2ï¿½
    dey                        ; 2
 DrawSpiderCavernStairsKernel
    ldx #23                    ; 2
@@ -5516,25 +5516,25 @@ DrawSpiderCavernStairsKernel
    lda SpiderCavernStairGraphics,x;4
    sta PF1                    ; 3 = @18
    inc roomObstacleGraphicIndex;5
-   bmi .skipDrawObstacleSpiderStairKernel;2³ + 1
+   bmi .skipDrawObstacleSpiderStairKernel;2ï¿½ + 1
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @39
-   bne .getSmurfGraphicIndexSpiderCavernStairSection;2³
+   bne .getSmurfGraphicIndexSpiderCavernStairSection;2ï¿½
    dec roomObstacleGraphicIndex;5
 .getSmurfGraphicIndexSpiderCavernStairSection
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfSpiderCavernStairKernel
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextSpiderCavernStairScanline;2³
+   bmi .nextSpiderCavernStairScanline;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextSpiderCavernStairScanline;2³
+   bne .nextSpiderCavernStairScanline;2ï¿½
    dey                        ; 2
 .nextSpiderCavernStairScanline
    dex                        ; 2
-   bpl .drawSpiderCavernStairsKernel;2³
+   bpl .drawSpiderCavernStairsKernel;2ï¿½
    inx                        ; 2
    stx PF1                    ; 3 = @73
    stx PF0                    ; 3 = @76
@@ -5574,13 +5574,13 @@ MushroomHouseDisplayKernel
    sta COLUP1                 ; 3 = @39
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextMushroomTopScanline;2³
+   bmi .nextMushroomTopScanline;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextMushroomTopScanline;2³
+   bne .nextMushroomTopScanline;2ï¿½
    dey                        ; 2
 .nextMushroomTopScanline
    dex                        ; 2
-   bpl .drawMushroomHouseTopKernel;2³
+   bpl .drawMushroomHouseTopKernel;2ï¿½
    ldx #7                     ; 2
 .drawMushroomHouseTreeTrunkKernel
    sta WSYNC
@@ -5598,13 +5598,13 @@ MushroomHouseDisplayKernel
    sta PF2                    ; 3 = @37
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextMushroomHouseTreeTrunkScanline;2³
+   bmi .nextMushroomHouseTreeTrunkScanline;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextMushroomHouseTreeTrunkScanline;2³
+   bne .nextMushroomHouseTreeTrunkScanline;2ï¿½
    dey                        ; 2
 .nextMushroomHouseTreeTrunkScanline
    dex                        ; 2
-   bpl .drawMushroomHouseTreeTrunkKernel;2³
+   bpl .drawMushroomHouseTreeTrunkKernel;2ï¿½
    ldx #0                     ; 2
    stx PF1                    ; 3 = @61
    stx PF0                    ; 3 = @64
@@ -5623,13 +5623,13 @@ MushroomHouseDisplayKernel
    sta GRP1                   ; 3 = @31
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextMushroomHouseBottomScanline;2³
+   bmi .nextMushroomHouseBottomScanline;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextMushroomHouseBottomScanline;2³
+   bne .nextMushroomHouseBottomScanline;2ï¿½
    dey                        ; 2
 .nextMushroomHouseBottomScanline
    dex                        ; 2
-   bpl .drawMushroomHouseBottomKernel;2³
+   bpl .drawMushroomHouseBottomKernel;2ï¿½
    inx                        ; 2         x = 0
    stx GRP1                   ; 3 = @65
    ldy #GREEN + 6             ; 2
@@ -5644,7 +5644,7 @@ MushroomHouseDisplayKernel
       IF COMPILE_REGION = PAL50
 
    .byte $AE,$89,$B0,$A0,$B0,$A0,$D5,$A5,$D2 ; unused bytes
-   
+
       ELSE
 
    .byte $D5,$A0,$9F,$D3,$85,$A0,$CD,$C5,$F0 ; unused bytes
@@ -5677,24 +5677,24 @@ StartWoodsDisplayKernel
    lda (smurfColorPointer),y  ; 5
    sta COLUP0                 ; 3 = @11
    inc roomObstacleGraphicIndex;5
-   bmi .skipObstacleDrawBackgroundLayer_00;2³ branch to not draw obstacle
+   bmi .skipObstacleDrawBackgroundLayer_00;2ï¿½ branch to not draw obstacle
    sty tmpSmurfGraphicIdx     ; 3         set Smurf graphic index value
    ldy roomObstacleGraphicIndex;3         get room obstacle graphic index value
    lda (roomObstacleGraphicPointer),y;5   get graphic data for room obstacle
    sta GRP1                   ; 3 = @32
-   bne .skipDoneObstacleDrawBackgroundLayer_00;2³
+   bne .skipDoneObstacleDrawBackgroundLayer_00;2ï¿½
    dec roomObstacleGraphicIndex;5         decrement room obstacle graphic index
    ldy tmpSmurfGraphicIdx     ; 3         get Smurf graphic index value
 .drawSmurfBackgroundLayer_00
    lda #0                     ; 2
    iny                        ; 2         increment Smurf graphic index value
-   bmi .nextScanlineBackgroundLayer_00; 2³ branch if not drawing Smurf graphic
+   bmi .nextScanlineBackgroundLayer_00; 2ï¿½ branch if not drawing Smurf graphic
    lda (smurfGraphicPointer),y; 5         get Smurf graphic data
-   bne .nextScanlineBackgroundLayer_00;2³
+   bne .nextScanlineBackgroundLayer_00;2ï¿½
    dey                        ; 2
 .nextScanlineBackgroundLayer_00
    dex                        ; 2
-   bpl .drawWoodsKernelBackgroundLayer_00;2³
+   bpl .drawWoodsKernelBackgroundLayer_00;2ï¿½
    SLEEP_5                    ; 5
    ldx #GREEN + 4             ; 2
    stx COLUBK                 ; 3 = @71
@@ -5710,25 +5710,25 @@ StartWoodsDisplayKernel
    lda #$01                   ; 2
    sta PF2                    ; 3 = @21
    inc roomObstacleGraphicIndex;5
-   bmi .drawSmurfBackgroundLayer_01;2³
+   bmi .drawSmurfBackgroundLayer_01;2ï¿½
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @42
-   bne .getSmurfGraphicIndex  ; 2³
+   bne .getSmurfGraphicIndex  ; 2ï¿½
    dec roomObstacleGraphicIndex;5
 .getSmurfGraphicIndex
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfBackgroundLayer_01
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextScanlineBackgroundLayer_01;2³
+   bmi .nextScanlineBackgroundLayer_01;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextScanlineBackgroundLayer_01;2³
+   bne .nextScanlineBackgroundLayer_01;2ï¿½
    dey                        ; 2
 .nextScanlineBackgroundLayer_01
    dex                        ; 2
-   bpl .drawWoodsKernelBackgroundLayer_01;2³
+   bpl .drawWoodsKernelBackgroundLayer_01;2ï¿½
    ldx #3                     ; 2
 .drawWoodsKernelBackgroundLayer_02
    sta WSYNC
@@ -5741,24 +5741,24 @@ StartWoodsDisplayKernel
    lda #0                     ; 2
    sta PF2                    ; 3 = @21
    inc roomObstacleGraphicIndex;5
-   bmi .skipObstacleDrawBackgroundLayer_02;2³
+   bmi .skipObstacleDrawBackgroundLayer_02;2ï¿½
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @42
-   bne .skipDoneObstacleDrawBackgroundLayer_02;2³
+   bne .skipDoneObstacleDrawBackgroundLayer_02;2ï¿½
    dec roomObstacleGraphicIndex;5
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfBackgroundLayer_02
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextScanlineBackgroundLayer_02;2³
+   bmi .nextScanlineBackgroundLayer_02;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextScanlineBackgroundLayer_02;2³
+   bne .nextScanlineBackgroundLayer_02;2ï¿½
    dey                        ; 2
 .nextScanlineBackgroundLayer_02
    dex                        ; 2
-   bpl .drawWoodsKernelBackgroundLayer_02;2³
+   bpl .drawWoodsKernelBackgroundLayer_02;2ï¿½
    ldx #0                     ; 2
    stx PF0                    ; 3 = @76
 ;--------------------------------------
@@ -5784,7 +5784,7 @@ StartWoodsDisplayKernel
    jmp .drawSmurfBackgroundLayer_02;3
 
 RiverRoomDisplayKernel
-   lda cloudHorizontalPosition;3        
+   lda cloudHorizontalPosition;3
    jsr PositionGRP0Horizontally_BANK1;6
 ;--------------------------------------
    ldx #WHITE                 ; 2
@@ -5797,7 +5797,7 @@ RiverRoomDisplayKernel
    clc                        ; 2
    adc #8                     ; 2         increment by 8 for next set of Clouds
    cmp #XMAX + 1              ; 2
-   bcc .horizontallyPositionSecondCloud;2³
+   bcc .horizontallyPositionSecondCloud;2ï¿½
    sec                        ; 2         not needed...carry already set
    sbc #XMAX + 1              ; 2
 .horizontallyPositionSecondCloud
@@ -5817,7 +5817,7 @@ RiverRoomDisplayKernel
    sta COLUBK                 ; 3 = @03
    dey                        ; 2
    cpy #H_SUNSET_COLORS - 12  ; 2
-   bne .colorTopHorizon       ; 2³
+   bne .colorTopHorizon       ; 2ï¿½
    ldx #H_CLOUDS - 1          ; 2
 .drawClouds
    lda HorizonSunsetColorValues,y;4
@@ -5830,7 +5830,7 @@ RiverRoomDisplayKernel
    sta GRP1                   ; 3 = @17
    dey                        ; 2
    dex                        ; 2
-   bpl .drawClouds            ; 2³
+   bpl .drawClouds            ; 2ï¿½
 .drawUnderCloudHorizonColors
    lda HorizonSunsetColorValues,y;4
    sta WSYNC
@@ -5838,7 +5838,7 @@ RiverRoomDisplayKernel
    sta COLUBK                 ; 3 = @03
    dey                        ; 2
    cpy #H_SUNSET_COLORS - 53  ; 2
-   bne .drawUnderCloudHorizonColors;2³
+   bne .drawUnderCloudHorizonColors;2ï¿½
 .drawRiverMountainTops
    lda HorizonSunsetColorValues,y;4
    sta WSYNC
@@ -5851,7 +5851,7 @@ RiverRoomDisplayKernel
    lda RiverMountainTopPF2Graphics,y;4
    sta PF2                    ; 3 = @24
    dey                        ; 2
-   bpl .drawRiverMountainTops ; 2³
+   bpl .drawRiverMountainTops ; 2ï¿½
    sta WSYNC
 ;--------------------------------------
    ldx #GREEN + 4             ; 2
@@ -5859,7 +5859,7 @@ RiverRoomDisplayKernel
    jsr HorizPositionSmurfAndObstacle_BANK1;6
 ;--------------------------------------
    lda #0                     ; 2
-   sta PF1                    ; 3 = @45       
+   sta PF1                    ; 3 = @45
    sta PF0                    ; 3 = @48
    sta PF2                    ; 3 = @52
    sta COLUP1                 ; 3 = @55
@@ -5886,13 +5886,13 @@ RiverRoomDisplayKernel
    lda #0                     ; 2
    sta PF2                    ; 3 = @50
    iny                        ; 2
-   bmi .nextRiverRoomScanline ; 2³
+   bmi .nextRiverRoomScanline ; 2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextRiverRoomScanline ; 2³
+   bne .nextRiverRoomScanline ; 2ï¿½
    dey                        ; 2
 .nextRiverRoomScanline
    dex                        ; 2
-   bpl .drawRiverRoomDisplayKernel;2³
+   bpl .drawRiverRoomDisplayKernel;2ï¿½
 .drawRiverSection_00
    sta WSYNC
 ;--------------------------------------
@@ -5913,13 +5913,13 @@ RiverRoomDisplayKernel
    ldy tmpSmurfGraphicIdx     ; 3
    stx PF2                    ; 3 = @51
    iny                        ; 2
-   bmi .nextRiverSection_00   ; 2³
+   bmi .nextRiverSection_00   ; 2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextRiverSection_00   ; 2³
+   bne .nextRiverSection_00   ; 2ï¿½
    dey                        ; 2
 .nextRiverSection_00
    dec riverHeightSection_00  ; 5
-   bpl .drawRiverSection_00   ; 2³
+   bpl .drawRiverSection_00   ; 2ï¿½
 .drawRiverSection_01
    sta WSYNC
 ;--------------------------------------
@@ -5940,13 +5940,13 @@ RiverRoomDisplayKernel
    ldy tmpSmurfGraphicIdx     ; 3
    stx PF2                    ; 3 = @51
    iny                        ; 2
-   bmi .nextRiverSection_01   ; 2²
+   bmi .nextRiverSection_01   ; 2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextRiverSection_01   ; 2³
+   bne .nextRiverSection_01   ; 2ï¿½
    dey                        ; 2
 .nextRiverSection_01
    dec riverHeightSection_01  ; 5
-   bpl .drawRiverSection_01   ; 2³
+   bpl .drawRiverSection_01   ; 2ï¿½
 .drawRiverSection_02
    sta WSYNC
 ;--------------------------------------
@@ -5967,13 +5967,13 @@ RiverRoomDisplayKernel
    ldy tmpSmurfGraphicIdx     ; 3
    stx PF2                    ; 3 = @51
    iny                        ; 2
-   bmi .nextRiverSection_02   ; 2³
+   bmi .nextRiverSection_02   ; 2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextRiverSection_02   ; 2³
+   bne .nextRiverSection_02   ; 2ï¿½
    dey                        ; 2
 .nextRiverSection_02
    dec riverHeightSection_02  ; 5
-   bpl .drawRiverSection_02   ; 2³
+   bpl .drawRiverSection_02   ; 2ï¿½
 .drawRiverSection_03
    sta WSYNC
 ;--------------------------------------
@@ -5994,13 +5994,13 @@ RiverRoomDisplayKernel
    ldy tmpSmurfGraphicIdx     ; 3
    stx PF2                    ; 3 = @51
    iny                        ; 2
-   bmi .nextRiverSection_03   ; 2³
+   bmi .nextRiverSection_03   ; 2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextRiverSection_03   ; 2³
+   bne .nextRiverSection_03   ; 2ï¿½
    dey                        ; 2
 .nextRiverSection_03
    dec riverHeightSection_03  ; 5
-   bpl .drawRiverSection_03   ; 2³
+   bpl .drawRiverSection_03   ; 2ï¿½
 .drawRiverSection_04
    sta WSYNC
 ;--------------------------------------
@@ -6021,13 +6021,13 @@ RiverRoomDisplayKernel
    ldy tmpSmurfGraphicIdx     ; 3
    stx PF2                    ; 3 = @51
    iny                        ; 2
-   bmi .nextRiverSection_04   ; 2³
+   bmi .nextRiverSection_04   ; 2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextRiverSection_04   ; 2³
+   bne .nextRiverSection_04   ; 2ï¿½
    dey                        ; 2
 .nextRiverSection_04
    dec riverHeightSection_04  ; 5
-   bpl .drawRiverSection_04   ; 2³
+   bpl .drawRiverSection_04   ; 2ï¿½
 .drawRiverSection_05
    sta WSYNC
 ;--------------------------------------
@@ -6048,13 +6048,13 @@ RiverRoomDisplayKernel
    ldy tmpSmurfGraphicIdx     ; 3
    stx PF2                    ; 3 = @51
    iny                        ; 2
-   bmi .nextRiverSection_05   ; 2³
+   bmi .nextRiverSection_05   ; 2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextRiverSection_05   ; 2³
+   bne .nextRiverSection_05   ; 2ï¿½
    dey                        ; 2
 .nextRiverSection_05
    dec riverHeightSection_05  ; 5
-   bpl .drawRiverSection_05   ; 2³
+   bpl .drawRiverSection_05   ; 2ï¿½
    lda #COLOR_RIVER           ; 2
    sta WSYNC
 ;--------------------------------------
@@ -6085,7 +6085,7 @@ MountainsDisplayKernel SUBROUTINE
    sta COLUBK                 ; 3 = @03
    dey                        ; 2
    cpy #46 - 11               ; 2
-   bne .colorMountainsHorizon ; 2³
+   bne .colorMountainsHorizon ; 2ï¿½
    ldx #8                     ; 2
 .drawMountainTopGraphics
    lda HorizonSunsetColorValues + 16,y;4
@@ -6099,13 +6099,13 @@ MountainsDisplayKernel SUBROUTINE
    lda MountainTopPF2Graphics,x;4
    sta PF2                    ; 3 = @24
    dey                        ; 2
-   bmi .doneDrawMountainTopGraphics;2³
+   bmi .doneDrawMountainTopGraphics;2ï¿½
    tya                        ; 2
    and #3                     ; 2
    cmp #3                     ; 2
-   bne .drawMountainTopGraphics;2³
+   bne .drawMountainTopGraphics;2ï¿½
    dex                        ; 2
-   bpl .drawMountainTopGraphics;2³
+   bpl .drawMountainTopGraphics;2ï¿½
 .doneDrawMountainTopGraphics
    lda #GREEN + 4             ; 2
    sta WSYNC
@@ -6127,17 +6127,17 @@ MountainsDisplayKernel SUBROUTINE
    IF ORIGINAL_ROM
 
       IF COMPILE_REGION = PAL50
-   
+
    .byte $A0,$B1,$A0,$EF,$A0,$A0,$D3,$A0,$99,$BB,$E5,$C5,$A0,$FF,$A0
    .byte $C0,$B2,$E9,$BA,$C5,$B0,$A0,$EE,$AE,$F0,$BA,$B7,$B0,$A0,$A0
 
       ELSE
-   
+
    .byte $CF,$A0,$D3,$A0,$C0,$B2,$A5,$D5,$A0,$CF,$A0,$9E,$A0,$F0,$BA
    .byte $A0,$D5,$A0,$A9,$A0,$85,$A0,$C5,$D2,$A0,$8A,$A0,$A8,$D3,$C8
 
       ENDIF
-   
+
    ENDIF
 
    FILL_BOUNDARY 55, 0
@@ -6167,12 +6167,12 @@ DrawMountainsKernelBackgroundLayers
    lda #GREEN + 4             ; 2
    sta COLUBK                 ; 3 = @16
    inc roomObstacleGraphicIndex;5
-   bmi .skipObstacleDrawBackgroundLayer_00;2³
+   bmi .skipObstacleDrawBackgroundLayer_00;2ï¿½
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @37
-   bne .skipDoneObstacleDrawBackgroundLayer_00;2³
+   bne .skipDoneObstacleDrawBackgroundLayer_00;2ï¿½
    dec roomObstacleGraphicIndex;5
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfBackgroundLayer_00
@@ -6180,13 +6180,13 @@ DrawMountainsKernelBackgroundLayers
    sta COLUBK                 ; 3
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextScanlineBackgroundLayer_00;2³
+   bmi .nextScanlineBackgroundLayer_00;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextScanlineBackgroundLayer_00;2³
+   bne .nextScanlineBackgroundLayer_00;2ï¿½
    dey                        ; 2
 .nextScanlineBackgroundLayer_00
    dex                        ; 2
-   bpl .drawMountainsKernelBackgroundLayer_00;2³
+   bpl .drawMountainsKernelBackgroundLayer_00;2ï¿½
    ldx #12                    ; 2
 .drawMountainsKernelBackgroundLayer_01
    sta WSYNC
@@ -6204,19 +6204,19 @@ DrawMountainsKernelBackgroundLayers
    sta COLUBK                 ; 3 = @35
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @43
-   bne .skipDoneObstacleDrawBackgroundLayer_01;2³
+   bne .skipDoneObstacleDrawBackgroundLayer_01;2ï¿½
    dec roomObstacleGraphicIndex;5
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfBackgroundLayer_01
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextScanlineBackgroundLayer_01;2³
+   bmi .nextScanlineBackgroundLayer_01;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextScanlineBackgroundLayer_01;2³
+   bne .nextScanlineBackgroundLayer_01;2ï¿½
    dey                        ; 2
 .nextScanlineBackgroundLayer_01
    dex                        ; 2
-   bpl .drawMountainsKernelBackgroundLayer_01;2³
+   bpl .drawMountainsKernelBackgroundLayer_01;2ï¿½
    sta WSYNC
 ;--------------------------------------
    inx                        ; 2
@@ -6232,10 +6232,10 @@ DrawMountainsKernelBackgroundLayers
    sta PF0                    ; 3 = @07
    lda MountainHillsPF1Graphics,y;4
    sta PF1                    ; 3 = @14
-   lda MountainHillsPF2Graphics,y;4        
+   lda MountainHillsPF2Graphics,y;4
    sta PF2                    ; 3 = @21
    dey                        ; 2
-   bpl .drawMountainsKernelBackgroundLayer_02;2³
+   bpl .drawMountainsKernelBackgroundLayer_02;2ï¿½
    lda #GREEN + 10            ; 2
    sta WSYNC
 ;--------------------------------------
@@ -6285,13 +6285,13 @@ GargamelLabDisplayKernel
    ldy tmpSmurfGraphicIdx     ; 3
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextDrawSmurfetteScanline;2³
+   bmi .nextDrawSmurfetteScanline;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextDrawSmurfetteScanline;2³
+   bne .nextDrawSmurfetteScanline;2ï¿½
    dey                        ; 2
 .nextDrawSmurfetteScanline
    dex                        ; 2
-   bpl .drawSmurfetteKernel   ; 2³
+   bpl .drawSmurfetteKernel   ; 2ï¿½
    ldx #10                    ; 2
 .drawGargamelLedgeKernel
    sta WSYNC
@@ -6307,13 +6307,13 @@ GargamelLabDisplayKernel
    sta CTRLPF                 ; 3 = @30
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextGargamelLedgeScanline;2³
+   bmi .nextGargamelLedgeScanline;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextGargamelLedgeScanline;2³
+   bne .nextGargamelLedgeScanline;2ï¿½
    dey                        ; 2
 .nextGargamelLedgeScanline
    dex                        ; 2
-   bpl .drawGargamelLedgeKernel;2³
+   bpl .drawGargamelLedgeKernel;2ï¿½
    ldx #BLACK + 8             ; 2
    stx COLUP1                 ; 3
    ldx #19                    ; 2
@@ -6328,21 +6328,21 @@ GargamelLabDisplayKernel
    lda GargamelTablePF2Graphics,x;4
    sta PF2                    ; 3 = @25
    inc roomObstacleGraphicIndex;5
-   bmi .drawSmurfGargamelTableSection_01;2³
+   bmi .drawSmurfGargamelTableSection_01;2ï¿½
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @46
-   bne .getSmurfGraphicIndexGargamelTableSection_01;2³
+   bne .getSmurfGraphicIndexGargamelTableSection_01;2ï¿½
    dec roomObstacleGraphicIndex;5
 .getSmurfGraphicIndexGargamelTableSection_01
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfGargamelTableSection_01
    lda #0                     ; 2
    iny                        ; 2
-   bmi .gargamelTableSection_01;2³
+   bmi .gargamelTableSection_01;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .gargamelTableSection_01;2³
+   bne .gargamelTableSection_01;2ï¿½
    dey                        ; 2
 .gargamelTableSection_01
    sta WSYNC
@@ -6355,21 +6355,21 @@ GargamelLabDisplayKernel
    lda GargamelTableColors,x  ; 4
    sta COLUPF                 ; 3 = @25
    inc roomObstacleGraphicIndex;5
-   bmi .drawSmurfGargamelTableSection_02;2³
+   bmi .drawSmurfGargamelTableSection_02;2ï¿½
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @46
-   bne .getSmurfGraphicIndexGargamelTableSection_02;2³
+   bne .getSmurfGraphicIndexGargamelTableSection_02;2ï¿½
    dec roomObstacleGraphicIndex;5
 .getSmurfGraphicIndexGargamelTableSection_02
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfGargamelTableSection_02
    lda #0                     ; 2
    iny                        ; 2
-   bmi .gargamelTableSection_02;2³
+   bmi .gargamelTableSection_02;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .gargamelTableSection_02;2³
+   bne .gargamelTableSection_02;2ï¿½
    dey                        ; 2
 .gargamelTableSection_02
    sta WSYNC
@@ -6382,21 +6382,21 @@ GargamelLabDisplayKernel
    lda GargamelTableColors,x  ; 4
    sta COLUPF                 ; 3 = @25
    inc roomObstacleGraphicIndex;5
-   bmi .drawSmurfGargamelTableSection_03;2³
+   bmi .drawSmurfGargamelTableSection_03;2ï¿½
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @46
-   bne .getSmurfGraphicIndexGargamelTableSection_03;2³
+   bne .getSmurfGraphicIndexGargamelTableSection_03;2ï¿½
    dec roomObstacleGraphicIndex;5
 .getSmurfGraphicIndexGargamelTableSection_03
    ldy tmpSmurfGraphicIdx     ; 3
 .drawSmurfGargamelTableSection_03
    lda #0                     ; 2
    iny                        ; 2
-   bmi .gargamelTableSection_03;2³
+   bmi .gargamelTableSection_03;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .gargamelTableSection_03;2³
+   bne .gargamelTableSection_03;2ï¿½
    dey                        ; 2
 .gargamelTableSection_03
    sta WSYNC
@@ -6408,25 +6408,25 @@ GargamelLabDisplayKernel
    sta COLUPF                 ; 3 = @18
    SLEEP 2                    ; 2
    inc roomObstacleGraphicIndex;5
-   bmi .drawNextSmurfGargamelTableSection;2³ + 1
+   bmi .drawNextSmurfGargamelTableSection;2ï¿½ + 1
    sty tmpSmurfGraphicIdx     ; 3
    ldy roomObstacleGraphicIndex;3
    lda (roomObstacleGraphicPointer),y;5
    sta GRP1                   ; 3 = @41
-   bne .getSmurfGraphicIndexGargamelTableSection;2³
+   bne .getSmurfGraphicIndexGargamelTableSection;2ï¿½
    dec roomObstacleGraphicIndex;5
 .getSmurfGraphicIndexGargamelTableSection
    ldy tmpSmurfGraphicIdx     ; 3
 .drawNextSmurfGargamelTableSection
    lda #0                     ; 2
    iny                        ; 2
-   bmi .nextGargamelTableScanline;2³
+   bmi .nextGargamelTableScanline;2ï¿½
    lda (smurfGraphicPointer),y; 5
-   bne .nextGargamelTableScanline;2³
+   bne .nextGargamelTableScanline;2ï¿½
    dey                        ; 2
 .nextGargamelTableScanline
    dex                        ; 2
-   bmi DrawGargamelLabFloor   ; 2³
+   bmi DrawGargamelLabFloor   ; 2ï¿½
    jmp .drawGargamelTableKernel;3
 
 DrawGargamelLabFloor
@@ -6450,7 +6450,7 @@ DrawGargamelLabFloor
    ldx #4                     ; 2
 .wait24Cycles
    dex                        ; 2
-   bpl .wait24Cycles          ; 2³
+   bpl .wait24Cycles          ; 2ï¿½
    SLEEP 2                    ; 2
    sta RESP0                  ; 3 = @31
    SLEEP 2                    ; 2
@@ -6480,7 +6480,7 @@ DrawGargamelLabFloor
 .setPlayerGraphicValuesForFloor
    sta GRP0,x                 ; 4
    dex                        ; 2
-   bpl .setPlayerGraphicValuesForFloor;2³
+   bpl .setPlayerGraphicValuesForFloor;2ï¿½
    ldx #15                    ; 2
    lda #HMOVE_R1              ; 2
    sta HMM1                   ; 3
@@ -6495,7 +6495,7 @@ DrawGargamelLabFloor
    SLEEP_12                   ; 12
    SLEEP_6                    ; 6
    dex                        ; 2
-   bpl .colorGargamelLabFloorKernel;2³
+   bpl .colorGargamelLabFloorKernel;2ï¿½
    sta WSYNC
 ;--------------------------------------
    inx                        ; 2         x = 0
@@ -6510,7 +6510,7 @@ DrawGargamelLabFloor
 .clearPlayerGraphicRegisters
    stx GRP0,y                 ; 4
    dey                        ; 2
-   bpl .clearPlayerGraphicRegisters;2³
+   bpl .clearPlayerGraphicRegisters;2ï¿½
    ldy #OVERSCAN_TIME - 20    ; 2
    jmp SetTimerForOverscanTime; 3
 
@@ -6554,15 +6554,15 @@ JumpToCurrentGameStateRoutine_BANK1
    IF ORIGINAL_ROM
 
    .byte $EA,$EA,$EA,$EA
-   
+
       IF COMPILE_REGION = PAL50
-   
+
    .byte $FF,$FF,$D3,$D3
 
       ELSE
-   
+
    .byte $A0,$A2,$80,$A0
-   
+
       ENDIF
 
    ENDIF

@@ -30,7 +30,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1982, ATARI, INC.                                  =
+; = THE ASSEMBLED CODE IS ï¿½ 1982, ATARI, INC.                                  =
 ; =                                                                            =
 ; ==============================================================================
 ;
@@ -61,20 +61,20 @@ TIA_BASE_READ_ADDRESS = $30         ; set the read address base so this runs on
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -133,7 +133,7 @@ FRACTIONAL_MOVEMENT_FAST_HUMAN = <[(256 * 22) / FPS];~22 pixels / sec
 FRACTIONAL_MOVEMENT_SLOW_HUMAN = <[(256 * 14) / FPS];~14 pixels / sec
 
    ELSE
-   
+
 FPS                     = 50        ; ~50 frames per second
 VBLANK_TIME             = 78
 OVERSCAN_TIME           = 72
@@ -175,7 +175,7 @@ BROWN                   = $F0
 NTSC_BROWN              = BROWN
 
    ELSE
-   
+
 LT_RED                  = $20
 LT_BROWN_2              = LT_RED
 BROWN                   = LT_RED
@@ -193,7 +193,7 @@ BLUE                    = $D0
 DK_GREEN_2              = BLUE
 GREEN                   = $E0
 NTSC_BROWN              = $F0
-   
+
    ENDIF
 
 ;===============================================================================
@@ -423,7 +423,7 @@ DONE_EASTER_EGG_STEPS   = %00000111
 ;===============================================================================
    SEG.U variables
    .org $80
-   
+
 currentScreenId         ds 1
 frameCount              ds 1
 secondTimer             ds 1        ; updates ~every second
@@ -779,7 +779,7 @@ CheckETPlayerCollisions
    sec                              ; set carry and shift value right to set
    ror humanAttributes,x            ; RETURN_HOME flag (i.e. D7 = 1)
    bmi CheckIfETOnPitScreen         ; unconditional branch
-   
+
 .checkCollisionObjectInWell
    cpx #$80 | ID_FLOWER
    bcs CheckIfETOnPitScreen         ; branch if E.T. didn't pick up phone piece
@@ -847,19 +847,19 @@ CalculateCurrentPitNumber
    tya
    ora tempPitNumber
    bne .setCurrentPitNumber         ; unconditional branch
-   
+
 SetPitNumberForDiamondPits
    cmp #41                          ; compare E.T.'s horizontal position
    bcs .etNotInPitOne
    lda #ID_LEFT_DIAMOND_PIT         ; show that E.T. is in pit number 1
    bne .setCurrentPitNumber         ; unconditional branch
-   
+
 .etNotInPitOne
    cmp #81                          ; compare E.T.'s horizontal position
    bcc .etNotInPitTwo
    lda #ID_RIGHT_DIAMOND_PIT        ; show that E.T. is in pit number 2
    bne .setCurrentPitNumber         ; unconditional branch
-   
+
 .etNotInPitTwo
    lda etVertPos                    ; get E.T.'s vertical position
    cmp #29
@@ -867,7 +867,7 @@ SetPitNumberForDiamondPits
    bcc .setCurrentPitNumber         ; set E.T. to pit number 0
    lda #ID_LOWER_DIAMOND_PIT        ; show that E.T. is in pit number 3
    bne .setCurrentPitNumber         ; unconditional branch
-   
+
 SetPitNumberForEightPits
    ldx etVertPos                    ; get E.T.'s vertical position
    cpx #19
@@ -895,7 +895,7 @@ SetPitNumberForEightPits
    bcc .combineIndexForPitNumber
    iny                              ; y = 2
    bne .combineIndexForPitNumber    ; unconditional branch
-   
+
 .setCurrentPitNumber
    sta currentPitNumber
    lda #ID_PIT
@@ -999,7 +999,7 @@ CheckForETNeckExtension
    lda frameCount                   ; get the current frame count
    and #3
    bne .jmpToSetPhoneHiddenLocation
-   bvc ExtendedETNeck               ; branch if extending E.T. neck 
+   bvc ExtendedETNeck               ; branch if extending E.T. neck
    bit etPitStatus                  ; check E.T. pit status flags
    bvs .jmpToSetPhoneHiddenLocation ; branch if E.T. levitating
    dec etNeckExtensionValues
@@ -1009,7 +1009,7 @@ CheckForETNeckExtension
    beq .reduceETNeckExtension
    inc etVertPos                    ; move E.T. down 1 pixel
    bne .jmpToSetPhoneHiddenLocation ; unconditional branch
-   
+
 .reduceETNeckExtension
    lda #$00
    sta etNeckExtensionValues        ; clear neck extension value
@@ -1069,7 +1069,7 @@ ReviveFlower
    sec                              ; set carry flag and rotate flower state
    ror flowerState                  ; right to set FLOWER_REVIVED state
    bmi .setPhonePieceHiddenLocation ; unconditional branch
-   
+
 LevitateETOutOfPit
    lda #LEVITATING
    sta etPitStatus                  ; set status to show E.T. levitating
@@ -1101,7 +1101,7 @@ DetermineHiddenPhonePiece
    ora #PHONE_PIECE_SCREEN_LOC      ; set value to show phone hidden on screen
    sta phonePieceAttributes,x
    bne .setHiddenPhonePieceLocation ; unconditional branch
-   
+
 WarpETRight
    lda RightScreenIdTable,y
    jmp .warpETToNewScreen
@@ -1126,7 +1126,7 @@ ClearElliottReturnHomeFlag
    clc                              ; clear carry and rotate Elliott attributes
    ror elliottAttributes            ; right to clear RETURN_HOME flag
    bpl SetPhonePieceHiddenLocation  ; unconditional branch
-   
+
 CallMothership
    ldx currentObjectId              ; get the current object id
    bmi .checkToStartShipLandingTimer; branch if current object returning home
@@ -1152,7 +1152,7 @@ CallMothership
    sta elliottAttributes            ; don't move
    sta scientistAttributes
    bne SetPhonePieceHiddenLocation  ; unconditional branch
-   
+
 ReturnCurrentHumanHome
    ldx currentObjectId              ; get the current object id
    bmi SetPhonePieceHiddenLocation  ; branch if human set to return home
@@ -1160,7 +1160,7 @@ ReturnCurrentHumanHome
    sec                              ; set carry and rotate value right to set
    ror humanAttributes,x            ; RETURN_HOME flag (i.e. D7 = 1)
    bmi SetPhonePieceHiddenLocation  ; unconditional branch
-   
+
 EatCandyPiece
    lda heldCandyPieces              ; get number of candy pieces held by E.T.
    sec
@@ -1377,7 +1377,7 @@ CheckToPlayETFallingSound
    lsr                              ; divide value by 2 to set frequency
    sta AUDF1
    bne .donePlayingSoundChannel1    ; unconditional branch
-   
+
 CheckToPlayETLevitationSound
    bvc CheckToPlayNeckExtensionSound; branch if E.T. not levitating
    lda etEnergy + 1
@@ -1591,9 +1591,9 @@ MoveET
    bpl .setCurrentScreenId          ; branch if E.T. not running
    lda etMotionValues               ; get E.T. motion values
    and #<(~ET_CARRIED_BY_SCIENTIST)
-   sta etMotionValues               ; release E.T. from Scientist 
+   sta etMotionValues               ; release E.T. from Scientist
    bne .jmpToCheckToMoveET          ; unconditional branch
-   
+
 .setCurrentScreenId
    sta currentScreenId              ; set the current screen id
    jsr SetCurrentScreenData
@@ -1681,13 +1681,13 @@ ETFallingInPit
    bcs ETReachedPitBottom
    inc etVertPos
    bne .jmpToDetermineObjectToMove  ; unconditional branch
-   
+
 ETReachedPitBottom SUBROUTINE
    lda #PLAY_SOUND_CHANNEL0 | $1F
    sta soundDataChannel0
    ldx #FALLING_IN_PENALTY >> 8     ; reduce energy by 296 units for falling
-   ldy #FALLING_IN_PENALTY & $FF    ; into pit 
-   jsr DecrementETEnergy            
+   ldy #FALLING_IN_PENALTY & $FF    ; into pit
+   jsr DecrementETEnergy
    lda #IN_PIT_BOTTOM
    sta etPitStatus                  ; set flag to show E.T. at pit bottom
 .jmpToDetermineObjectToMove
@@ -1854,7 +1854,7 @@ CheckToLandMothership
    sec                              ; set carry and rotate Mothership status
    rol mothershipStatus             ; left to set MOTHERSHIP_LEAVING status
    bne .playMothershipSound         ; unconditional branch
-   
+
 .etGoingHome
    dec etVertPos                    ; move E.T. up 1 pixel
    dec currentObjectVertPos         ; move current object up 1 pixel
@@ -2182,7 +2182,7 @@ SetETGraphicPointers
    lda ETNeckExtensionLSBTable_B,x
    sta etGraphicPointers1
    bne .setETSpritePtrMSB           ; unconditional branch
-   
+
 .setNormalETGraphicPointers
    lda #18 / 2
    sta etHeight
@@ -2207,7 +2207,7 @@ SetETGraphicPointers
    lda ETAnimationLSBTable_B,x
    sta etGraphicPointers1
    bne .setETSpritePtrMSB           ; unconditional branch
-   
+
 .setToETRestSpritePtrs
    lda #<ETWalkSprite_A0
    sta etGraphicPointers0
@@ -2392,7 +2392,7 @@ CalculatePowerZonePointer
    bcs .multi8                      ; branch if odd screen id (EIGHT_PITS, FOUR_PITS, WASH)
    lsr                              ; divide value by 2
    bpl .setPowerZonePointerLSB      ; unconditional branch
-   
+
 .multi8
    asl
    asl
@@ -2560,7 +2560,7 @@ MoveHumanTowardTarget
    bcs .moveObjectUpTowardTarget
    inc objectVertPos,x              ; move object down
    bne .checkTargetHorizPosition    ; unconditional branch
-   
+
 .moveObjectUpTowardTarget
    dec objectVertPos,x              ; move object up
 .checkTargetHorizPosition
@@ -2578,7 +2578,7 @@ MoveHumanTowardTarget
 
 PhonePiecePitVertPosition
    .byte 19,32,32,44,11,32,32,52,21,21,45,45,15,15,47,47
-   
+
 PhonePiecePitHorizPosition
    .byte 62,25,101,62,62,30,95,62,25,100,28,96,30,95,30,95
    .byte 0,0,0,0,0,10,9,11,0,6,5,7,0,14,13,15
@@ -2600,25 +2600,25 @@ PF2GraphicPointersLSB
 
 LeftScreenIdHorizPosTable
    .byte 119,119,119,119,68,68
-   
+
 RightScreenIdHorizPosTable
    .byte 1,1,1,1,58,58
-   
+
 UpperScreenIdHorizPosTable
    .byte 0,117,0,4,0,0
-   
+
 LowerScreenIdHorizPosTable
    .byte 0,4,0,117,0,0
-   
+
 LeftScreenIdVertPosTable
    .byte 0,0,0,0,4,53
-   
+
 RightScreenIdVertPosTable
    .byte 0,0,0,0,4,53
-   
+
 UpperScreenIdVertPosTable
    .byte 8,36,57,36,8,57
-   
+
 LowerScreenIdVertPosTable
    .byte 2,28,50,28,2,50
 
@@ -2642,12 +2642,12 @@ HumanTargetHorizPosTable
    .byte FBI_AGENT_HORIZ_TARGET
    .byte ELLIOTT_HORIZ_TARGET
    .byte SCIENTIST_HORIZ_TARGET
-   
+
 HumanTargetVertPosTable
    .byte FBI_AGENT_VERT_TARGET
    .byte ELLIOTT_VERT_TARGET
    .byte SCIENTIST_VERT_TARGET
-   
+
 HumanVerticalMaxTable
    .byte FBI_AGENT_VERT_MAX
    .byte ELLIOTT_VERT_MAX
@@ -2722,29 +2722,29 @@ SpriteHeightValues
 
 HumanAnimationRate
    .byte 3, 3, 3
-   
+
 ETAnimationLSBTable_A
    .byte <ETWalkSprite_A0, <ETWalkSprite_A1, <ETWalkSprite_A2
-   
+
 ETAnimationLSBTable_B
    .byte <ETWalkSprite_B0, <ETWalkSprite_B1, <ETWalkSprite_B2
-   
+
 HumanDirectionTable
    .byte NO_MOVE, MOVE_LEFT>>4, MOVE_UP>>4, MOVE_RIGHT>>4, MOVE_UP>>4, MOVE_DOWN>>4
    .byte P0_NO_MOVE, P0_NO_MOVE, MOVE_RIGHT>>4, NO_MOVE, MOVE_LEFT>>4, MOVE_UP>>4
    .byte MOVE_UP>>4, MOVE_DOWN>>4, P0_NO_MOVE, P0_NO_MOVE
-   
+
    .byte MOVE_UP>>4, MOVE_RIGHT>>4, NO_MOVE, MOVE_LEFT>>4, MOVE_UP>>4, MOVE_DOWN>>4
    .byte P0_NO_MOVE, P0_NO_MOVE, MOVE_LEFT>>4, MOVE_DOWN>>4, MOVE_RIGHT>>4, NO_MOVE
    .byte MOVE_UP>>4, MOVE_DOWN>>4, P0_NO_MOVE, P0_NO_MOVE
-   
+
    .byte MOVE_UP>>4, MOVE_RIGHT>>4, MOVE_DOWN>>4, MOVE_LEFT>>4, NO_MOVE
    .byte MOVE_DOWN>>4, P0_NO_MOVE, P0_NO_MOVE, MOVE_UP>>4, MOVE_LEFT>>4
    .byte MOVE_DOWN>>4, MOVE_RIGHT>>4, MOVE_UP>>4, NO_MOVE, P0_NO_MOVE, P0_NO_MOVE
-   
+
 ETFrameDelayTable
    .byte FRACTIONAL_MOVEMENT_ET_WALKING, FRACTIONAL_MOVEMENT_ET_RUNNING
-   
+
 PowerZoneJumpTable
    .word SetPhonePieceHiddenLocation - 1
    .word WarpETLeft - 1
@@ -2759,15 +2759,15 @@ PowerZoneJumpTable
    .word SetPhonePieceHiddenLocation - 1
    .word LevitateETOutOfPit - 1
    .word ReviveFlower - 1
-   
+
 ETNeckExtensionLSBTable_A
    .byte <ETExtensionSprite_A0, <ETExtensionSprite_A1
    .byte <ETExtensionSprite_A2, <ETExtensionSprite_A3
-   
+
 ETNeckExtensionLSBTable_B
    .byte <ETExtensionSprite_B0, <ETExtensionSprite_B1
    .byte <ETExtensionSprite_B2, <ETExtensionSprite_B3
-   
+
 CandyStatusMaskTable
    .byte ~FOUR_DIAMOND_PITS_CANDY
    .byte ~EIGHT_PITS_CANDY
@@ -2779,10 +2779,10 @@ CandyStatusValueTable
    .byte EIGHT_PITS_CANDY
    .byte ARROW_PITS_CANDY
    .byte WIDE_DIAMOND_PITS_CANDY
-   
+
 ExtraCandyReductionTable
    .byte 4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0
-   
+
 ETNeckExtensionHeightTable
    .byte 10, 11, 12, 13
 
@@ -2845,9 +2845,9 @@ ThemeMusicFrequencyTable
    .byte LEAD_F3_SHARP,LEAD_G3_SHARP,LEAD_G3_SHARP,LEAD_G3_SHARP,LEAD_H3
    .byte LEAD_C4_SHARP,LEAD_A3,LEAD_E3_2,LEAD_E3_2,LEAD_E3_2,LEAD_E3_2
    .byte LEAD_E3_2
-   
+
    BOUNDARY 0
-   
+
 PowerZoneMap
    .byte ID_WARP_UP_ZONE << 4 | ID_RETURN_HOME_ZONE
    .byte ID_WARP_UP_ZONE << 4 | ID_CALL_SHIP_ZONE
@@ -2857,7 +2857,7 @@ PowerZoneMap
    .byte ID_CALL_ELLIOTT_ZONE << 4 | ID_WARP_LEFT_ZONE
    .byte ID_BLANK_ZONE
    .byte ID_EAT_CANDY_ZONE << 4 | ID_WARP_LEFT_ZONE
-   
+
    .byte ID_LANDING_ZONE << 4 | ID_EAT_CANDY_ZONE
    .byte ID_RETURN_HOME_ZONE << 4 | ID_WARP_DOWN_ZONE
    .byte ID_WARP_LEFT_ZONE << 4 | ID_BLANK_ZONE
@@ -2866,7 +2866,7 @@ PowerZoneMap
    .byte ID_WARP_DOWN_ZONE << 4 | ID_CALL_ELLIOTT_ZONE
    .byte ID_FIND_PHONE_ZONE << 4 | ID_CALL_SHIP_ZONE
    .byte ID_WARP_LEFT_ZONE << 4 | ID_WARP_UP_ZONE
-   
+
    .byte ID_LANDING_ZONE << 4 | ID_BLANK_ZONE
    .byte ID_WARP_RIGHT_ZONE << 4 | ID_WARP_LEFT_ZONE
    .byte ID_WARP_UP_ZONE << 4 | ID_WARP_LEFT_ZONE
@@ -2875,7 +2875,7 @@ PowerZoneMap
    .byte ID_WARP_DOWN_ZONE << 4 | ID_FIND_PHONE_ZONE
    .byte ID_WARP_RIGHT_ZONE << 4 | ID_RETURN_HOME_ZONE
    .byte ID_CALL_SHIP_ZONE << 4 | ID_CALL_ELLIOTT_ZONE
-   
+
    .byte ID_WARP_DOWN_ZONE << 4 | ID_WARP_UP_ZONE
    .byte ID_EAT_CANDY_ZONE << 4 | ID_FIND_PHONE_ZONE
    .byte ID_BLANK_ZONE
@@ -2884,7 +2884,7 @@ PowerZoneMap
    .byte ID_WARP_DOWN_ZONE << 4 | ID_CALL_ELLIOTT_ZONE
    .byte ID_CALL_SHIP_ZONE << 4 | ID_WARP_UP_ZONE
    .byte ID_WARP_LEFT_ZONE << 4 | ID_WARP_RIGHT_ZONE
-   
+
    .byte ID_EAT_CANDY_ZONE << 4 | ID_CALL_ELLIOTT_ZONE
    .byte ID_CALL_SHIP_ZONE << 4 | ID_WARP_RIGHT_ZONE
    .byte ID_FIND_PHONE_ZONE << 4 | ID_WARP_UP_ZONE
@@ -2893,7 +2893,7 @@ PowerZoneMap
    .byte ID_WARP_DOWN_ZONE << 4 | ID_WARP_LEFT_ZONE
    .byte ID_BLANK_ZONE << 4 | ID_WARP_DOWN_ZONE
    .byte ID_WARP_RIGHT_ZONE << 4 | ID_BLANK_ZONE
-   
+
    .byte ID_WARP_UP_ZONE << 4 | ID_WARP_LEFT_ZONE
    .byte ID_LANDING_ZONE << 4 | ID_WARP_RIGHT_ZONE
    .byte ID_WARP_UP_ZONE << 4 | ID_WARP_LEFT_ZONE
@@ -2902,7 +2902,7 @@ PowerZoneMap
    .byte ID_BLANK_ZONE << 4 | ID_RETURN_HOME_ZONE
    .byte ID_FIND_PHONE_ZONE << 4 | ID_WARP_DOWN_ZONE
    .byte ID_WARP_DOWN_ZONE << 4 | ID_WARP_RIGHT_ZONE
-   
+
    .byte ID_EAT_CANDY_ZONE << 4 | ID_WARP_DOWN_ZONE
    .byte ID_CALL_ELLIOTT_ZONE << 4 | ID_WARP_LEFT_ZONE
    .byte ID_FIND_PHONE_ZONE << 4 | ID_WARP_RIGHT_ZONE
@@ -2911,7 +2911,7 @@ PowerZoneMap
    .byte ID_WARP_DOWN_ZONE << 4 | ID_LANDING_ZONE
    .byte ID_WARP_UP_ZONE << 4 | ID_CALL_SHIP_ZONE
    .byte ID_BLANK_ZONE << 4 | ID_RETURN_HOME_ZONE
-   
+
    .byte ID_WARP_LEFT_ZONE << 4 | ID_EAT_CANDY_ZONE
    .byte ID_RETURN_HOME_ZONE << 4 | ID_WARP_UP_ZONE
    .byte ID_BLANK_ZONE << 4 | ID_WARP_UP_ZONE
@@ -2920,7 +2920,7 @@ PowerZoneMap
    .byte ID_BLANK_ZONE << 4 | ID_WARP_DOWN_ZONE
    .byte ID_CALL_ELLIOTT_ZONE << 4 | ID_CALL_SHIP_ZONE
    .byte ID_WARP_RIGHT_ZONE << 4 | ID_WARP_RIGHT_ZONE
-   
+
    .byte ID_WARP_RIGHT_ZONE << 4 | ID_LANDING_ZONE
    .byte ID_RETURN_HOME_ZONE << 4 | ID_WARP_UP_ZONE
    .byte ID_BLANK_ZONE << 4 | ID_WARP_DOWN_ZONE
@@ -2929,7 +2929,7 @@ PowerZoneMap
    .byte ID_WARP_DOWN_ZONE << 4 | ID_FIND_PHONE_ZONE
    .byte ID_WARP_RIGHT_ZONE << 4 | ID_EAT_CANDY_ZONE
    .byte ID_CALL_SHIP_ZONE << 4 | ID_WARP_LEFT_ZONE
-   
+
    .byte ID_EAT_CANDY_ZONE << 4 | ID_WARP_LEFT_ZONE
    .byte ID_WARP_RIGHT_ZONE << 4 | ID_CALL_SHIP_ZONE
    .byte ID_WARP_LEFT_ZONE << 4 | ID_WARP_RIGHT_ZONE
@@ -2938,7 +2938,7 @@ PowerZoneMap
    .byte ID_BLANK_ZONE << 4 | ID_WARP_UP_ZONE
    .byte ID_CALL_ELLIOTT_ZONE << 4 | ID_BLANK_ZONE
    .byte ID_FIND_PHONE_ZONE << 4 | ID_WARP_UP_ZONE
-   
+
    .byte ID_CALL_SHIP_ZONE << 4 | ID_EAT_CANDY_ZONE
    .byte ID_WARP_DOWN_ZONE << 4 | ID_BLANK_ZONE
    .byte ID_WARP_UP_ZONE << 4 | ID_FIND_PHONE_ZONE
@@ -2947,7 +2947,7 @@ PowerZoneMap
    .byte ID_WARP_LEFT_ZONE << 4 | ID_WARP_DOWN_ZONE
    .byte ID_WARP_LEFT_ZONE << 4 | ID_RETURN_HOME_ZONE
    .byte ID_LANDING_ZONE << 4 | ID_WARP_RIGHT_ZONE
-   
+
    .byte ID_WARP_LEFT_ZONE << 4 | ID_WARP_UP_ZONE
    .byte ID_LANDING_ZONE << 4 | ID_WARP_DOWN_ZONE
    .byte ID_RETURN_HOME_ZONE << 4 | ID_WARP_LEFT_ZONE
@@ -2956,7 +2956,7 @@ PowerZoneMap
    .byte ID_EAT_CANDY_ZONE << 4 | ID_BLANK_ZONE
    .byte ID_WARP_DOWN_ZONE << 4 | ID_WARP_RIGHT_ZONE
    .byte ID_FIND_PHONE_ZONE << 4 | ID_CALL_SHIP_ZONE
-   
+
    .byte ID_WARP_DOWN_ZONE << 4 | ID_WARP_RIGHT_ZONE
    .byte ID_WARP_LEFT_ZONE << 4 | ID_WARP_DOWN_ZONE
    .byte ID_FIND_PHONE_ZONE << 4 | ID_WARP_UP_ZONE
@@ -2965,7 +2965,7 @@ PowerZoneMap
    .byte ID_WARP_RIGHT_ZONE << 4 | ID_BLANK_ZONE
    .byte ID_LANDING_ZONE << 4 | ID_RETURN_HOME_ZONE
    .byte ID_CALL_ELLIOTT_ZONE << 4 | ID_BLANK_ZONE
-   
+
    .byte ID_WARP_RIGHT_ZONE << 4 | ID_WARP_UP_ZONE
    .byte ID_CALL_ELLIOTT_ZONE << 4 | ID_WARP_DOWN_ZONE
    .byte ID_WARP_UP_ZONE << 4 | ID_WARP_RIGHT_ZONE
@@ -2974,7 +2974,7 @@ PowerZoneMap
    .byte ID_EAT_CANDY_ZONE << 4 | ID_CALL_SHIP_ZONE
    .byte ID_RETURN_HOME_ZONE << 4 | ID_LANDING_ZONE
    .byte ID_WARP_LEFT_ZONE << 4 | ID_BLANK_ZONE
-   
+
    .byte ID_WARP_DOWN_ZONE << 4 | ID_WARP_UP_ZONE
    .byte ID_BLANK_ZONE << 4 | ID_WARP_RIGHT_ZONE
    .byte ID_CALL_SHIP_ZONE << 4 | ID_RETURN_HOME_ZONE
@@ -2983,7 +2983,7 @@ PowerZoneMap
    .byte ID_WARP_DOWN_ZONE << 4 | ID_WARP_UP_ZONE
    .byte ID_WARP_LEFT_ZONE << 4 | ID_WARP_LEFT_ZONE
    .byte ID_EAT_CANDY_ZONE << 4 | ID_LANDING_ZONE
-   
+
    .byte ID_WARP_RIGHT_ZONE << 4 | ID_WARP_DOWN_ZONE
    .byte ID_CALL_ELLIOTT_ZONE << 4 | ID_WARP_UP_ZONE
    .byte ID_WARP_DOWN_ZONE << 4 | ID_WARP_UP_ZONE
@@ -3066,16 +3066,16 @@ DecrementETEnergy
    rts
 
    IF COMPILE_REGION = NTSC
-   
+
       .org BANK0TOP + 4096 - 6, 0
-      
+
    ELSE
-   
+
       .org BANK0TOP + 4096 - 8, 0
       .byte 0, -1
-      
+
    ENDIF
-   
+
    .word Start
    .word Start
    .word Start
@@ -3094,7 +3094,7 @@ BANK1Start
 
 .checkForEndGameKernel
    cpx #64                    ; 2
-   bcc .skipObjectDraw        ; 2³
+   bcc .skipObjectDraw        ; 2ï¿½
    jmp ScoreKernel            ; 3
 
 .skipObjectDraw
@@ -3127,7 +3127,7 @@ JumpIntoGameKernel
    sty GRP1                   ; 3         draw ET graphic data
    sta WSYNC
 ;--------------------------------------
-   bcs .checkForEndGameKernel ; 2³        skip object draw if greater
+   bcs .checkForEndGameKernel ; 2ï¿½        skip object draw if greater
    tay                        ; 2
    lda (objectGraphicPtrs_0),y; 5
    sta GRP0                   ; 3 = @12
@@ -3145,7 +3145,7 @@ JumpIntoGameKernel
    sec                        ; 2
    sbc etVertPos              ; 3
    cmp etHeight               ; 3
-   bcs .skipETDraw            ; 2³
+   bcs .skipETDraw            ; 2ï¿½
    tay                        ; 2
    lda (etGraphicPointers1),y ; 5
    sta nextETGraphicData      ; 3
@@ -3178,7 +3178,7 @@ TitleScreenKernel
 ;--------------------------------------
    inx                        ; 2
    cpx #16                    ; 2
-   bcc .waitLoop              ; 2³
+   bcc .waitLoop              ; 2ï¿½
    lda #LT_RED + 4            ; 2
    sta COLUP0                 ; 3 = @11
    sta COLUP1                 ; 3 = @14
@@ -3197,7 +3197,7 @@ TitleScreenKernel
    lda ETTitle_T,x            ; 4
    sta GRP1                   ; 3 = @14
    cpx #2                     ; 2
-   bcs .nextETTileScanline    ; 2³
+   bcs .nextETTileScanline    ; 2ï¿½
    lda #$0F                   ; 2         enable missiles for dots in E.T.
    sta ENAM0                  ; 3 = @23
    sta ENAM1                  ; 3 = @26
@@ -3207,7 +3207,7 @@ TitleScreenKernel
    dex                        ; 2
    sta WSYNC
 ;--------------------------------------
-   bpl .drawETTitle           ; 2³
+   bpl .drawETTitle           ; 2ï¿½
    lda #0                     ; 2
    sta GRP0                   ; 3 = @07
    sta GRP1                   ; 3 = @10
@@ -3219,7 +3219,7 @@ TitleScreenKernel
 ;--------------------------------------
    inx                        ; 2
    cpx #64                    ; 2
-   bcc .upperTitleWaitLoop    ; 2³
+   bcc .upperTitleWaitLoop    ; 2ï¿½
    sta WSYNC
 ;--------------------------------------
    sta HMOVE                  ; 3
@@ -3277,7 +3277,7 @@ TitleScreenKernel
 ;--------------------------------------
    inx                        ; 2
    cpx #128                   ; 2
-   bcc .lowerTitleWaitLoop    ; 2³
+   bcc .lowerTitleWaitLoop    ; 2ï¿½
 ScoreKernel
    sta WSYNC
 ;--------------------------------------
@@ -3295,12 +3295,12 @@ ScoreKernel
 ;--------------------------------------
    lda frameCount             ; 3         get the current frame count
    and #7                     ; 2
-   bne .skipFlowerAnimation   ; 2³
+   bne .skipFlowerAnimation   ; 2ï¿½
    lda flowerState            ; 3         get flower state
-   bpl .skipFlowerAnimation   ; 2³        branch if flower not revived
+   bpl .skipFlowerAnimation   ; 2ï¿½        branch if flower not revived
    and #<(~FLOWER_REVIVED)    ; 2
    cmp #FLOWER_REVIVE_ANIMATION;2
-   bcs .skipFlowerAnimation   ; 2³
+   bcs .skipFlowerAnimation   ; 2ï¿½
    adc #FLOWER_REVIVED | (1 * 16);2       increment flower animation frame
    sta flowerState            ; 3
    lda #PLAY_SOUND_CHANNEL0 | $03;2
@@ -3351,9 +3351,9 @@ ScoreKernel
    sta tempNumberFonts + 2    ; 3
    lda currentScreenId        ; 3         get the current screen id
    cmp #ID_TITLE_SCREEN       ; 2
-   bne .setToShowScoreOrEnergy; 2³
+   bne .setToShowScoreOrEnergy; 2ï¿½
    bit gameState              ; 3         check the game state
-   bmi .setToShowScoreOrEnergy; 2³        branch if player loss the game
+   bmi .setToShowScoreOrEnergy; 2ï¿½        branch if player loss the game
    lda #>Copyright_0          ; 2         set to show copyright information
    bne .setGraphicPointersMSB ; 3         unconditional branch
 
@@ -3370,7 +3370,7 @@ ScoreKernel
 ;--------------------------------------
    lda currentScreenId        ; 3         get the current screen id
    cmp #ID_ET_HOME            ; 2
-   bcc .setGraphicPointers    ; 2³        branch if not showing the score
+   bcc .setGraphicPointers    ; 2ï¿½        branch if not showing the score
    lda playerScore            ; 3
    sta tempNumberFonts        ; 3
    lda playerScore + 1        ; 3
@@ -3384,7 +3384,7 @@ ScoreKernel
    sta COLUBK                 ; 3 = @05
    lda tempNumberFonts        ; 3
    and #$F0                   ; 2
-   bne .setGraphicsPointerLSB ; 2³
+   bne .setGraphicsPointerLSB ; 2ï¿½
    lda #<[Blank * 2]          ; 2
 .setGraphicsPointerLSB
    lsr                        ; 2
@@ -3411,7 +3411,7 @@ ScoreKernel
 ;--------------------------------------
    lda #SHOW_HSW_INITIALS_VALUE; 2
    cmp programmerInitialFlag  ; 3
-   bne .skipShowHSWInitials   ; 2³
+   bne .skipShowHSWInitials   ; 2ï¿½
    lda #[(<HSWInitials / 8) << 4] | [(<HSWInitials + 8) / 8]; 2
    sta tempNumberFonts + 2    ; 3
 .skipShowHSWInitials
@@ -3430,28 +3430,28 @@ ScoreKernel
    ldy #<Blank                ; 2
    ldx currentScreenId        ; 3         get the current screen id
    cpx #ID_ET_HOME            ; 2
-   bcc .suppressZeroDigits    ; 2³        branch if not ET_HOME or TITLE_SCREEN
+   bcc .suppressZeroDigits    ; 2ï¿½        branch if not ET_HOME or TITLE_SCREEN
    cpy graphicPointers        ; 3
-   bne .checkToSetCopyrightInfo; 2³
+   bne .checkToSetCopyrightInfo; 2ï¿½
    lda graphicPointers + 2    ; 3
-   bne .checkToSetCopyrightInfo; 2³
+   bne .checkToSetCopyrightInfo; 2ï¿½
    sty graphicPointers + 2    ; 3
 .suppressZeroDigits
    lda graphicPointers + 4    ; 3
-   bne .checkToSetCopyrightInfo; 2³
+   bne .checkToSetCopyrightInfo; 2ï¿½
    sty graphicPointers + 4    ; 3
    lda graphicPointers + 6    ; 3
-   bne .checkToSetCopyrightInfo; 2³
+   bne .checkToSetCopyrightInfo; 2ï¿½
    sty graphicPointers + 6    ; 3
    lda graphicPointers + 8    ; 3
-   bne .checkToSetCopyrightInfo; 2³
+   bne .checkToSetCopyrightInfo; 2ï¿½
    sty graphicPointers + 8    ; 3
 .checkToSetCopyrightInfo
    sta WSYNC
 ;--------------------------------------
    lda #>Copyright_0          ; 2
    cmp graphicPointers + 1    ; 3
-   bne .skipSetCopyrightInfo  ; 2³
+   bne .skipSetCopyrightInfo  ; 2ï¿½
    lda #<BlankIcon            ; 2
    sta graphicPointers        ; 3
    lda #<Copyright_0          ; 2
@@ -3472,7 +3472,7 @@ ScoreKernel
 ;--------------------------------------
    lda #SELECT_MASK           ; 2
    and SWCHB                  ; 4   check console switch value
-   bne Overscan               ; 2³  branch if SELECT not pressed
+   bne Overscan               ; 2ï¿½  branch if SELECT not pressed
    lda #SET_STARTING_SCREEN | ID_TITLE_SCREEN
    sta startingScreenId
    sta gameState
@@ -3486,23 +3486,23 @@ Overscan
    sta WSYNC
    ldx #$0F
    stx VBLANK                       ; disable TIA (D1 = 1)
-   
+
    IF COMPILE_REGION = NTSC
-   
+
       jsr Waste12Cycles
       jsr Waste12Cycles
-      
+
    ELSE
-   
+
       nop                           ; waste 12 cycles
       nop
       nop
       nop
       nop
       nop
-      
+
    ENDIF
-   
+
    ldx #OVERSCAN_TIME
    stx TIM64T                       ; set timer for overscan period
    ror SWCHB                        ; shift RESET into carry
@@ -3560,7 +3560,7 @@ PlayHumanWalkingSound
    bcs .divideDistanceRangeBy2
    lsr
    bpl .addWithHorizDistance        ; unconditional branch
-   
+
 .divideDistanceRangeBy2
    lsr humanETHorizDistRange
 .addWithHorizDistance
@@ -3569,7 +3569,7 @@ PlayHumanWalkingSound
    bpl .determineHumanSoundVolume
    lda #0
    beq .setHumanWalkingVolume       ; unconditional branch
-   
+
 .determineHumanSoundVolume
    lsr
    lsr
@@ -3589,7 +3589,7 @@ CheckToPlaySoundForChannel0
    lda #PLAY_SOUND_CHANNEL0 | $00   ; turn off channel 0 sound next frame
    sta soundDataChannel0
    bne .doneCheckToPlaySoundChannel0; unconditional branch
-   
+
 .setToDontSetChannel0Data
    lsr soundDataChannel0            ; shift value right (i.e. D7 = 0)
 .doneCheckToPlaySoundChannel0
@@ -3624,7 +3624,7 @@ DoETHomeProcessing
    bpl .moveElliottLeft
    inc currentObjectHorizPos        ; move Elliott right
    bne .checkToChangeElliottDirection; unconditional branch
-   
+
 .moveElliottLeft
    dec currentObjectHorizPos        ; move Elliott left
 .checkToChangeElliottDirection
@@ -3893,7 +3893,7 @@ SixDigitKernel
    sty GRP1                   ; 3 = @40
    sty GRP0                   ; 3 = @43
    dec loopCount              ; 5
-   bpl .sixDigitLoop          ; 2³
+   bpl .sixDigitLoop          ; 2ï¿½
    lda #0                     ; 2
    sta WSYNC
 ;--------------------------------------
@@ -3930,15 +3930,15 @@ StatusKernel
 ;--------------------------------------
    ldx #NUM_PHONE_PIECES      ; 2
    bit h_phonePieceAttribute  ; 3         check H phone piece value
-   bpl .checkForCarringSPiece ; 2³        branch if E.T. not taken H piece
+   bpl .checkForCarringSPiece ; 2ï¿½        branch if E.T. not taken H piece
    dex                        ; 2
 .checkForCarringSPiece
    bit s_phonePieceAttribute  ; 3         check S phone piece value
-   bpl .checkForCarringWPiece ; 2³        branch if E.T. not taken S piece
+   bpl .checkForCarringWPiece ; 2ï¿½        branch if E.T. not taken S piece
    dex                        ; 2
 .checkForCarringWPiece
    bit w_phonePieceAttribute  ; 3         check W phone piece value
-   bpl .setTelephoneIconLSB   ; 2³        branch if E.T. not taken W piece
+   bpl .setTelephoneIconLSB   ; 2ï¿½        branch if E.T. not taken W piece
    dex                        ; 2
 .setTelephoneIconLSB
    lda TelephoneIconLSBPtrs,x ; 4
@@ -3948,14 +3948,14 @@ StatusKernel
    lda #$00                   ; 2
    ldy currentScreenId        ; 3         get the current screen id
    cpy #ID_ET_HOME            ; 2
-   bcc .setupToDrawStatusIcons; 2³
+   bcc .setupToDrawStatusIcons; 2ï¿½
    sta graphicPointers + 2    ; 3
    sta graphicPointers + 4    ; 3
-   bne .setupToDrawGameSelection; 2³
+   bne .setupToDrawGameSelection; 2ï¿½
    ldx #<EatCandyIcon_0       ; 2
    lda collectedCandyScoring  ; 3         get collected candy scoring value
    ror                        ; 2         shift D0 to carry and branch if
-   bcc .setEatingCandyLSB     ; 2³        showing open eating candy animation
+   bcc .setEatingCandyLSB     ; 2ï¿½        showing open eating candy animation
    ldx #<EatCandyIcon_1       ; 2
 .setEatingCandyLSB
    stx graphicPointers        ; 3
@@ -3973,13 +3973,13 @@ StatusKernel
    sta WSYNC
 ;--------------------------------------
    bit mothershipStatus       ; 3         check Mothership status
-   bpl .checkToDrawArtistInitials; 2³        branch if Mothership not present
+   bpl .checkToDrawArtistInitials; 2ï¿½        branch if Mothership not present
    lda #$00                   ; 2
    sta graphicPointers + 2    ; 3
    sta graphicPointers + 4    ; 3
 .checkToDrawArtistInitials
    lda artistInitialFlag      ; 3
-   beq .prepareToDrawIndicators; 2³
+   beq .prepareToDrawIndicators; 2ï¿½
    lda #<ArtistInitials       ; 2
    sta graphicPointers + 2    ; 3
 .prepareToDrawIndicators
@@ -4008,7 +4008,7 @@ StatusKernel
    sta COLUP1                 ; 3 = @54   color timer icon
    sty GRP1                   ; 3 = @57
    dec loopCount              ; 5
-   bpl .drawStatusKernelLoop  ; 2³
+   bpl .drawStatusKernelLoop  ; 2ï¿½
    sta WSYNC
 ;--------------------------------------
    lda #0                     ; 2
@@ -4034,7 +4034,7 @@ StatusKernel
    tay                        ; 2
 .coarsePositionET
    dey                        ; 2
-   bpl .coarsePositionET      ; 2³
+   bpl .coarsePositionET      ; 2ï¿½
    sta RESP0,x                ; 4
    sta WSYNC
 ;--------------------------------------
@@ -4042,23 +4042,23 @@ StatusKernel
    lda #MSBL_SIZE2 | PF_REFLECT; 2
    ldx currentScreenId        ; 3         get the current screen id
    cpx #ID_WASHINGTON_DC      ; 2
-   bne .setPlayfieldPriority  ; 2³
+   bne .setPlayfieldPriority  ; 2ï¿½
    lda #MSBL_SIZE2 | PF_PRIORITY | PF_REFLECT; 2
 .setPlayfieldPriority
    sta CTRLPF                 ; 3
    ldx #$FF                   ; 2
    bit SWCHA                  ; 4         check joystick values
-   bpl .setETReflectState     ; 2³        branch if joystick pushed right
+   bpl .setETReflectState     ; 2ï¿½        branch if joystick pushed right
    inx                        ; 2         x = 0
 .setETReflectState
    stx REFP1                  ; 3
    ldx currentObjectId        ; 3         get the current object id
-   bmi .skipHumanReflection   ; 2³
+   bmi .skipHumanReflection   ; 2ï¿½
    bit etMotionValues         ; 3         check E.T. motion values
-   bvs .skipHumanReflection   ; 2³        branch if E.T. carried by Scientist
+   bvs .skipHumanReflection   ; 2ï¿½        branch if E.T. carried by Scientist
    ldy #$FF                   ; 2
    lda humanAttributes,x      ; 4         get human attribute value
-   bpl .turnToFaceET          ; 2³        branch if not returning home
+   bpl .turnToFaceET          ; 2ï¿½        branch if not returning home
    lda HumanHorizReflectionTable,x; 4
    bne .determineHumanReflection; 3       unconditional branch
 
@@ -4066,7 +4066,7 @@ StatusKernel
    lda etHorizPos             ; 3         get E.T.'s horizontal position
 .determineHumanReflection
    cmp currentObjectHorizPos  ; 3
-   bcc .setHumanReflectState  ; 2³
+   bcc .setHumanReflectState  ; 2ï¿½
    iny                        ; 2
 .setHumanReflectState
    sty REFP0                  ; 3
@@ -4075,9 +4075,9 @@ StatusKernel
 ;--------------------------------------
    ldx currentScreenId        ; 3         get the current screen id
    cpx #ID_ET_HOME            ; 2
-   bne .determineETColorFromEnergy; 2³
+   bne .determineETColorFromEnergy; 2ï¿½
    bit etHomeElliottMovement  ; 3         check Elliott movement value
-   bpl .moveElliottBehindHouse; 2³        branch if Elliott moving left
+   bpl .moveElliottBehindHouse; 2ï¿½        branch if Elliott moving left
    lda #MSBL_SIZE2 | PF_REFLECT; 2
    sta CTRLPF                 ; 3
    bne .setCurrentObjectReflectState; 3   unconditional branch
@@ -4091,7 +4091,7 @@ StatusKernel
 .determineETColorFromEnergy
    ldx #$00                   ; 2
    bit playerState            ; 3         check current player state
-   bmi .setETColor            ; 2³        branch if E.T. is dead
+   bmi .setETColor            ; 2ï¿½        branch if E.T. is dead
    lda etEnergy               ; 3         get E.T. energy level
    lsr                        ; 2         divide E.T. energy level by 32 to
    lsr                        ; 2         get E.T. color value
@@ -4116,7 +4116,7 @@ StatusKernel
    sta COLUBK                 ; 3 = @28
    lda #MSBL_SIZE4            ; 2
    bit mothershipStatus       ; 3         check Mothership status
-   bpl .setCurrentObjectSize  ; 2³        branch if Mothership not present
+   bpl .setCurrentObjectSize  ; 2ï¿½        branch if Mothership not present
    lda #MSBL_SIZE4 | DOUBLE_SIZE; 2       set Mothership to DOUBLE_SIZE
 .setCurrentObjectSize
    sta NUSIZ0                 ; 3 = @40
@@ -4176,7 +4176,7 @@ CheckForYarIndyOrHSWEasterEgg
 .setEasterEggStepDone
    sec
    bcs .setEasterEggStatusFlags     ; unconditional branch
-   
+
 .setEasterEggStepNotDone
    clc
 .setEasterEggStatusFlags
@@ -4434,10 +4434,10 @@ TitleETGraphics_5
    .byte $80 ; |X.......|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 NextRoundScoreMSB
    .byte $00, $10, $22, $34, $45, $63, $78, $99
-   
+
 NextRoundEnergyValues
    .byte $99, $92, $84, $76, $68, $59, $51, $42
 
@@ -4703,9 +4703,9 @@ KernelJumpTable
 
 PsuedoRandomValueIncTable
    .byte 115, 13, 91, 213
-   
+
    BOUNDARY 0
-   
+
 ETSprites
 ETWalkSprite_A0
    .byte $FE ; |XXXXXXX.|
@@ -4717,7 +4717,7 @@ ETWalkSprite_A0
    .byte $2B ; |..X.X.XX|
    .byte $E7 ; |XXX..XXX|
    .byte $00 ; |........|
-   
+
 ETExtensionSprites_A
 ETExtensionSprite_A0
    .byte $FE ; |XXXXXXX.|
@@ -4770,7 +4770,7 @@ ETExtensionSprite_A3
    .byte $E7 ; |XXX..XXX|
    .byte $00 ; |........|
 
-ETWalkSprite_B0   
+ETWalkSprite_B0
    .byte $BF ; |X.XXXXXX|
    .byte $FF ; |XXXXXXXX|
    .byte $03 ; |......XX|
@@ -4780,7 +4780,7 @@ ETWalkSprite_B0
    .byte $63 ; |.XX...XX|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 ETExtensionSprites_B
 ETExtensionSprite_B0
    .byte $BF ; |X.XXXXXX|
@@ -4832,7 +4832,7 @@ ETExtensionSprite_B3
    .byte $63 ; |.XX...XX|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 ETDead_0
    .byte $E0 ; |XXX.....|
    .byte $A2 ; |X.X...X.|
@@ -4999,7 +4999,7 @@ FlowerColors
 
 EasterEggSpriteValues
    .byte SHOW_YAR_SPRITE, SHOW_INDY_SPRITE
-   
+
    BOUNDARY 0
 
 NumberFonts
@@ -5270,7 +5270,7 @@ Elliott_11
    .byte $30 ; |..XX....|
    .byte $CC ; |XX..XX..|
    .byte $CC ; |XX..XX..|
-   
+
 ElliottColors_B
    .byte BLACK, ORANGE_2 + 8, RED + 4, RED + 4, RED + 4, LT_BLUE + 10
    .byte LT_BLUE + 10, LT_BLUE + 10, LT_BLUE + 10, DK_GREEN_2 + 14
@@ -5334,7 +5334,7 @@ FourDiamondPitPF1Graphics
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 EightPitGraphics
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -5540,7 +5540,7 @@ Yar_1
    .byte $18 ; |...XX...|
    .byte $18 ; |...XX...|
    .byte $3C ; |..XXXX..|
-   
+
    BOUNDARY 0
 
 GameIcons
@@ -5661,7 +5661,7 @@ ReviveFlowerIcon
    .byte $00 ; |........|
    .byte $22 ; |..X...X.|
    .byte $22 ; |..X...X.|
-   
+
 CountdownClockIcons
 CountdownClock_0
    .byte $00 ; |........|
@@ -5699,7 +5699,7 @@ CountdownClock_3
    .byte $D0 ; |XX.X....|
    .byte $B0 ; |X.XX....|
    .byte $70 ; |.XXX....|
-CountdownClock_4   
+CountdownClock_4
    .byte $7E ; |.XXXXXX.|
    .byte $BC ; |X.XXXX..|
    .byte $D8 ; |XX.XX...|
@@ -5708,7 +5708,7 @@ CountdownClock_4
    .byte $D0 ; |XX.X....|
    .byte $B0 ; |X.XX....|
    .byte $70 ; |.XXX....|
-CountdownClock_5   
+CountdownClock_5
    .byte $7E ; |.XXXXXX.|
    .byte $BD ; |X.XXXX.X|
    .byte $DB ; |XX.XX.XX|
@@ -5717,7 +5717,7 @@ CountdownClock_5
    .byte $D0 ; |XX.X....|
    .byte $B0 ; |X.XX....|
    .byte $70 ; |.XXX....|
-CountdownClock_6   
+CountdownClock_6
    .byte $7E ; |.XXXXXX.|
    .byte $BD ; |X.XXXX.X|
    .byte $DB ; |XX.XX.XX|
@@ -5821,7 +5821,7 @@ DetermineToShowArtistInitials
    rts
 
    BOUNDARY 0
-   
+
 PitGraphics
 PitPF1Graphics
    .byte $00 ; |........|
@@ -5874,11 +5874,11 @@ PitPF1Graphics
    .byte $F8 ; |XXXXX...|
 
    IF COMPILE_REGION = NTSC
-   
+
 IndyColors
 
    ENDIF
-   
+
    .byte NTSC_BROWN + 8, NTSC_BROWN + 8, NTSC_BROWN + 8, NTSC_BROWN + 12
    .byte NTSC_BROWN + 12, NTSC_BROWN + 14, NTSC_BROWN + 15, NTSC_BROWN + 15
    .byte NTSC_BROWN + 15, NTSC_BROWN + 15, NTSC_BROWN + 15, NTSC_BROWN + 15
@@ -6035,19 +6035,19 @@ PitPF2Graphics
    .byte $00 ; |........|
 
    IF COMPILE_REGION = NTSC
-   
+
 YarColor
    .byte BROWN + 15, BROWN + 15, BROWN + 15, BROWN + 15
    .byte BROWN + 15, BROWN + 15, BROWN + 15, BROWN + 15
-   
+
    ELSE
-   
+
       REPEAT 8
-      
+
          .byte -1
-         
+
       REPEND
-      
+
    ENDIF
 
 PlayfieldColors
@@ -6302,18 +6302,18 @@ MotherShipColors
    .byte DK_PINK + 4, DK_PINK + 6, DK_PINK + 8, DK_PINK + 6, DK_PINK + 4
    .byte DK_PINK + 2, DK_PINK + 4, DK_PINK + 6, DK_PINK + 8, DK_PINK + 6
    .byte DK_PINK + 4, DK_PINK+2
-   
+
    IF COMPILE_REGION = PAL50
-   
+
 YarColor
 IndyColors
    .byte BROWN + 12, BROWN + 12, BROWN + 12, BROWN + 12, BROWN + 12
    .byte BROWN + 12, BROWN + 12, BROWN + 12, BROWN + 12, BROWN + 12
-   
+
    ENDIF
-   
+
    BOUNDARY 0
-   
+
 ETHomePFGraphics
 ETHomePF2Graphics
    .byte $00 ; |........|
@@ -6555,16 +6555,16 @@ IndySprite
    .byte $3C ; |..XXXX..|
 
    IF COMPILE_REGION = NTSC
-   
+
       .org BANK1TOP + 4096 - 6, 0
-            
+
    ELSE
-   
+
       .org BANK1TOP + 4096 - 8, 0
       .byte -1, 0
-      
+
    ENDIF
-   
+
    .word BANK1Start
    .word BANK1Start
    .word BANK1Start

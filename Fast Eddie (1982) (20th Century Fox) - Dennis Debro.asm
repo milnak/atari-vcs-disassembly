@@ -16,7 +16,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1982, SIRIUS                                       =
+; = THE ASSEMBLED CODE IS ï¿½ 1982, SIRIUS                                       =
 ; =                                                                            =
 ; ==============================================================================
 
@@ -31,20 +31,20 @@ TIA_BASE_READ_ADDRESS = $30         ; set the read address base so this runs on
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -61,7 +61,7 @@ TIA_BASE_READ_ADDRESS = $30         ; set the read address base so this runs on
    ENDIF
 
    LIST ON
-   
+
 ;===============================================================================
 ; A S S E M B L E R - S W I T C H E S
 ;===============================================================================
@@ -186,12 +186,12 @@ SNEAKER_QUAD_SIZE_RIGHT_BOUNDARY = XMAX - 26
    MAC SLEEP_3
       bit $FF
    ENDM
-   
+
    MAC SLEEP_6
       eor ($FC,x)
    ENDM
-   
-   MAC SLEEP_7 
+
+   MAC SLEEP_7
       rol ROM_BASE,x
    ENDM
 
@@ -226,7 +226,7 @@ _04PlatformPrizeHorizPos = _05PlatformPrizeHorizPos + 1
 _03PlatformPrizeHorizPos = _04PlatformPrizeHorizPos + 1
 _02PlatformPrizeHorizPos = _03PlatformPrizeHorizPos + 1
 fastEddieHorizPos       ds 1        ; Fast Eddie horizontal position
-objectFCHorizValues     ds 9        ; fine / coarse horizontal values 
+objectFCHorizValues     ds 9        ; fine / coarse horizontal values
 ;--------------------------------------
 tmpGameSelectionFCValues = objectFCHorizValues
 fastEddieFCHorizValue   ds 1
@@ -435,7 +435,7 @@ NewFrame
    txs                              ; set stack to the beginning
    jsr IncrementPlatformColor
    bne .jmpToDisplayKernel          ; unconditional branch
-   
+
 .skipGamePaused
    dec ladderJustificationValue     ; decremented each frame
    inc frameCount                   ; incremented each frame
@@ -447,7 +447,7 @@ IncrementScoreForScreenDone
    lda screenDoneAwardTimer         ; get award timer for completing screen
    bpl .incrementScoreForScreenDone
    jmp CheckForGameRestart
-       
+
 .incrementScoreForScreenDone
    and #3                           ; get mod4 value of screen done timer
    cmp #3
@@ -599,7 +599,7 @@ CheckForGameRestart
    sta fastEddieHorizPos            ; set Fast Eddie init horizontal position
    sta highTopHorizPosition         ; set High-Top init horizontal position
    bpl .doneCheckForGameRestart     ; unconditional branch
-       
+
 .checkForResetSwitchReleased
    lda resetDebounce                ; get RESET debounce value
    bpl CheckGameSelectSwitch        ; branch if RESET switch not held
@@ -621,7 +621,7 @@ CheckGameSelectSwitch
    lda gameState                    ; get current game state
    bpl .setGameSelectionGraphicPtrs ; branch if game not in progress
    bmi .checkToPlayGameSounds       ; unconditional branch
-       
+
 .selectSwitchPressed
    lda selectDebounce               ; get SELECT debounce value
    bpl .incrementGameSelection      ; branch if SELECT released
@@ -760,7 +760,7 @@ CheckToPlayGameOverSounds
    lda #13
    sta AUDC1
    bne .checkToPlayFastEddieDeathSounds; unconditional branch
-       
+
 .donePlayingJumpingSound
    lda #0
    sta AUDV1
@@ -768,7 +768,7 @@ CheckToPlayGameOverSounds
    lda fastEddieDeathSequence       ; get Fast Eddie death sequence value
    bpl .checkToStartFastEddieDeathSequence; branch if not in death sequence
    jmp PlayFastEddieDeathSounds
-       
+
 .checkToStartFastEddieDeathSequence
    lda frameCollisionCount          ; get frame collision count
    cmp #MAX_FRAME_COLLISION_VALUE
@@ -794,7 +794,7 @@ CheckToSpawnNewPrize
    lda prizeControlValue
    bne .checkToSpawnNewPrize
    jmp PlaySoundForCollectedPrize
-       
+
 .checkToSpawnNewPrize
    bpl .checkToPlaySoundForCollectedPrize
    lda allowedToSpawnPrize          ; determine if allowed to spawn prize
@@ -892,7 +892,7 @@ PlaySoundForCollectedPrize
    lda #0
    sta AUDV0
    beq .donePlaySoundForCollectedPrize; unconditional branch
-       
+
 .playSoundForCollectedPrize
    lsr
    lsr
@@ -907,7 +907,7 @@ PlaySoundForCollectedPrize
    dec fastEddieLadderDelay         ; decrement ladder delay value
    beq MoveFastEddieOnLadder        ; branch when reached 0
    jmp MoveSneakersHorizontally
-       
+
 .checkFastEddieForJumping
    jmp CheckFastEddieForJumping
 
@@ -971,12 +971,12 @@ MoveFastEddieOnLadder
    lda #<FastEddieWalkingColors     ; set Fast Eddie walking on platform colors
    sta fastEddieColorPtrs
    bne .doneMoveFastEddieOnLadder   ; unconditional branch
-       
+
 CheckFastEddieForJumping
    lda actionButtonDebounce         ; get action button debounce value
    bpl .fastEddieJumping            ; branch if pressed this frame
    jmp CheckFastEddieForDemoModeJumping
-       
+
 .fastEddieJumping
    lda fastEddieHorizPos            ; get Fast Eddie's horizontal position
    clc
@@ -987,7 +987,7 @@ CheckFastEddieForJumping
    lda #XMIN                        ; get horizontal minimum value
    sta fastEddieHorizPos            ; set Fast Eddie to left border
    bne .checkToUpdateJumpingAnimation; unconditional branch
-       
+
 .checkFastEddieRightRestrictions
    cmp #XMAX
    bcc .checkToUpdateJumpingAnimation; branch if Fast Eddie not at right border
@@ -1008,7 +1008,7 @@ CheckFastEddieForJumping
    lda #>FastEddieJumpingGraphic
    sta fastEddieGraphicPtrs + 1
    bmi .doneCheckFastEddieForJumping; unconditional branch
-       
+
 .fastEddieDoneJumping
    lda #<FastEddieGraphic_00        ; set Fast Eddie graphics for stationary
    sta fastEddieGraphicPtrs
@@ -1035,7 +1035,7 @@ CheckFastEddieForDemoModeJumping
    cmp #INIT_HORIZ_POS_FAST_EDDIE + 16
    beq .setActionButtonStateForJumping; branch if in range for Fast Eddie to jump
    bne .setFastEddieStationaryForDemoMode; unconditional branch
-       
+
 CheckIfFireButtonPressedForJumping
    lda INPT4                        ; read left port action button
    bmi CheckToReadPlayerJoystickValues;branch if button not pressed
@@ -1087,7 +1087,7 @@ CheckToReadPlayerJoystickValues
    lda #XMIN
    sta fastEddieHorizPos            ; set Fast Eddie position to left border
    bpl .doneJoystickHorizontalChecks; unconditional branch
-   
+
 .checkForJoystickMovingUp
    tya                              ; move joystick values to accumulator
    and #<(~MOVE_UP) >> 4            ; keep MOVE_UP value
@@ -1137,7 +1137,7 @@ CheckToReadPlayerJoystickValues
    lda #64
    sta ladderSoundValue
    bpl .doneJoystickVerticalChecks  ; unconditional branch
-   
+
 .checkForJoystickMovingDown
    tya                              ; move joystick values to accumulator
    and #<(~MOVE_DOWN) >> 4          ; keep MOVE_DOWN value
@@ -1195,7 +1195,7 @@ CheckToReadPlayerJoystickValues
    lda #64
    sta ladderSoundValue
    bne MoveSneakersHorizontally     ; unconditional branch
-       
+
 DetermineEddieFootAnimation
    lda prizeMovementDelayValue
    cmp #1
@@ -1207,14 +1207,14 @@ DetermineEddieFootAnimation
    lda #>FastEddieGraphic_00
    sta fastEddieGraphicPtrs + 1
    bmi MoveSneakersHorizontally     ; unconditional branch
-       
+
 .setFastEddieFootAnimation
    lda #<FastEddieGraphic_01
    sta fastEddieGraphicPtrs
    lda #>FastEddieGraphic_01
    sta fastEddieGraphicPtrs + 1
    bmi MoveSneakersHorizontally     ; unconditional branch
-       
+
 SetFastEddieStationaryForDemoMode
    lda #<FastEddieStationary
    sta fastEddieGraphicPtrs
@@ -1234,11 +1234,11 @@ MoveSneakersHorizontally
    inc middleSneakerMoveDelay       ; increment move delay for middle Sneakers
    bne .moveSneakerRight
    inc moveMiddlePlatformSneakers   ; increment to move move Sneakers
-.moveSneakerRight 
+.moveSneakerRight
    lda #1
    sta sneakerHorizDelta,y
    bne .moveNextSneaker             ; unconditional branch
-       
+
 .checkSneakerForReachingRightBoundary
    ldx gameSelection                ; get current game selection
    lda SneakerNUSIZLSBValues,x
@@ -1316,7 +1316,7 @@ CalculateObjectHorizPosition
    sbc #15
    inx                              ; increment coarse movement value
    bne .divideBy15                  ; unconditional branch
-   
+
 .setObjectFineCoarsePositionValue
    stx objectFCHorizValues,y
    tax                              ; move division remainder to x register
@@ -1344,21 +1344,21 @@ DrawTopKernelItems
    sta WSYNC
 ;--------------------------------------
    cpx #H_KERNEL - 1          ; 2
-   beq .scoreAndFastEddieLiteralKernel;2³
+   beq .scoreAndFastEddieLiteralKernel;2ï¿½
    jmp DrawNumberLivesKernel  ; 3
-       
+
 .drawScoreKernel
    jmp DrawScoreKernel        ; 3
 
 .scoreAndFastEddieLiteralKernel
    lda gameState              ; 3         get current game state
-   bmi .drawScoreKernel       ; 2³        branch if game in progress
+   bmi .drawScoreKernel       ; 2ï¿½        branch if game in progress
    lda platformColor          ; 3
    cmp #BLUE + 7              ; 2
-   bcc .drawScoreKernel       ; 2³
-   beq DrawFastEddieLiteralKernel;2³
+   bcc .drawScoreKernel       ; 2ï¿½
+   beq DrawFastEddieLiteralKernel;2ï¿½
    bcs .drawFastEddieLiteralKernel;3
-       
+
 DrawFastEddieLiteralKernel
    ldx #$FF                   ; 2 = @22
    txs                        ; 2         set stack to the beginning
@@ -1373,7 +1373,7 @@ DrawFastEddieLiteralKernel
 ;--------------------------------------
 .wait19Cycles
    dex                        ; 2
-   bne .wait19Cycles          ; 2³
+   bne .wait19Cycles          ; 2ï¿½
    SLEEP 2                    ; 2
    SLEEP_7                    ; 7
    SLEEP 2                    ; 2
@@ -1413,12 +1413,12 @@ DrawFastEddieLiteralKernel
    sty GRP1                   ; 3 = @49
    sta GRP0                   ; 3 = @52
    dec tmpFastEddieFontLoop   ; 5
-   bpl .drawFastEddieLiteral  ; 2³
+   bpl .drawFastEddieLiteral  ; 2ï¿½
    lda #0                     ; 2
    sta VDELP0                 ; 3 = @64
    sta VDELP1                 ; 3 = @67
    jmp DoneScoreAndFastEddieLiteralKernel;3
-       
+
 DrawScoreKernel SUBROUTINE
    sta HMCLR                  ; 3
    lda #WHITE                 ; 2
@@ -1436,7 +1436,7 @@ DrawScoreKernel SUBROUTINE
    SLEEP 2                    ; 2
 .wait19Cycles
    dex                        ; 2
-   bne .wait19Cycles          ; 2³
+   bne .wait19Cycles          ; 2ï¿½
    sta RESP0                  ; 3
    sta RESP1                  ; 3
    sta WSYNC
@@ -1472,7 +1472,7 @@ DrawScoreKernel SUBROUTINE
    stx GRP1                   ; 3 = @46
    sta GRP0                   ; 3 = @49
    dec digitGraphicPtrs       ; 5
-   bpl .drawScore             ; 2³
+   bpl .drawScore             ; 2ï¿½
 DoneScoreAndFastEddieLiteralKernel
    lda #ONE_COPY              ; 2
    sta NUSIZ1                 ; 3 = @61
@@ -1485,10 +1485,10 @@ DoneScoreAndFastEddieLiteralKernel
 ;--------------------------------------
    sta tmpObjectIndex         ; 3
    jmp DrawTopKernelItems     ; 3
-       
+
 DrawNumberLivesKernel SUBROUTINE
    cpx #H_KERNEL - 10         ; 2 = @09
-   bne .checkToDrawGameSelectionKernel;2³
+   bne .checkToDrawGameSelectionKernel;2ï¿½
    lda #0                     ; 2
    sta PF0                    ; 3 = @16
    sta PF1                    ; 3 = @19
@@ -1502,7 +1502,7 @@ DrawNumberLivesKernel SUBROUTINE
    ldy #4                     ; 2
 .wait24Cycles
    dey                        ; 2
-   bpl .wait24Cycles          ; 2³
+   bpl .wait24Cycles          ; 2ï¿½
    ldy numberOfLives          ; 3         get number of lives
    lda PF0LivesIndicatorValues,y;4
    sta PF0                    ; 3 = @45
@@ -1521,7 +1521,7 @@ DrawNumberLivesKernel SUBROUTINE
    ldy #3                     ; 2
 .wait19Cycles
    dey                        ; 2
-   bpl .wait19Cycles          ; 2³
+   bpl .wait19Cycles          ; 2ï¿½
    ldy numberOfLives          ; 3         get number of lives
    lda PF0LivesIndicatorValues,y;4
    sta PF0                    ; 3 = @43
@@ -1535,13 +1535,13 @@ DrawNumberLivesKernel SUBROUTINE
    sta COLUPF                 ; 3 = @07
 .checkToDrawGameSelectionKernel
    cpx #H_KERNEL - 13         ; 2
-   beq DrawGameSelectionKernel; 2³
+   beq DrawGameSelectionKernel; 2ï¿½
    jmp .checkDisplayKernelDone; 3
-       
+
 DrawGameSelectionKernel
    txs                        ; 2 = @19   push scanline value to stack
    lda gameState              ; 3         get current game state
-   bmi .continueDrawGameSelectionKernel;2³ branch if game in progress
+   bmi .continueDrawGameSelectionKernel;2ï¿½ branch if game in progress
    lda #HMOVE_R4 | 5          ; 2
    sta tmpGameSelectionFCValues;3
 .continueDrawGameSelectionKernel
@@ -1558,7 +1558,7 @@ DrawGameSelectionKernel
    SLEEP_7                    ; 7
 .coarsePositionGameSelection
    dex                        ; 2
-   bne .coarsePositionGameSelection;2³
+   bne .coarsePositionGameSelection;2ï¿½
    sta RESP0                  ; 3
    sta WSYNC
 ;--------------------------------------
@@ -1574,7 +1574,7 @@ DrawGameSelectionKernel
    SLEEP_7                    ; 7
 .coarsePositionFastEddie
    dex                        ; 2
-   bne .coarsePositionFastEddie;2³
+   bne .coarsePositionFastEddie;2ï¿½
    sta RESP1                  ; 3
    sta WSYNC
 ;--------------------------------------
@@ -1586,7 +1586,7 @@ DrawGameSelectionKernel
    lda #HMOVE_0               ; 2
    sta HMP1                   ; 3 = @05
    lda gameState              ; 3         get current game state
-   bmi DrawTopKernelSection   ; 2³        branch if game in progress
+   bmi DrawTopKernelSection   ; 2ï¿½        branch if game in progress
    tsx                        ; 2         pull scanline value from stack
    ldy #H_DIGITS              ; 2
 .drawGameSelection
@@ -1598,7 +1598,7 @@ DrawGameSelectionKernel
    sta GRP0                   ; 3 = @13
    dex                        ; 2
    dey                        ; 2
-   bpl .drawGameSelection     ; 2³
+   bpl .drawGameSelection     ; 2ï¿½
    iny                        ; 2         y = 0
    sty GRP0                   ; 3 = @24
    ldy #20                    ; 2
@@ -1607,13 +1607,13 @@ DrawGameSelectionKernel
 ;--------------------------------------
    dex                        ; 2
    dey                        ; 2
-   bpl .skip21Scanlines       ; 2³
+   bpl .skip21Scanlines       ; 2ï¿½
    jmp .doneDrawTopKernelSection;3
-       
-DrawTopKernelSection 
+
+DrawTopKernelSection
    lda fastEddieKernelSection ; 3         get Fast Eddie kernel section
    cmp #MAX_KERNEL_SECTION    ; 2         compare with top kernel section
-   bne .setFastEddieToBlankGraphic;2³     branch if Fast Eddie not in section
+   bne .setFastEddieToBlankGraphic;2ï¿½     branch if Fast Eddie not in section
    lda fastEddieGraphicPtrs   ; 3         get Fast Eddie graphic LSB value
    clc                        ; 2
    adc fastEddieSinkingOffset ; 3         increment by death sinking value
@@ -1621,7 +1621,7 @@ DrawTopKernelSection
    lda fastEddieGraphicPtrs + 1;3
    sta fastEddieKernelGraphicPtrs + 1;3
    bmi .startDrawingToKernelSection;3     unconditional branch
-       
+
 .setFastEddieToBlankGraphic
    lda #<BlankGraphics        ; 2
    sta fastEddieKernelGraphicPtrs;3
@@ -1648,20 +1648,20 @@ DrawTopKernelSection
    dex                        ; 2
    dey                        ; 2
    cpy #H_KERNEL_SECTION - 17 ; 2
-   bne .checkToDrawHighTopSprite;2³
+   bne .checkToDrawHighTopSprite;2ï¿½
    sta WSYNC
 ;--------------------------------------
    sta WSYNC
 ;--------------------------------------
    lda fastEddieDeathSequence ; 3         get Fast Eddie death sequence value
-   bmi .donePlayerCollisionCheck;2³       branch if in death sequence
+   bmi .donePlayerCollisionCheck;2ï¿½       branch if in death sequence
    lda CXPPMM                 ; 3         read player collision values
-   bpl .donePlayerCollisionCheck;2³       branch if players didn't collide
+   bpl .donePlayerCollisionCheck;2ï¿½       branch if players didn't collide
    lda prizesCollected        ; 3         get number of prizes collected
    cmp #MAX_COLLECTED_PRIZES  ; 2
-   bcc .donePlayerCollisionCheck;2³       branch if not collected maximum prizes
+   bcc .donePlayerCollisionCheck;2ï¿½       branch if not collected maximum prizes
    lda screenDoneAwardTimer   ; 3         get award timer for completing screen
-   bpl .donePlayerCollisionCheck;2³
+   bpl .donePlayerCollisionCheck;2ï¿½
    lda #INIT_AWARD_TIMER_VALUE; 2
    sta screenDoneAwardTimer   ; 3
 .donePlayerCollisionCheck
@@ -1672,7 +1672,7 @@ DrawTopKernelSection
    dex                        ; 2
 .checkToDrawHighTopSprite
    cpy #H_KERNEL_SECTION - 23 ; 2
-   bne .drawTopKernelSection  ; 2³
+   bne .drawTopKernelSection  ; 2ï¿½
 .drawHighTopFeetKernel
    lda (fastEddieKernelGraphicPtrs),y;5
    sta tmpFastEddieGraphic    ; 3
@@ -1690,11 +1690,11 @@ DrawTopKernelSection
    sta GRP0                   ; 3 = @22
    dex                        ; 2
    dey                        ; 2
-   bpl .drawHighTopFeetKernel ; 2³
+   bpl .drawHighTopFeetKernel ; 2ï¿½
    lda CXPPMM                 ; 3         read player collision values
-   bpl .doneDrawTopKernelSection;2³       branch if players didn't collide
+   bpl .doneDrawTopKernelSection;2ï¿½       branch if players didn't collide
    lda fastEddieDeathSequence ; 3         get Fast Eddie death sequence value
-   bmi .doneDrawTopKernelSection;2³       branch if in death sequence
+   bmi .doneDrawTopKernelSection;2ï¿½       branch if in death sequence
    lda #MAX_FRAME_COLLISION_VALUE;2
    sta frameCollisionCount    ; 3
    sta ladderSoundValue       ; 3
@@ -1707,11 +1707,11 @@ DrawTopKernelSection
    sty GRP0                   ; 3 = @08
    sty GRP1                   ; 3 = @11
 .checkDisplayKernelDone
-   beq DrawPlatformKernel     ; 2³ + 1
+   beq DrawPlatformKernel     ; 2ï¿½ + 1
    dex                        ; 2         decrement scanline
-   beq .startNewFrame         ; 2³ + 1
+   beq .startNewFrame         ; 2ï¿½ + 1
    jmp DrawTopKernelItems     ; 3
-       
+
 .startNewFrame
    jmp NewFrame
 
@@ -1723,10 +1723,10 @@ DrawPlatformKernel SUBROUTINE
    sta PF2                    ; 3 = @29
    sta WSYNC
 ;--------------------------------------
-.doneDrawPlatformKernel 
+.doneDrawPlatformKernel
    sta CXCLR                  ; 3         clear all collisions
    jmp SetupPrizeValuesForKernel;3
-       
+
 DrawLadderKernel
    ldy #H_KERNEL_SECTION      ; 2
    SLEEP 2                    ; 2
@@ -1735,7 +1735,7 @@ DrawLadderKernel
    sta COLUP0                 ; 3 = @17
    lda fastEddieKernelSection ; 3         get Fast Eddie kernel section
    cmp tmpKernelSection       ; 3         compare with current kernel section
-   bne .setFastEddieToBlankGraphic;2³     branch if Fast Eddie not in section
+   bne .setFastEddieToBlankGraphic;2ï¿½     branch if Fast Eddie not in section
    lda fastEddieGraphicPtrs   ; 3         get Fast Eddie graphic LSB value
    clc                        ; 2
    adc fastEddieSinkingOffset ; 3         increment by death sinking value
@@ -1743,7 +1743,7 @@ DrawLadderKernel
    lda fastEddieGraphicPtrs + 1;3
    sta fastEddieKernelGraphicPtrs + 1;3
    jmp .prepareToDrawLadderKernel;3
-       
+
 .setFastEddieToBlankGraphic
    lda #<BlankGraphics        ; 2
    sta fastEddieKernelGraphicPtrs;3
@@ -1783,16 +1783,16 @@ DrawLadderKernel
    dex                        ; 2
    dey                        ; 2
    cpy #H_KERNEL_SECTION - 16 ; 2
-   bne .drawPrizeKernel       ; 2³
+   bne .drawPrizeKernel       ; 2ï¿½
    lda CXPPMM                 ; 3         read player collision values
-   bpl .drawSneakersKernel    ; 2³        branch if players didn't collide
+   bpl .drawSneakersKernel    ; 2ï¿½        branch if players didn't collide
    ldy fastEddieKernelSection ; 3
    lda prizeArray - 1,y       ; 4         get prize index value
-   beq DrawSneakersKernel     ; 2³        branch if prize is a Blank sprite
+   beq DrawSneakersKernel     ; 2ï¿½        branch if prize is a Blank sprite
    cmp #MAX_PRIZES + 1        ; 2
-   bcs DrawSneakersKernel     ; 2³        branch if floating point value
+   bcs DrawSneakersKernel     ; 2ï¿½        branch if floating point value
    lda prizeControlValue      ; 3
-   beq .setPrizeControlValue  ; 2³
+   beq .setPrizeControlValue  ; 2ï¿½
    sta allowedToSpawnPrize    ; 3
 .setPrizeControlValue
    ldx #<-1                   ; 2
@@ -1823,14 +1823,14 @@ DrawSneakersKernel
    lda (kernelPF2LadderGraphicPtrs),y;5
    sta PF2                    ; 3 = @36
    cpy #H_KERNEL_SECTION - 16 ; 2
-   bne .continueDrawSneakerKernel;2³
+   bne .continueDrawSneakerKernel;2ï¿½
    jmp SetupSneakerValuesForKernel;3
-       
-.continueDrawSneakerKernel 
+
+.continueDrawSneakerKernel
    tsx                        ; 2         pull scanline value from stack
    dex                        ; 2
    dey                        ; 2
-   bpl .drawSneakersKernel    ; 2³
+   bpl .drawSneakersKernel    ; 2ï¿½
    txs                        ; 2         push scanline value to stack
    ldx tmpKernelSection       ; 3
    dec tmpKernelSection       ; 5
@@ -1861,28 +1861,28 @@ DrawSneakersKernel
    lda ladderGraphicPtrs + 3,y; 4
    sta kernelPF2LadderGraphicPtrs + 1;3
    cpx #1                     ; 2
-   bne .checkFastEddieSneakerCollision;2³
+   bne .checkFastEddieSneakerCollision;2ï¿½
    sta WSYNC
 ;--------------------------------------
 .checkFastEddieSneakerCollision
    cpx fastEddieKernelSection ; 3
-   bne .checkForDoneGameKernel; 2³
+   bne .checkForDoneGameKernel; 2ï¿½
    lda CXPPMM                 ; 3         read player collision values
-   bpl .clearFrameCollisionCount;2³       branch if players didn't collide
+   bpl .clearFrameCollisionCount;2ï¿½       branch if players didn't collide
    lda fastEddieOnLadderValue ; 3         get Fast Eddie ladder value
-   bne .checkForDoneGameKernel; 2³        branch if Fast Eddie on a ladder
+   bne .checkForDoneGameKernel; 2ï¿½        branch if Fast Eddie on a ladder
    inc frameCollisionCount    ; 5         increment frame collision count
    bne .checkForDoneGameKernel; 3         unconditional branch
-       
+
 .clearFrameCollisionCount
    lda #0                     ; 2
    sta frameCollisionCount    ; 3
 .checkForDoneGameKernel
    cpy #16                    ; 2
-   bcs .doneGameKernel        ; 2³        branch if ladder index done
+   bcs .doneGameKernel        ; 2ï¿½        branch if ladder index done
    tsx                        ; 2         pull scanline value from stack
    jmp .doneDrawPlatformKernel; 3
-       
+
 .doneGameKernel
    sta WSYNC
 ;--------------------------------------
@@ -1896,8 +1896,8 @@ DrawSneakersKernel
    lda #BLACK                 ; 2
    sta COLUPF                 ; 3 = @05
    jmp DrawTopKernelItems     ; 3
-       
-SetupPrizeValuesForKernel 
+
+SetupPrizeValuesForKernel
    ldy tmpKernelSection       ; 3 = @09   get current kernel section
    lda prizeArray - 1,y       ; 4         get prize index value
    tay                        ; 2         move prize index value to y register
@@ -1921,7 +1921,7 @@ SetupPrizeValuesForKernel
    SLEEP 2                    ; 2
 .coarsePositionPrize
    dex                        ; 2
-   bne .coarsePositionPrize   ; 2³
+   bne .coarsePositionPrize   ; 2ï¿½
    sta RESP0                  ; 3
    sta WSYNC
 ;--------------------------------------
@@ -1933,7 +1933,7 @@ DetermineLadderPlacement
 .determineLadderPlacement
    stx tmpLadderKernelSection
    jmp DetermineRandomLadderPlacement
-       
+
 .setPFLadderPlacementValues
    ldx tmpLadderKernelSection
    sec
@@ -1948,7 +1948,7 @@ DetermineLadderPlacement
    lda #17                          ; must be between pixels 77 - 89 on left
    sta fastEddieHorizLadderValues,x ; or pixels 159 - 171 on the right side
    bcs .setNoPF2LadderGraphics      ; unconditional branch
-       
+
 .setRightJustifiedPF1LadderGraphics
    lda #<RightJustifiedLadderGraphics
    sta ladderGraphicPtrs,y
@@ -1962,7 +1962,7 @@ DetermineLadderPlacement
    lda #>BlankGraphics
    sta ladderGraphicPtrs + 3,y
    bcs .determineNextSectionLadderPlacement;unconditional branch
-   
+
 .setPlacementForPF2LadderGraphics
    lda ladderJustificationValue     ; get ladder justification value
    bpl .setRightJustifiedPF2LadderGraphics; branch to right justify when D7 low
@@ -1973,7 +1973,7 @@ DetermineLadderPlacement
    lda #65
    sta fastEddieHorizLadderValues,x
    bcs .setNoPF1LadderGraphics      ; unconditional branch
-   
+
 .setRightJustifiedPF2LadderGraphics
    lda #<RightJustifiedLadderGraphics
    sta ladderGraphicPtrs + 2,y
@@ -2022,21 +2022,21 @@ LevelSevenSneakerSizeValues
    .byte ONE_COPY, ONE_COPY, TWO_MED_COPIES, DOUBLE_SIZE, THREE_MED_COPIES
 LevelEightSneakerSizeValues
    .byte ONE_COPY, DOUBLE_SIZE, TWO_MED_COPIES, THREE_COPIES, THREE_MED_COPIES
-  
+
 FastEddieColorValues
 FastEddieJumpingColorValues_02
    .byte BLACK, BLACK, BLACK, BLACK, YELLOW + 10, YELLOW + 10, YELLOW + 10
    .byte YELLOW + 10, GREEN + 7, GREEN + 7, GREEN + 7, GREEN + 7, GREEN + 7
    .byte GREEN + 7, GREEN + 7, GREEN + 7, YELLOW + 12, YELLOW + 12, YELLOW + 12
    .byte BLUE + 15, BLUE + 15, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK
-   
+
 FastEddieJumpingColorValues_00
    .byte YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10
    .byte YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10
    .byte YELLOW + 10, GREEN + 7, GREEN + 7, GREEN + 7, GREEN + 7, GREEN + 7
    .byte GREEN + 7, GREEN + 7, GREEN + 7, YELLOW + 12, YELLOW + 12, YELLOW + 12
    .byte BLUE + 15, BLUE + 15, BLACK, BLACK, BLACK, BLACK
-   
+
 FastEddieJumpingColorValues_01
    .byte YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10
    .byte YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10
@@ -2086,7 +2086,7 @@ FastEddieJumpingGraphic
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 FastEddieWalkingColors
    .byte YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10
    .byte YELLOW + 10, GREEN + 7, GREEN + 7, GREEN + 7, GREEN + 7, GREEN + 7
@@ -2099,14 +2099,14 @@ FastEddieVerticalColors_00
    .byte YELLOW + 10, YELLOW + 10, YELLOW + 10, GREEN + 7, GREEN + 7, GREEN + 7
    .byte GREEN + 7, GREEN + 7, GREEN + 7, GREEN + 7, YELLOW + 12, YELLOW + 12
    .byte BLUE + 15, BLUE + 15, BLUE + 15, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK
-   
+
 FastEddieVerticalColors_01
    .byte BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, YELLOW + 10
    .byte YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10, YELLOW + 10
    .byte YELLOW + 10, GREEN + 7, GREEN + 7, GREEN + 7, GREEN + 7, GREEN + 7
    .byte GREEN + 7, GREEN + 7, GREEN + 7, YELLOW + 12, YELLOW + 12, BLUE + 15
    .byte BLUE + 15, BLACK, BLACK
-   
+
 FastEddieGraphic_00
    .byte $07 ; |.....XXX|
    .byte $07 ; |.....XXX|
@@ -2246,7 +2246,7 @@ HighTopColors
    .byte RED_ORANGE + 6, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK
    .byte BLACK, BLACK, BLACK, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK
    .byte BLACK, BLACK, BLACK, BLACK
-   
+
 EddiePrizeGraphic
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -2430,7 +2430,7 @@ HeartPrizeGraphics
    .byte $36 ; |..XX.XX.|
    .byte $00 ; |........|
 
-BlankGraphics      
+BlankGraphics
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -2591,7 +2591,7 @@ _90PointGraphic
    .byte $55 ; |.X.X.X.X|
    .byte $22 ; |..X...X.|
    .byte $00 ; |........|
-       
+
 DetermineRandomLadderPlacement
    lda ladderPlacementValue
    ror
@@ -2602,30 +2602,30 @@ DetermineRandomLadderPlacement
    sta ladderJustificationValue
    stx ladderPlacementValue
    jmp .setPFLadderPlacementValues
-       
+
 HorizontalFineMotionValues
    .byte HMOVE_L7, HMOVE_L6, HMOVE_L5, HMOVE_L4
    .byte HMOVE_L3, HMOVE_L2, HMOVE_L1, HMOVE_0
    .byte HMOVE_R1, HMOVE_R2, HMOVE_R3, HMOVE_R4
    .byte HMOVE_R5, HMOVE_R6, HMOVE_R7
-   
+
 PF2LivesIndicatorValues
    .byte $00 ; |........|
    .byte $E0 ; |XXX.....|
    .byte $0E ; |....XXX.|
    .byte $EE ; |XXX.XXX.|
-   
+
 NewPrizeIndexItemValues
    .byte <highTopHorizPosition - objectHorizPositions
    .byte <_05PlatformPrizeHorizPos - objectHorizPositions
    .byte <_04PlatformPrizeHorizPos - objectHorizPositions
    .byte <_03PlatformPrizeHorizPos - objectHorizPositions
    .byte <_02PlatformPrizeHorizPos - objectHorizPositions
-   
+
 FastEddieVertAnimationValues
    .byte <FastEddieVertical
    .byte <FastEddieVertical - 4
-   
+
 FastEddieVerticalColorLSBValues
    .byte <FastEddieVerticalColors_00
    .byte <FastEddieVerticalColors_01
@@ -2636,8 +2636,8 @@ FastEddieVerticalColorLSBValues
    .byte $B0,$A0,$90,$00,$E0,$0E,$EE,$00,$05,$06,$07,$08
 
    BOUNDARY 0
-   
-NumberFonts       
+
+NumberFonts
 zero
    .byte $3E ; |..XXXXX.|
    .byte $63 ; |.XX...XX|
@@ -2750,7 +2750,7 @@ SneakerGraphic_00
 SneakerColors
    .byte WHITE, WHITE, WHITE, WHITE, WHITE, LT_BLUE + 8, LT_BLUE + 8
    .byte LT_BLUE + 8, LT_BLUE + 8, LT_BLUE + 8, LT_BLUE + 8, BLACK, BLACK
-   
+
 SneakerGraphic_01
    .byte $E0 ; |XXX.....|
    .byte $E0 ; |XXX.....|
@@ -2767,7 +2767,7 @@ SneakerGraphic_01
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 HighTopGraphics_00
    .byte $07 ; |.....XXX|
    .byte $07 ; |.....XXX|
@@ -2858,7 +2858,7 @@ HighTopGraphics_01
    .byte $02 ; |......X.|
    .byte $00 ; |........|
    .byte $00 ; |........|
-       
+
 PrizeGraphicLSBValues
    .byte <BlankPrizeGraphic - 16
    .byte <HeartPrizeGraphics - 16
@@ -2880,7 +2880,7 @@ PrizeGraphicLSBValues
    .byte <_70PointGraphic - 16
    .byte <_80PointGraphic - 16
    .byte <_90PointGraphic - 16
-       
+
 PrizeGraphicMSBValues
    .byte >BlankPrizeGraphic
    .byte >HeartPrizeGraphics
@@ -2914,16 +2914,16 @@ InitHorizPosAndDirValues
    .byte INIT_HORIZ_POS_SNEAKER_02, INIT_HORIZ_POS_PRIZE_05
    .byte INIT_HORIZ_POS_PRIZE_04, INIT_HORIZ_POS_PRIZE_03
    .byte INIT_HORIZ_POS_PRIZE_02, INIT_HORIZ_POS_FAST_EDDIE
-       
+
 FastEddieVerticalReflectValues
    .byte NO_REFLECT, REFLECT, NO_REFLECT
-   
+
 PF0LivesIndicatorValues
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $EE ; |XXX.XXX.|
    .byte $EE ; |XXX.XXX.|
-   
+
 FastEddieJumpingGraphicLSBValues
    .byte <FastEddieJumpingGraphic
    .byte <FastEddieJumpingGraphic - 3
@@ -2939,7 +2939,7 @@ FastEddieJumpingColorLSBValues
    .byte <FastEddieJumpingColorValues_01
    .byte <FastEddieJumpingColorValues_01
    .byte <FastEddieJumpingColorValues_00
-   
+
 HighTopGraphicLSBValues_00
    .byte <HighTopGraphics_00 + 1, <HighTopGraphics_00 + 2
    .byte <HighTopGraphics_00 + 3, <HighTopGraphics_00 + 4
@@ -2947,7 +2947,7 @@ HighTopGraphicLSBValues_00
    .byte <HighTopGraphics_00 + 7, <HighTopGraphics_00 + 8
    .byte <HighTopGraphics_00 + 9, <HighTopGraphics_00 + 10
    .byte <HighTopGraphics_00 + 16
-   
+
 HighTopGraphicLSBValues_01
    .byte <HighTopGraphics_01 + 1, <HighTopGraphics_01 + 2
    .byte <HighTopGraphics_01 + 3, <HighTopGraphics_01 + 4
@@ -2955,7 +2955,7 @@ HighTopGraphicLSBValues_01
    .byte <HighTopGraphics_01 + 7, <HighTopGraphics_01 + 8
    .byte <HighTopGraphics_01 + 9, <HighTopGraphics_01 + 10
    .byte <HighTopGraphics_01 + 16
-   
+
 HighTopColorLSBValues
    .byte <HighTopColors + 1, <HighTopColors + 2
    .byte <HighTopColors + 3, <HighTopColors + 4
@@ -2963,7 +2963,7 @@ HighTopColorLSBValues
    .byte <HighTopColors + 7, <HighTopColors + 8
    .byte <HighTopColors + 9, <HighTopColors + 10
    .byte <HighTopColors + 16
-   
+
 LeftJustifiedLadderGraphics
    .byte $90 ; |X..X....|
    .byte $90 ; |X..X....|
@@ -2992,7 +2992,7 @@ LeftJustifiedLadderGraphics
    .byte $90 ; |X..X....|
    .byte $90 ; |X..X....|
    .byte $90 ; |X..X....|
-   
+
 RightJustifiedLadderGraphics
    .byte $09 ; |....X..X|
    .byte $09 ; |....X..X|
@@ -3021,17 +3021,17 @@ RightJustifiedLadderGraphics
    .byte $09 ; |....X..X|
    .byte $09 ; |....X..X|
    .byte $09 ; |....X..X|
-   
+
 GameSelectionGraphicLSBValues
-   .byte <one - 1, <two - 1, <three - 1, <four - 1 
+   .byte <one - 1, <two - 1, <three - 1, <four - 1
    .byte <five - 1, <six - 1, <seven - 1, <eight - 1, <nine - 1
-   
+
 SneakerRightBoundaryValues
    .byte SNEAKER_ONE_COPY_RIGHT_BOUNDARY, SNEAKER_TWO_COPIES_RIGHT_BOUNDARY
    .byte SNEAKER_TWO_MED_COPIES_RIGHT_BOUNDARY, SNEAKER_THREE_COPIES_RIGHT_BOUNDARY
    .byte SNEAKER_TWO_WIDE_COPIES_RIGHT_BOUNDARY, SNEAKER_DOUBLE_SIZE_RIGHT_BOUNDARY
    .byte SNEAKER_THREE_MED_COPIES_RIGHT_BOUNDARY, SNEAKER_QUAD_SIZE_RIGHT_BOUNDARY
-       
+
 SetupSneakerValuesForKernel
    ldy gameSelection          ; 3
    lda SneakerNUSIZLSBValues,y; 4
@@ -3055,7 +3055,7 @@ SetupSneakerValuesForKernel
    SLEEP 2                    ; 2
 .coarsePositionSneaker
    dex                        ; 2
-   bne .coarsePositionSneaker ; 2³
+   bne .coarsePositionSneaker ; 2ï¿½
    SLEEP 2                    ; 2
    sta RESP0                  ; 3
    sta WSYNC
@@ -3063,7 +3063,7 @@ SetupSneakerValuesForKernel
    sta HMOVE                  ; 3
    ldy #H_KERNEL_SECTION - 16 ; 2
    jmp .continueDrawSneakerKernel;3
-       
+
 FastEddieLiteral_00
    .byte $84 ; |X....X..|
    .byte $84 ; |X....X..|
@@ -3118,7 +3118,7 @@ FastEddieLiteral_05
    .byte $A8 ; |X.X.X...|
    .byte $2F ; |..X.XXXX|
    .byte $00 ; |........|
-       
+
 IncrementPlatformColor
    lda platformColor                ; get current platform color
    clc
@@ -3136,7 +3136,7 @@ SneakerNUSIZLSBValues
    .byte <LevelSevenSneakerSizeValues
    .byte <LevelEightSneakerSizeValues
    .byte <LevelEightSneakerSizeValues
-       
+
    .org ROM_BASE + 4096 - 4, 0      ; 4K ROM
    .word Start
    .word Start

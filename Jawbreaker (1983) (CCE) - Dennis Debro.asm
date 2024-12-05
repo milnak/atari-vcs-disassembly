@@ -16,7 +16,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1982, TIGER ELECTRONIC TOYS, INC.                  =
+; = THE ASSEMBLED CODE IS ï¿½ 1982, TIGER ELECTRONIC TOYS, INC.                  =
 ; =                                                                            =
 ; ==============================================================================
 ;
@@ -41,14 +41,14 @@
 ; - This game uses a lot of overlays and flags.
 
    processor 6502
-      
+
 ;
 ; Set the read address base so this runs on the real VCS and compiles to the
 ; exact ROM image. This must be done before including the vcs.h header file.
 ;
 TIA_BASE_READ_ADDRESS = $30
 
-   include "tia_constants.h"
+   include "tia_constants_100.h"
    include "vcs.h"
    include "macro.h"
 
@@ -56,14 +56,14 @@ TIA_BASE_READ_ADDRESS = $30
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -119,11 +119,11 @@ VBLANK_TIME             = 38
 OVERSCAN_TIME           = 31
 
    ELSE
-   
+
 FPS                     = 50        ; ~50 frames per second
 VBLANK_TIME             = 69
 OVERSCAN_TIME           = 57
-   
+
    ENDIF
 
 ;===============================================================================
@@ -519,7 +519,7 @@ ResetCandyPlayfield
    bcs .resetPlayer2CandyEaten
    sty player1NumCandyBarsEaten     ; reset number of candy eaten by player 1
    bcc .skipPlayer2Reset            ; unconditional branch
-   
+
 .resetPlayer2CandyEaten
    sty player2NumCandyBarsEaten     ; reset number of candy eaten by player 2
    lda #PLAYER2_CANDY_MASK
@@ -694,7 +694,7 @@ Overscan
    lsr                              ; shift D0 into carry
    bcc ReadConsoleSwitches          ; branch if on an even time value
    jmp CheckPlayerSmileyCollision
-   
+
 ReadConsoleSwitches
    lda SWCHB                        ; read console switch value
    tay                              ; save value in y for later use
@@ -717,7 +717,7 @@ ReadConsoleSwitches
    sta gameState
    jsr ResetPlayfieldState
    bne .incrementAttractModeTimer   ; unconditional branch
-   
+
 .checkForGameReset
    lda #0
    sta selectDebounce               ; reset select debounce rate
@@ -752,7 +752,7 @@ ReadConsoleSwitches
    bpl .setSmileyAttractModeColors
 .jmpToVerticalSync
    jmp VerticalSync
-   
+
 StartNewGame
    lda gameState                    ; get current game state
    bmi .initializeGameVariables     ; branch if game in progress
@@ -780,7 +780,7 @@ StartNewGame
 .setPlayer2Lives
    stx player2State
    bpl .jmpToVerticalSync           ; unconditional branch
-   
+
 CheckForGameOver
    ldx #1
 .checkNumberOfLives
@@ -793,7 +793,7 @@ CheckForGameOver
    and #~MASK_GAME_RUNNING
    sta gameState                    ; set game state to GAME OVER
    jmp .incrementAttractModeTimer
-   
+
 CheckPlayerSmileyCollision
    bit gameBoardState               ; check game board state
    bvs DoPlayerDeathAnimation       ; branch if player caught by smiley
@@ -804,7 +804,7 @@ CheckPlayerSmileyCollision
    bne jmpToMoveSmiliesOrToothbrush
    ldx #H_SMILEY - 1
    lda vitaminActiveTimer           ; determine if vitamin is active
-   beq SmileyCaughtPlayer           ; if not active then smiley caught player   
+   beq SmileyCaughtPlayer           ; if not active then smiley caught player
    ldx #MAX_NUM_SMILIES
    tya                              ; move player row number to accumulator
 .findSmileyLoop
@@ -820,7 +820,7 @@ CheckPlayerSmileyCollision
    jsr IncrementScore
 jmpToMoveSmiliesOrToothbrush
    jmp MoveSmiliesOrToothbrush
-   
+
 SmileyCaughtPlayer SUBROUTINE
 .clearSmileyGraphics
    sta smileyGraphics,x             ; a = 0
@@ -840,7 +840,7 @@ SmileyCaughtPlayer SUBROUTINE
    ora #%01000000
    sta gameBoardState               ; set to show player caught by smiley
    bne .setPlayerDeathAnimation     ; unconditional branch
-   
+
 DoPlayerDeathAnimation
    dec smileyHorizValues            ; reduce death animation frame wait
    bne .jmpToVerticalSync
@@ -893,7 +893,7 @@ DoPlayerDeathAnimation
    bmi .setPlayer2Active            ; branch if player 1 is active
    ora #%10000000                   ; make player 1 active
    bmi .setPlayerActiveState        ; unconditional branch
-   
+
 .setPlayer2Active
    and #%01111111
 .setPlayerActiveState
@@ -902,13 +902,13 @@ DoPlayerDeathAnimation
    jsr ResetPlayerPositions
 .jmpToVerticalSync
    jmp VerticalSync
-   
+
 MoveSmiliesOrToothbrush
    lda gameBoardState               ; get the current board state
-   bpl DetermineToMoveSmilies       ; move smilies if board not finished 
+   bpl DetermineToMoveSmilies       ; move smilies if board not finished
    ldx #0                           ; index for tooth brush horizontal value
    jmp MoveToothbrush
-   
+
 DetermineToMoveSmilies
    ldx #MAX_NUM_SMILIES - 1
 MoveNextSmiley
@@ -923,7 +923,7 @@ MoveNextSmiley
    sta smileyDelayMotion,x
    bcc MoveSmileySprite
    jmp DoNextSmiley
-   
+
 MoveSmileySprite
    lda smileyDirections             ; get the smiley direction values
    sta tmpSmileyDirections          ; save to manipulate the values
@@ -938,7 +938,7 @@ MoveSmileySprite
    inc smileyRowValues,x
    beq .setSmileyToRow10
    jmp DoNextSmiley
-   
+
 .moveSmiley
    bcs .smileyTravelingLeft
    jsr MoveSmileyRight              ; increment the smiley horizontal position
@@ -950,17 +950,17 @@ MoveSmileySprite
    cmp #HMOVE_R4 | 6
    beq DetermineSmileyChangeDirection
    bne .doneMoveSmileySprite        ; unconditional branch
-   
+
 .smileyTravelingLeft
    jsr MoveSmileyLeft               ; decrement the smiley horizontal position
    cmp #XMAX                        ; compare with XMAX to see if off screen
    jmp .checkIfSmileyOffScreen
-   
+
 .setSmileyToRow10
    lda #10
    sta smileyRowValues,x
    jmp DetermineNewRowOfSmiley
-   
+
 DetermineSmileyChangeDirection
    jsr DetermineRowOfPlayer
    tya                              ; move row number to accumulator
@@ -982,24 +982,24 @@ DetermineSmileyChangeDirection
    and SmileyLeftTravelValues,x
    beq .changeSmileyDirection
    bne .doneMoveSmileySprite        ; unconditional branch
-   
+
 .playerToTheLeftOfSmiley
    lda smileyDirections             ; get the smiley direction values
    and SmileyLeftTravelValues,x
    bne .changeSmileyDirection
    beq .doneMoveSmileySprite        ; unconditional branch
-   
+
 .randomlyChangeDirection
    jsr NextRandom                   ; re-seed random number
    cmp #192                         ; if value greater than 192 then don't
    bcc .checkToChangeSmileyDirection; change smiley direction
    bcs .doneMoveSmileySprite        ; unconditional branch
-   
+
 .checkToChangeSmileyDirection
    jsr NextRandom                   ; re-seed random number
    bmi .changeSmileyDirection       ; change smiley direction if random >= 128
    bpl .doneMoveSmileySprite        ; unconditional branch
-   
+
 .changeSmileyDirection
    lda smileyDirections             ; get the smiley direction values
    and SmileyLeftTravelValues,x
@@ -1007,7 +1007,7 @@ DetermineSmileyChangeDirection
    lda smileyDirections             ; get the smiley direction values
    ora SmileyLeftTravelValues,x     ; or in the left travel value for smiley
    jmp .setSmileyDirection          ; could use unconditionl branch -- bne
-   
+
 .setSmileyDirectionToRight
    lda smileyDirections             ; get the smiley direction values
    and SmileyRightTravelValues,x    ; and in the right travel value for smiley
@@ -1015,7 +1015,7 @@ DetermineSmileyChangeDirection
    sta smileyDirections
 .doneMoveSmileySprite
    jmp DetermineToMoveSmiley
-   
+
 DetermineNewRowOfSmiley SUBROUTINE
    lda vitaminActiveTimer           ; determine if the vitamin is active
    bne CalculateRandomSmileyRow     ; branch if vitamin active
@@ -1025,7 +1025,7 @@ DetermineNewRowOfSmiley SUBROUTINE
    jsr DetermineRowOfPlayer         ; get the row the player is in
    tya                              ; move player row to accumulator
    jmp NewSmileyRowFound
-   
+
 CalculateRandomSmileyRow
    jsr NextRandom                   ; get a new random number
    ldy #<-1
@@ -1057,7 +1057,7 @@ NewSmileyRowFound
    cmp #8                           ; compare player's coarse value with 8
    bcc .setSmileyDirectionToRight
    bcs .setSmileyDirectionToLeft    ; unconditional branch
-   
+
 SetSmileyNewDirection
    jsr NextRandom
    bmi .setSmileyDirectionToRight
@@ -1067,7 +1067,7 @@ SetSmileyNewDirection
    sta smileyDirections             ; set to make smiley move left next frame
    lda #XMIN
    bne .setSmileyNewHorizontalValue ; unconditional branch
-   
+
 .setSmileyDirectionToRight
    lda smileyDirections             ; get the smiley direction values
    and SmileyRightTravelValues,x    ; and in the right travel value for smiley
@@ -1079,15 +1079,15 @@ DetermineToMoveSmiley
    dec skipAllowMotionState         ; reduce skipAllowMotionState value
    bmi DoNextSmiley                 ; branch if not moving this frame
    jmp MoveSmileySprite
-   
+
 DoNextSmiley
    dex
    bmi .doneMovingSmilies
    jmp MoveNextSmiley
-   
+
 .doneMovingSmilies
    jmp VerticalSync
-   
+
 MoveToothbrush
    lda toothbrushSoundIndex1
    beq CheckToMoveToothbrushRight
@@ -1102,7 +1102,7 @@ MoveToothbrush
    lda #12
    sta toothbrushSoundIndex2
    bne .doneMovingSmilies           ; unconditional branch
-   
+
 ChangeToothbrushToLeft
    dec toothbrushSoundIndex2
    lda toothbrushSoundIndex2
@@ -1115,7 +1115,7 @@ ChangeToothbrushToLeft
    bne .setChannelAndFreqForToothbrush
    jsr ResetPlayfieldState
    bne .doneToothbrushMovement      ; unconditional branch
-   
+
 CheckToMoveToothbrushRight
    lda toothbrushSoundIndex3
    lsr                              ; shift D0 to carry
@@ -1139,7 +1139,7 @@ CheckToMoveToothbrushRight
    sta AUDF1
 .doneToothbrushMovement
    jmp VerticalSync
-   
+
 ChangeToothbrushToRight
    dec toothbrushSoundIndex2
    lda toothbrushSoundIndex2
@@ -1157,7 +1157,7 @@ ChangeToothbrushToRight
    lda #1
    sta toothbrushSoundIndex1
    bne .doneToothbrushMovement      ; unconditional branch
-   
+
 MoveSmileyRight
    lda smileyHorizValues,x          ; get the smiley's horizontal value
    clc
@@ -1175,7 +1175,7 @@ MoveSmileyLeft
    bvc .setSmileyHorizPosition      ; check to see if overflow happened
    sbc #15                          ; if so the subtract 15 for new position
    jmp .setSmileyHorizPosition
-   
+
 VerticalSync SUBROUTINE
 .waitTime
    lda TIMINT
@@ -1190,7 +1190,7 @@ VerticalSync SUBROUTINE
    bmi CheckForActiveVitamin        ; branch if game in progress
    sta gameTimer                    ; set game timer to 2
    jmp CheckPlayerVitaminCollision
-   
+
 CheckForActiveVitamin
    dec gameTimer                    ; reduce game timer
    bne CheckPlayerVitaminCollision
@@ -1207,7 +1207,7 @@ CheckForActiveVitamin
    ldx #MAX_NUM_SMILIES - 1
    lda vitaminActiveTimer           ; get the vitamin timer
    cmp #5                           ; see if it's time to flash smiley colors
-   bcs .colorSmilies                ; color smiley RED if greater than 4             
+   bcs .colorSmilies                ; color smiley RED if greater than 4
    lsr                              ; move D0 to carry
    bcs .colorSmilies                ; color RED on odd frames
    ldy #WHITE                       ; Smilies to be WHITE
@@ -1218,11 +1218,11 @@ CheckForActiveVitamin
    dex
    bpl .colorSmilies
    bmi DoGameSounds                 ; unconditional branch
-   
+
 .vitaminNotActive
    jsr SetSmileyAttributes
    jmp .vsyncWaitTime
-   
+
 DetermineToActivateVitamin
    lda gameBoardState               ; get the current board state
    and #$0F                         ; mask to get the vitamin timer
@@ -1274,7 +1274,7 @@ DoGameSounds
    sta AUDC1
    sta soundIndex
    beq .vsyncWaitTime               ; unconditional branch
-   
+
 .playExtraLifeOrEatingSmiley
    cmp #144
    bcs .playExtraLifeSound
@@ -1290,7 +1290,7 @@ DoGameSounds
    sta AUDC1
    sta soundIndex
    beq .vsyncWaitTime               ; unconditional branch
-   
+
 .playExtraLifeSound
    sta AUDV1
    lda #12
@@ -1316,19 +1316,19 @@ DoGameSounds
    sta TIM64T                       ; set timer for vertical blank time
    sta CXCLR                        ; clear all collision registers
    jmp StartGameCalculations
-   
+
 SmileyRightTravelValues
    .byte ~FOURTH_SMILEY_TRAVEL_LEFT, ~THIRD_SMILEY_TRAVEL_LEFT
    .byte ~SECOND_SMILEY_TRAVEL_LEFT, ~FIRST_SMILEY_TRAVEL_LEFT
-   
+
 SmileyLeftTravelValues
    .byte FOURTH_SMILEY_TRAVEL_LEFT, THIRD_SMILEY_TRAVEL_LEFT
    .byte SECOND_SMILEY_TRAVEL_LEFT, FIRST_SMILEY_TRAVEL_LEFT
-   
+
 SmileyColorTable
    .byte FIRST_SMILEY_COLOR, SECOND_SMILEY_COLOR
    .byte THIRD_SMILEY_COLOR, FOURTH_SMILEY_COLOR
-   
+
 SmileyDelayMotionValues
    .byte MOVE_FRAME_RATE_8, MOVE_FRAME_RATE_8, MOVE_FRAME_RATE_10
    .byte MOVE_FRAME_RATE_11, MOVE_FRAME_RATE_8, MOVE_FRAME_RATE_8
@@ -1341,10 +1341,10 @@ SmileyDelayMotionValues
    .byte MOVE_FRAME_RATE_6, MOVE_FRAME_RATE_8, MOVE_FRAME_RATE_9
    .byte MOVE_FRAME_RATE_6, MOVE_FRAME_RATE_6, MOVE_FRAME_RATE_8
    .byte MOVE_FRAME_RATE_8, MOVE_FRAME_RATE_6
-   
+
 SmileyFrameDelayValues
    .byte FAST_MOVING_SMILEY, MEDIUM_MOVING_SMILEY, SLOW_MOVING_SMILEY
-   
+
 InitJawGraphics
    .byte $38 ; |..XXX...|
    .byte $7C ; |.XXXXX..|
@@ -1356,7 +1356,7 @@ InitJawGraphics
    .byte $28 ; |..X.X...|
    .byte $7C ; |.XXXXX..|
    .byte $38 ; |..XXX...|
-   
+
    .byte $44 ; |.X...X..|
    .byte $44 ; |.X...X..|
    .byte $00 ; |........|
@@ -1367,7 +1367,7 @@ InitJawGraphics
    .byte $38 ; |..XXX...|
    .byte $44 ; |.X...X..|
    .byte $44 ; |.X...X..|
-   
+
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $08 ; |....X...|
@@ -1378,7 +1378,7 @@ InitJawGraphics
    .byte $40 ; |.X......|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    .byte $08 ; |....X...|
    .byte $08 ; |....X...|
    .byte $7C ; |.XXXXX..|
@@ -1389,7 +1389,7 @@ InitJawGraphics
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    .byte $7C ; |.XXXXX..|
    .byte $38 ; |..XXX...|
    .byte $00 ; |........|
@@ -1400,7 +1400,7 @@ InitJawGraphics
    .byte $00 ; |........|
    .byte $7C ; |.XXXXX..|
    .byte $38 ; |..XXX...|
-   
+
    .byte $00 ; |........|
    .byte $00 ; |........|
 
@@ -1408,7 +1408,7 @@ StartGameCalculations
    bit gameBoardState               ; check the game board state
    bvc CheckForEatingCandy          ; branch if player not caught by smiley
    jmp SetSmileySpriteAnimation
-   
+
 ; Understanding how the pointers are calculated for eating dots algorithm
 ; ---------------------------------------------------------------------------
 ;
@@ -1519,7 +1519,7 @@ CheckForEatingCandy
    jsr SetXForActivePlayer          ; determine which player is active
    inc numCandyBarsEaten,x          ; increment player's number of candy eaten
    bne .determineToMovePlayer       ; unconditional branch
-   
+
 CheckForGameBoardDone
    lda gameBoardState               ; get the current game board state
    bmi SetToothbrushGraphics        ; branch if board done
@@ -1575,7 +1575,7 @@ IncrementGameLevel
    adc #8                           ; increment by 8 to increase player 1's
    sta levelNumber                  ; level number
    bne SetToothbrushGraphics        ; unconditional branch
-   
+
 .incrementPlayer2LevelNumber
    inc levelNumber
 SetToothbrushGraphics
@@ -1615,14 +1615,14 @@ DeterminePlayerDifficulty
    bcc DeterminePlayerDirection
 .skipJoystickRead
    jmp SetSmileySpriteAnimation
-   
+
 DeterminePlayerDirection
    lda $0288                        ; read joystick values
    ldx player1State                 ; check to see if player 1 is active
    bpl .shiftPlayer1JoystickValues  ; shift joystick values if active
    and #$0F                         ; mask player 1's joystick values
    bne .determineMovementDelta      ; unconditional branch
-   
+
 .shiftPlayer1JoystickValues
    lsr                              ; shift player 1's joystick values
    lsr                              ; to the lower nybbles
@@ -1657,7 +1657,7 @@ DeterminePlayerVertMovement
    ora #DIRECTION_DOWN              ; or in the downward direction
    sta playerFrameState             ; set the direction and branch
    bne MovePlayerVertically         ; unconditional branch
-   
+
 .determineMovePlayerUp
    lda playerFrameState             ; get the current player frame state
    and #MASK_DIRECTION_VERT
@@ -1670,7 +1670,7 @@ DeterminePlayerVertMovement
    ora #DIRECTION_UP                ; or in the upward direction
    sta playerFrameState             ; set the direction and branch
    bne MovePlayerVertically         ; unconditional branch
-   
+
 DeterminePlayerHorizMovement
    lda horizMovementDelta           ; get the horizontal movement direction
    beq DetermineMovementByDirection ; branch if invalid horizontal value
@@ -1686,14 +1686,14 @@ DeterminePlayerHorizMovement
    ora #DIRECTION_RIGHT             ; or in right direction
    sta playerFrameState             ; set the direction and branch
    bne MovePlayerHorizontally       ; unconditional branch
-   
+
 .movePlayerLeft
    lda playerFrameState             ; get the current player frame state
    and #$0F                         ; mask the direction bits
    ora #DIRECTION_LEFT              ; or in left direction
    sta playerFrameState             ; set the direction and branch
    bne MovePlayerHorizontally       ; unconditional branch
-   
+
 DetermineMovementByDirection
    lda playerFrameState             ; get current player frame state
    and #DIRECTION_DOWN
@@ -1703,14 +1703,14 @@ DetermineMovementByDirection
    jsr DetermineVertAllowedMotion
    bcc MovePlayerVertically
    bcs .setPlayerMotionToNotMoving  ; unconditional branch
-   
+
 .checkPlayerMovingDown
    lda playerFrameState             ; get current player frame state
    and #DIRECTION_UP
    beq .checkHorizMovementByDirection
    lda #<-1
    bne .determineVertAllowedMotion  ; unconditional branch
-   
+
 .checkHorizMovementByDirection
    lda playerFrameState             ; get current player frame state
    and #DIRECTION_RIGHT
@@ -1724,26 +1724,26 @@ DetermineMovementByDirection
    and #$0F                         ; mask the direction bits
    sta playerFrameState             ; set player direction to not moving
    jmp SetSmileySpriteAnimation
-   
+
 .checkPlayerMovingLeft
    lda playerFrameState             ; get current player frame state
    and #DIRECTION_LEFT
    beq .setPlayerMotionToNotMoving
    lda #<-1
    bne .determineHorizAllowedMotion ; unconditional branch
-   
+
 MovePlayerVertically SUBROUTINE
    lda playerFrameState             ; get current player frame state
    bmi .movePlayerUp
    dec playerVertPos
    dec playerVertPos
    bne .determineJawsSpriteAnimation; unconditional branch
-   
+
 .movePlayerUp
    inc playerVertPos
    inc playerVertPos
    bne .determineJawsSpriteAnimation; unconditional branch
-   
+
 MovePlayerHorizontally
    lda playerFrameState             ; get current player frame state
    and #DIRECTION_RIGHT
@@ -1759,7 +1759,7 @@ MovePlayerHorizontally
    dec skipAllowMotionState         ; reduce skipAllowMotionState value
    bmi SetPlayerSpriteAnimation     ; branch if not moving this frame
    jmp DeterminePlayerDirection
-   
+
 .movePlayerRight
    lda playerHorizPos               ; get the player's horizontal position
    clc
@@ -1767,7 +1767,7 @@ MovePlayerHorizontally
    bvc .setPlayerHorizontalPosition ; check to see if overflow happened
    adc #15                          ; if so then add in 15 for new position
    bne .setPlayerHorizontalPosition ; unconditional branch
-   
+
 SetPlayerSpriteAnimation
    lda gameTimer                    ; get the current game timer
    lsr                              ; shift D0 to carry
@@ -1782,7 +1782,7 @@ SetPlayerSpriteAnimation
    lda #>JawSpritesVertical         ; set the player graphics MSB
    sta playerGraphicsPointer + 1
    bne .incrementPlayerFrameState   ; unconditional branch
-   
+
 .setForHorizontalAnimation
    lda #<JawSpritesHorizontal
    sta playerGraphicsPointer
@@ -1811,7 +1811,7 @@ SetPlayerSpriteAnimation
    cpx #H_PLAYER
    bcc .setPlayerGraphics
    bcs MovePassThroughGaps          ; unconditional branch
-   
+
 SetSmileySpriteAnimation
    lda gameTimer                    ; get the current game timer
    lsr                              ; shift D0 into carry
@@ -1853,7 +1853,7 @@ MovePassThroughGaps
    sta passThroughGapDelayMotion    ; set pass through delay value
    asl tmpPassThroughDirections     ; shift directions left so next direction
    jmp .nextPassThroughGap          ; is in D7
-   
+
 .setPassThroughGapDelay
    lda #%11001101
    and PassThroughDelayMask,x       ; get delay for current pass through
@@ -1928,7 +1928,7 @@ SortSmilies
    cpy #MAX_NUM_SMILIES
    bcc .sortSmiliesLoop
    jmp DoneGameCalculations
-   
+
 DetermineHorizAllowedMotion SUBROUTINE
    bmi .determineAllowedLeftMotion
    lda playerHorizPos               ; get the player's horizontal position
@@ -1997,13 +1997,13 @@ DetermineVertAllowedMotion SUBROUTINE
 
 PlayfieldCandyPointers
    .byte leftPF1Candy, leftPF2Candy, rightPF2Candy, rightPF1Candy
-   
+
 HorizontalDirectionTable
    .byte 0, 0, 0, 0, 0, 1, 1, 1, 0, -1, -1, -1, 0, 0, 0, 0
-   
+
 VerticalDirectionTable
    .byte 0, 0, 0, 0, 0, 1, -1, 0, 0, 1, -1, 0, 0, 1, -1, 0
-   
+
 Toothbrush
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -2017,7 +2017,7 @@ Toothbrush
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 JawSprites
 JawSpritesHorizontal
 JawSpritesHorizontal_00
@@ -2158,13 +2158,13 @@ JawSpritesVertical_03
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 PassThroughDelayMask
    .byte D0, D1, D2, D3, D4, D5, D6, D7
-   
+
 PassThroughMask
    .byte ~D0, ~D1, ~D2, ~D3, ~D4, ~D5, ~D6, ~D7
-   
+
 CandyBarMaskingValues
    REPEAT 2
       .byte D6, D4, D2, D0, D0, D2, D4, D6
@@ -2176,7 +2176,7 @@ CandyBarMaskingValues
 
 DifficultySwitchMask
    .byte P0_DIFF_MASK, P1_DIFF_MASK
-   
+
 SmileySprites
 SmileyAnimation_0
    .byte $3C ; |..XXXX..|
@@ -2282,7 +2282,7 @@ SmileyAnimation_7
    .byte $CF ; |XX..XXXX|
    .byte $7E ; |.XXXXXX.|
    .byte $3C ; |..XXXX..|
-   
+
 SmileyAnimationTable
    .word SmileyAnimation_0, SmileyAnimation_1, SmileyAnimation_2
    .word SmileyAnimation_3, SmileyAnimation_4, SmileyAnimation_5
@@ -2380,7 +2380,7 @@ nine
    .byte $38 ; |..XXX...|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 DoneGameCalculations
    lda #0
    sta GRP0                         ; clear the player graphics to avoid
@@ -2456,7 +2456,7 @@ DisplayKernel SUBROUTINE
    tax                        ; 2 = @02
 .coarseMovePlayer
    dex                        ; 2
-   bne .coarseMovePlayer      ; 2³
+   bne .coarseMovePlayer      ; 2ï¿½
    sta RESP0                  ; 3
    sta WSYNC
 ;--------------------------------------
@@ -2471,7 +2471,7 @@ DisplayKernel SUBROUTINE
    sta HMP0                   ; 3 = @25
    ldy #1                     ; 2
    jmp JumpIntoGameKernel     ; 3
-   
+
 DigitLoop
    lda (digitPointers + 6),y  ; 5
    tax                        ; 2
@@ -2489,7 +2489,7 @@ DigitLoop
    ldy loopCount              ; 3
    iny                        ; 2
    bne .drawDigits            ; 3
-   
+
 DrawScoreDigits
    lda PlayerScoreColors,y    ; 4
    ldx vitaminActiveTimer     ; 3
@@ -2514,7 +2514,7 @@ DrawScoreDigits
 ;--------------------------------------
    sty loopCount              ; 3
    cpy #H_FONT - 1            ; 2
-   bcc DigitLoop              ; 2³
+   bcc DigitLoop              ; 2ï¿½
    lda #0                     ; 2
    sta GRP0                   ; 3 = @12
    sta GRP1                   ; 3 = @15
@@ -2526,15 +2526,15 @@ LivesKernel
    and #MASK_LIVES            ; 2         get number of remaining lives
    tax                        ; 2         move lives number to x
    lda LivesIndicatorCount,x  ; 4
-   bne .getLivesIndicatorColor; 2³        set lives colors if lives remain
+   bne .getLivesIndicatorColor; 2ï¿½        set lives colors if lives remain
    lda #PURPLE + 6            ; 2         set color to maze color
    bne .determineLivesColor   ; 3         unconditional branch
-   
+
 .getLivesIndicatorColor
    lda ActivePlayerLivesColor,y; 4
 .determineLivesColor
    ldx vitaminActiveTimer     ; 3
-   bpl .colorLivesIndicator   ; 2³
+   bpl .colorLivesIndicator   ; 2ï¿½
    eor randomSeed             ; 3
    and #$7F                   ; 2
 .colorLivesIndicator
@@ -2544,12 +2544,12 @@ LivesKernel
 ;--------------------------------------
 .coarseMoveLives
    dex                        ; 2
-   bne .coarseMoveLives       ; 2³
+   bne .coarseMoveLives       ; 2ï¿½
    stx RESP0                  ; 3 = @27   set lives indicators @ pixel 81
    ldx #4                     ; 2
 .wait19Cycles
    dex                        ; 2
-   bne .wait19Cycles          ; 2³
+   bne .wait19Cycles          ; 2ï¿½
    lda playerStates,y         ; 4 = @52   get current player state
    and #MASK_LIVES            ; 2         get number of remaining lives
    tax                        ; 2         move lives number to x
@@ -2565,7 +2565,7 @@ LivesKernel
    sta PF2                    ; 3 = @13
    ldx LivesIndicatorColor,y  ; 4
    lda vitaminActiveTimer     ; 3
-   bmi DrawLivesIndicators    ; 2²
+   bmi DrawLivesIndicators    ; 2ï¿½
    stx COLUP1                 ; 3 = @25
 DrawLivesIndicators
    ldy #0                     ; 2
@@ -2578,7 +2578,7 @@ DrawLivesIndicators
    sta GRP0                   ; 3 = @10
    iny                        ; 2
    cpy #H_FONT - 1            ; 2
-   bcc .livesIndicatorLoop    ; 2²
+   bcc .livesIndicatorLoop    ; 2ï¿½
    jsr SetXForActivePlayer    ; 6         determine which player is active
    sta WSYNC
 ;--------------------------------------
@@ -2589,14 +2589,14 @@ DrawLivesIndicators
    ldy #5                     ; 2
 .coarseMoveScoreDigits
    dey                        ; 2
-   bne .coarseMoveScoreDigits ; 2²
+   bne .coarseMoveScoreDigits ; 2ï¿½
    sta RESP0                  ; 3 = @40
    sta RESP1                  ; 3 = @43
    lda #HMOVE_L1              ; 2
    sta HMP1                   ; 3 = @48
    lda ActivePlayerLivesColor,x; 4
    ldx vitaminActiveTimer     ; 3
-   bpl .colorPlayer0          ; 2³
+   bpl .colorPlayer0          ; 2ï¿½
    eor randomSeed             ; 3
    and #COLOR_LIGHT_LUM       ; 2
 .colorPlayer0
@@ -2611,10 +2611,10 @@ DrawLivesIndicators
 
 LivesIndicatorColor
    .byte PLAYER1_LIVES_COLOR, PLAYER2_LIVES_COLOR
-   
+
 LivesIndicatorCount
    .byte ONE_COPY,ONE_COPY,MSBL_SIZE2,TWO_COPIES,THREE_COPIES
-   
+
 LivesIndicator
    .byte $38 ; |..XXX...|
    .byte $7C ; |.XXXXX..|
@@ -2623,14 +2623,14 @@ LivesIndicator
    .byte $28 ; |..X.X...|
    .byte $7C ; |.XXXXX..|
    .byte $38 ; |..XXX...|
-   
+
 DetermineToDrawPlayers
    iny                        ; 2
    lda #0                     ; 2
    cpy playerVertPos          ; 3
-   bcc .setPlayerGraphics     ; 2³
+   bcc .setPlayerGraphics     ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs .setPlayerGraphics     ; 2³
+   bcs .setPlayerGraphics     ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 .setPlayerGraphics
@@ -2650,14 +2650,14 @@ Waste12Cycles
    lda rightPF1Candy,x        ; 4
    lsr                        ; 2
    jmp .setRightPF1CandyPattern; 3
-   
+
 MainKernelLoop
    lda #0                     ; 2
    ldx playerGraphicIndex     ; 3
    cpy playerVertPos          ; 3
-   bcc LastScanlineOfSection  ; 2³
+   bcc LastScanlineOfSection  ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs LastScanlineOfSection  ; 2³
+   bcs LastScanlineOfSection  ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 LastScanlineOfSection
@@ -2673,9 +2673,9 @@ LastScanlineOfSection
    iny                        ; 2         increment scan line count
    lda #0                     ; 2
    cpy playerVertPos          ; 3
-   bcc .skipReadPlayerGraphics; 2³
+   bcc .skipReadPlayerGraphics; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs .skipReadPlayerGraphics; 2³
+   bcs .skipReadPlayerGraphics; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 .skipReadPlayerGraphics
@@ -2693,7 +2693,7 @@ LastScanlineOfSection
    lda tmpPlayerGraphics_b    ; 3
    sta GRP0                   ; 3 = @06
    lda player1State           ; 3         check to see if player 1 is active
-   bmi .setPlayer2PF2CandyPattern; 2³     branch if player 2 is active
+   bmi .setPlayer2PF2CandyPattern; 2ï¿½     branch if player 2 is active
    lda rightPF2Candy,x        ; 4
    asl                        ; 2
    ora #PLAYER2_CANDY_MASK    ; 2
@@ -2707,9 +2707,9 @@ JumpIntoGameKernel
    lda #0                     ; 2
    ldx playerGraphicIndex     ; 3
    cpy playerVertPos          ; 3
-   bcc SectionFirstScanline   ; 2³
+   bcc SectionFirstScanline   ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs SectionFirstScanline   ; 2³
+   bcs SectionFirstScanline   ; 2ï¿½
    lda playerGraphics,x       ; 4
    inc playerGraphicIndex     ; 5
 SectionFirstScanline
@@ -2724,7 +2724,7 @@ SectionFirstScanline
    ldx currentSmileyNumber    ; 3
    lda smileyRowValues,x      ; 4
    cmp kernelSection          ; 3
-   bne .noSmileyThisSection   ; 2³
+   bne .noSmileyThisSection   ; 2ï¿½
    lda smileyColors,x         ; 4
    sta COLUP1                 ; 3 = @35   color smiley
    sta smileyInSection        ; 3         set to say smiley is in section
@@ -2735,9 +2735,9 @@ SectionFirstScanline
    ldx playerGraphicIndex     ; 3
    lda #0                     ; 2
    cpy playerVertPos          ; 3
-   bcc .skipSetPlayerGraphics ; 2³
+   bcc .skipSetPlayerGraphics ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs .skipSetPlayerGraphics ; 2³
+   bcs .skipSetPlayerGraphics ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 .skipSetPlayerGraphics
@@ -2747,16 +2747,16 @@ SectionFirstScanline
 ;--------------------------------------
    sta GRP0                   ; 3
    cpy playerVertPos          ; 3         compare scan line and player vert
-   bcc .waste4Cycles          ; 2³
+   bcc .waste4Cycles          ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs MoveSmileyNoPlayer     ; 2³
+   bcs MoveSmileyNoPlayer     ; 2ï¿½
    lda playerGraphics,x       ; 4
    ldx tmpSmileyCoarseValue   ; 3
-   beq .resetSmileyPosition   ; 2³
+   beq .resetSmileyPosition   ; 2ï¿½
    nop                        ; 2 = @23
 .coarseMoveSmiley
    dex                        ; 2
-   bne .coarseMoveSmiley      ; 2³
+   bne .coarseMoveSmiley      ; 2ï¿½
 .resetSmileyPosition
    sta RESP1                  ; 3
    sta WSYNC
@@ -2764,24 +2764,24 @@ SectionFirstScanline
    sta HMOVE                  ; 3
    inc playerGraphicIndex     ; 5
    jmp ScanlineAfterSmileyMove; 3
-   
+
 .noSmileyThisSection
    lda #0                     ; 2
    sta smileyInSection        ; 3         set to say smiley not in section
    sta tmpSmileyGraphics      ; 3
    jmp .jmpIntoFirstSection   ; 3
-   
+
 .waste4Cycles
    SLEEP 2                    ; 2
    SLEEP 2                    ; 2 = @13
 MoveSmileyNoPlayer SUBROUTINE
    lda #0                     ; 2 = @15
    ldx.w tmpSmileyCoarseValue ; 4
-   beq .resetSmileyPosition   ; 2³
+   beq .resetSmileyPosition   ; 2ï¿½
    nop                        ; 2 = @23
 .coarseMoveSmiley
    dex                        ; 2
-   bne .coarseMoveSmiley      ; 2³
+   bne .coarseMoveSmiley      ; 2ï¿½
 .resetSmileyPosition
    sta RESP1                  ; 3
    sta WSYNC
@@ -2792,10 +2792,10 @@ ScanlineAfterSmileyMove
    lda tmpSmileyGraphics      ; 3
    sta GRP1                   ; 3 = @20
    lda smileyInSection        ; 3
-   beq .skipSmileyVariables   ; 2³
+   beq .skipSmileyVariables   ; 2ï¿½
    ldx smileyIndex            ; 3
    cpx #MAX_NUM_SMILIES - 1   ; 2
-   bcs .setTempSmileyGraphic  ; 2³
+   bcs .setTempSmileyGraphic  ; 2ï¿½
    inx                        ; 2
    stx smileyIndex            ; 3
    lda smileyIndexes,x        ; 4
@@ -2808,9 +2808,9 @@ ScanlineAfterSmileyMove
    iny                        ; 2         increment scan line number
    lda #0                     ; 2
    cpy playerVertPos          ; 3
-   bcc SectionFifthScanline   ; 2³
+   bcc SectionFifthScanline   ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs SectionFifthScanline   ; 2³
+   bcs SectionFifthScanline   ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 SectionFifthScanline SUBROUTINE
@@ -2820,20 +2820,20 @@ SectionFifthScanline SUBROUTINE
    lda tmpSmileyGraphics      ; 3
    sta GRP1                   ; 3 = @09
    lda smileyInSection        ; 3
-   beq .skipSetSmileyGraphic2 ; 2³
+   beq .skipSetSmileyGraphic2 ; 2ï¿½
    lda smileyGraphics + 2     ; 3
    sta tmpSmileyGraphics      ; 3
 .skipSetSmileyGraphic2
    jsr DetermineToDrawPlayers ; 6
 ;--------------------------------------
-   beq .skipSetSmileyGraphic3 ; 2³
+   beq .skipSetSmileyGraphic3 ; 2ï¿½
    lda smileyGraphics + 3     ; 3 = @23
    sta tmpSmileyGraphics      ; 3
 .skipSetSmileyGraphic3
    iny                        ; 2
    lda #0                     ; 2
    cpy playerVertPos          ; 3
-   bcc SectionSeventhScanline; 2³
+   bcc SectionSeventhScanline; 2ï¿½
    cpx #H_PLAYER              ; 2
    bcs SectionSeventhScanline; 2
    lda playerGraphics,x       ; 4
@@ -2845,24 +2845,24 @@ SectionSeventhScanline
    lda tmpSmileyGraphics      ; 3
    sta GRP1                   ; 3 = @09
    cpy #79                    ; 2
-   bne .skipVitamin           ; 2³
+   bne .skipVitamin           ; 2ï¿½
    lda gameBoardState         ; 3         get the current board state
    and #$0F                   ; 2         mask to get vitamin timer
-   bne .skipVitamin           ; 2³        branch if vitamin not be shown
+   bne .skipVitamin           ; 2ï¿½        branch if vitamin not be shown
    lda #ENABLE_BM             ; 2
    sta ENAM0                  ; 3 = @25
 .skipVitamin
    lda smileyInSection        ; 3
-   beq .skipSetSmileyGraphic4 ; 2³
+   beq .skipSetSmileyGraphic4 ; 2ï¿½
    lda smileyGraphics + 4     ; 3
    sta tmpSmileyGraphics      ; 3
 .skipSetSmileyGraphic4
    iny                        ; 2
    lda #0                     ; 2
    cpy playerVertPos          ; 3
-   bcc SectionEighthScanline  ; 2³
+   bcc SectionEighthScanline  ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs SectionEighthScanline  ; 2³
+   bcs SectionEighthScanline  ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 SectionEighthScanline
@@ -2872,18 +2872,18 @@ SectionEighthScanline
    lda tmpSmileyGraphics      ; 3
    sta GRP1                   ; 3 = @09
    lda gameBoardState         ; 3         get the current board state
-   bpl .skipToothbrushHandle  ; 2³        branch if not showing Toothbrush
+   bpl .skipToothbrushHandle  ; 2ï¿½        branch if not showing Toothbrush
    lda #QUAD_SIZE             ; 2
    sta NUSIZ1                 ; 3 = @19
    lda #RED                   ; 2
    sta COLUP1                 ; 3 = @24
 .skipToothbrushHandle
    lda smileyInSection        ; 3
-   beq JumpIntoCandyBarKernel ; 2³
+   beq JumpIntoCandyBarKernel ; 2ï¿½
    lda smileyGraphics + 5     ; 3
    sta tmpSmileyGraphics      ; 3
    jmp JumpIntoCandyBarKernel ; 3
-   
+
 CandyBarKernel
 .skipSmileyDraw
    lda rightPF2CandyBarPattern; 3
@@ -2891,47 +2891,47 @@ CandyBarKernel
    lda rightPF1CandyBarPattern; 3
    sta PF1                    ; 3
    bne .nextCandyBarScanline  ; 3         unconditional branch
-   
+
 .skipPlayerDraw
    lda #$FF                   ; 2
    bne .drawRightCandyBars    ; 3         unconditional branch
-   
+
 .skipPlayerDraw_c
    sta WSYNC
 ;--------------------------------------
    bmi .jmpIntoNextCandyScanline; 3         unconditional branch
-   
+
 .skipPlayerDraw_b
    lda #0                     ; 2
    beq StartNextCandyScanline ; 3         unconditional branch
-   
+
 .skipSmileyDraw_b
    lda rightPF2CandyBarPattern; 3
    sta.w  PF2                 ; 4
    lda rightPF1CandyBarPattern; 3
    sta PF1                    ; 3
    bne .continueCandyBarKernel; 3         unconditional branch
-   
+
 .skipPlayerDraw_d
    lda #$FF                   ; 2
    bne .drawNextRightCandyBars; 3         unconditional branch
-   
+
 .skipPlayerDraw_f
    sta WSYNC
 ;--------------------------------------
    bmi JmpIntoEndCandyBarKernel; 3        unconditional branch
-   
+
 .skipPlayerDraw_e
    lda #0                     ; 2
    beq EndCandyBarKernel      ; 3         unconditional branch
-   
+
 JumpIntoCandyBarKernel
    iny                        ; 2         increment scan line count
    lda #0                     ; 2
    cpy playerVertPos          ; 3
-   bcc .startCandyBarKernel   ; 2³
+   bcc .startCandyBarKernel   ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs .startCandyBarKernel   ; 2³
+   bcs .startCandyBarKernel   ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 .startCandyBarKernel
@@ -2946,13 +2946,13 @@ JumpIntoCandyBarKernel
    lda leftPF2CandyBarPattern ; 3
    sta PF2                    ; 3 = @21
    cpy playerVertPos          ; 3
-   bcc .skipPlayerDraw        ; 2³
+   bcc .skipPlayerDraw        ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 .drawRightCandyBars
    sta tmpPlayerGraphics_b    ; 3
    lda smileyInSection        ; 3
-   beq .skipSmileyDraw        ; 2³
+   beq .skipSmileyDraw        ; 2ï¿½
    nop                        ; 2
    lda rightPF2CandyBarPattern; 3
    sta PF2                    ; 3 = @48
@@ -2963,9 +2963,9 @@ JumpIntoCandyBarKernel
 .nextCandyBarScanline
    iny                        ; 2         increment scan line count
    cpx #H_PLAYER + 1          ; 2
-   bcs .skipPlayerDraw_b      ; 2³
+   bcs .skipPlayerDraw_b      ; 2ï¿½
    lda tmpPlayerGraphics_b    ; 3
-   bmi .skipPlayerDraw_c      ; 2³
+   bmi .skipPlayerDraw_c      ; 2ï¿½
 StartNextCandyScanline
    sta WSYNC
 ;--------------------------------------
@@ -2978,13 +2978,13 @@ StartNextCandyScanline
    lda leftPF2CandyBarPattern ; 3
    sta PF2                    ; 3 = @21
    cpy playerVertPos          ; 3
-   bcc .skipPlayerDraw_d      ; 2³
+   bcc .skipPlayerDraw_d      ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 .drawNextRightCandyBars
    sta tmpPlayerGraphics_b    ; 3
    lda smileyInSection        ; 3
-   beq .skipSmileyDraw_b      ; 2³
+   beq .skipSmileyDraw_b      ; 2ï¿½
    nop                        ; 2
    lda rightPF2CandyBarPattern; 3
    sta PF2                    ; 3 = @48
@@ -2994,9 +2994,9 @@ StartNextCandyScanline
    sta tmpSmileyGraphics      ; 3
 .continueCandyBarKernel
    cpx #H_PLAYER              ; 2
-   bcs .skipPlayerDraw_e      ; 2³
+   bcs .skipPlayerDraw_e      ; 2ï¿½
    lda tmpPlayerGraphics_b    ; 3
-   bmi .skipPlayerDraw_f      ; 2³
+   bmi .skipPlayerDraw_f      ; 2ï¿½
 EndCandyBarKernel
    sta WSYNC
 ;--------------------------------------
@@ -3008,16 +3008,16 @@ JmpIntoEndCandyBarKernel SUBROUTINE
    sta PF1                    ; 3 = @14
    sta PF2                    ; 3 = @17
    lda smileyInSection        ; 3
-   beq .skipSetSmileyGraphic8 ; 2³
+   beq .skipSetSmileyGraphic8 ; 2ï¿½
    lda smileyGraphics + 8     ; 3
    sta tmpSmileyGraphics      ; 3
 .skipSetSmileyGraphic8
    iny                        ; 2
    lda #0                     ; 2
    cpy playerVertPos          ; 3
-   bcc .skipPlayerDraw_a      ; 2³
+   bcc .skipPlayerDraw_a      ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs .skipPlayerDraw_a      ; 2³
+   bcs .skipPlayerDraw_a      ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 .skipPlayerDraw_a
@@ -3027,20 +3027,20 @@ JmpIntoEndCandyBarKernel SUBROUTINE
    lda tmpSmileyGraphics      ; 3
    sta GRP1                   ; 3 = @09
    lda gameBoardState         ; 3         get the current board state
-   bpl .skipDrawToothbrush    ; 2³        branch if not showing Toothbrush
+   bpl .skipDrawToothbrush    ; 2ï¿½        branch if not showing Toothbrush
    lda #ONE_COPY              ; 2
    sta NUSIZ1                 ; 3
    lda #WHITE                 ; 2
    sta COLUP1                 ; 3
 .skipDrawToothbrush
    lda smileyInSection        ; 3
-   beq .determineToDrawPlayers; 2³
+   beq .determineToDrawPlayers; 2ï¿½
    lda smileyGraphics + 9     ; 3
    sta tmpSmileyGraphics      ; 3
 .determineToDrawPlayers
    jsr DetermineToDrawPlayers ; 6
 ;--------------------------------------
-   beq .setVitaminEnableState ; 2³
+   beq .setVitaminEnableState ; 2ï¿½
    lda #DISABLE_BM            ; 2
    sta ENAM0                  ; 3 = @25
    lda smileyGraphics + 10    ; 3
@@ -3051,9 +3051,9 @@ JmpIntoEndCandyBarKernel SUBROUTINE
    iny                        ; 2
    lda #0                     ; 2
    cpy playerVertPos          ; 3
-   bcc .skipPlayerDraw_b      ; 2³
+   bcc .skipPlayerDraw_b      ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs .skipPlayerDraw_b      ; 2³
+   bcs .skipPlayerDraw_b      ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 .skipPlayerDraw_b
@@ -3063,7 +3063,7 @@ JmpIntoEndCandyBarKernel SUBROUTINE
    lda tmpSmileyGraphics      ; 3
    sta GRP1                   ; 3 = @09
    lda smileyInSection        ; 3
-   beq .skipSetSmileyGraphic11; 2³
+   beq .skipSetSmileyGraphic11; 2ï¿½
    lda smileyGraphics + 11    ; 3
    sta tmpSmileyGraphics      ; 3
 .skipSetSmileyGraphic11
@@ -3073,7 +3073,7 @@ JmpIntoEndCandyBarKernel SUBROUTINE
    ldx kernelSection          ; 3
    lda leftPF2Candy,x         ; 4
    ldx player1State           ; 3         check to see if player 1 is active
-   bpl .orInCandyMask         ; 2³        branch if player 1 is active
+   bpl .orInCandyMask         ; 2ï¿½        branch if player 1 is active
    lsr                        ; 2
 .orInCandyMask
    ora #PLAYER1_CANDY_MASK    ; 2
@@ -3081,9 +3081,9 @@ JmpIntoEndCandyBarKernel SUBROUTINE
    ldx playerGraphicIndex     ; 3
    lda #0                     ; 2
    cpy playerVertPos          ; 3
-   bcc PositionPassThroughGap ; 2³
+   bcc PositionPassThroughGap ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs PositionPassThroughGap ; 2³
+   bcs PositionPassThroughGap ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 PositionPassThroughGap SUBROUTINE
@@ -3095,9 +3095,9 @@ PositionPassThroughGap SUBROUTINE
    iny                        ; 2
    lda #0                     ; 2
    cpy playerVertPos          ; 3
-   bcc .setTempPlayerGraphics ; 2³
+   bcc .setTempPlayerGraphics ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs .setTempPlayerGraphics ; 2³
+   bcs .setTempPlayerGraphics ; 2ï¿½
    lda playerGraphics,x       ; 4
    inx                        ; 2
 .setTempPlayerGraphics
@@ -3119,11 +3119,11 @@ PositionPassThroughGap SUBROUTINE
    txa                        ; 2
    ldx playerGraphicIndex     ; 3
    cmp #MAX_KERNEL_SECTIONS   ; 2
-   beq ScoreKernel            ; 2³
+   beq ScoreKernel            ; 2ï¿½
    lda #0                     ; 2 = @22
 .coarseMoveBall
    dey                        ; 2
-   bne .coarseMoveBall        ; 2³
+   bne .coarseMoveBall        ; 2ï¿½
    sty RESBL                  ; 3
    ldy tmpScanlineCount       ; 3         restore scan line count
    iny                        ; 2
@@ -3131,9 +3131,9 @@ PositionPassThroughGap SUBROUTINE
 ;--------------------------------------
    sta HMOVE                  ; 3
    cpy playerVertPos          ; 3
-   bcc .skipPlayerDraw        ; 2³
+   bcc .skipPlayerDraw        ; 2ï¿½
    cpx #H_PLAYER              ; 2
-   bcs .skipPlayerDraw        ; 2³
+   bcs .skipPlayerDraw        ; 2ï¿½
    lda playerGraphics,x       ; 4
    inc playerGraphicIndex     ; 5
 .skipPlayerDraw
@@ -3141,18 +3141,18 @@ PositionPassThroughGap SUBROUTINE
    ldx kernelSection          ; 3
    lda leftPF1Candy,x         ; 4
    ldx player1State           ; 3         check to see if player 1 is active
-   bmi .setLeftPF1CandyPattern; 2³        branch if player 2 is active
+   bmi .setLeftPF1CandyPattern; 2ï¿½        branch if player 2 is active
    asl                        ; 2
 .setLeftPF1CandyPattern
    ora #$80 | PLAYER2_CANDY_MASK; 2
    sta leftPF1CandyBarPattern ; 3
    iny                        ; 2
    jmp MainKernelLoop         ; 3
-   
+
 ScoreKernel
    lda levelNumber            ; 3 = @24   get level number
    ldx player1State           ; 3         check to see if player 1 is active
-   bpl .maskForLevelNumber    ; 2³        branch if player 1 is active
+   bpl .maskForLevelNumber    ; 2ï¿½        branch if player 1 is active
    lsr                        ; 2
    lsr                        ; 2
    lsr                        ; 2
@@ -3187,26 +3187,26 @@ ScoreKernel
 ;--------------------------------------
    lda gameState              ; 3 = @21   get current game state
    lsr                        ; 2         move D0 to carry
-   bcs .drawSecondPlayerScore ; 2²        branch if this is a two player game
+   bcs .drawSecondPlayerScore ; 2ï¿½        branch if this is a two player game
    ldx #6                     ; 2
 .skipSevenScanLines
    stx WSYNC
    dex                        ; 2
-   bpl .skipSevenScanLines    ; 2³
+   bpl .skipSevenScanLines    ; 2ï¿½
    jsr Waste12Cycles          ; 6
    bmi .jmpToOverscan         ; 3         unconditional branch
-   
+
 .drawSecondPlayerScore
    jsr DrawScoreDigits        ; 6
 .jmpToOverscan
    jmp Overscan               ; 3
-   
+
 PlayerScoreColors
    .byte PLAYER1_SCORE_COLOR, PLAYER2_SCORE_COLOR, BLACK, BLACK, BLACK
-   
+
 ActivePlayerLivesColor
    .byte PLAYER1_ACTIVE_LIVES_COLOR, PLAYER2_ACTIVE_LIVES_COLOR
-   
+
    .org ROM_BASE + 4096 - 6, 0
    .word Start
    .word Start

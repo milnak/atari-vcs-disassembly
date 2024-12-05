@@ -16,7 +16,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1982, COLECO, INC.                                 =
+; = THE ASSEMBLED CODE IS ï¿½ 1982, COLECO, INC.                                 =
 ; =                                                                            =
 ; ==============================================================================
 
@@ -35,20 +35,20 @@ TIA_BASE_READ_ADDRESS = $30         ; set the read address base so this runs on
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -106,13 +106,13 @@ VBLANK_TIME             = 40
 OVERSCAN_TIME           = 36
 
    ELSE
-   
+
 FPS                     = 50        ; ~50 frames per second
 VBLANK_TIME             = 67
 OVERSCAN_TIME           = 66
-   
+
    ENDIF
-   
+
 ;===============================================================================
 ; C O L O R - C O N S T A N T S
 ;===============================================================================
@@ -121,7 +121,7 @@ BLACK                   = $00
 WHITE                   = $0E
 
    IF COMPILE_REGION = NTSC
-   
+
 YELLOW                  = $10
 RED                     = $30
 LT_BLUE                 = $90
@@ -167,7 +167,7 @@ H_KERNEL_SECTION        = 18
 ;
 INIT_PLAYER_HORIZ_POS   = XMID
 INIT_NUM_LIVES          = 3
-INIT_PLAYER_MAZE_COORDINATES = 5 << 4 | 5 
+INIT_PLAYER_MAZE_COORDINATES = 5 << 4 | 5
 INIT_BOTTOM_CAT_HOME_COORDINATES = 4 << 4 | 7
 INIT_TOP_CAT_HOME_COORDINATES = 5 << 4 | 0
 INIT_RIGHT_CAT_HOME_COORDINATES = 9 << 4 | 4
@@ -223,7 +223,7 @@ INIT_DOG_TIMER_VALUE    = 100
 ; Maze building constants
 ;
 MAZE_BUILD_RAM_IDX_MASK = $7F
-MAZE_BUILD_REMOVE_BIT   = 0 << 7 
+MAZE_BUILD_REMOVE_BIT   = 0 << 7
 MAZE_BUILD_ADD_BIT      = 1 << 7
 ;
 ; Cat directional constants
@@ -248,7 +248,7 @@ CAT_DIR_RIGHT           = DIRECTION_HORIZONTAL | DIRECTION_POSITIVE
    MAC SLEEP_6
       lda (GRP0,x)
    ENDM
-   
+
    MAC SLEEP_12
       SLEEP_6
       SLEEP_6
@@ -274,7 +274,7 @@ CAT_DIR_RIGHT           = DIRECTION_HORIZONTAL | DIRECTION_POSITIVE
    MAC CAT_DIR_PRIORITY
       .byte {1} << 6 | {2} << 4 | {3} << 2 | {4} << 0
    ENDM
-   
+
 ;----------------------------------------------------------
 ; FILL_BOUNDARY byte#
 ; Original author: Dennis Debro (borrowed from Bob Smith / Thomas Jentzsch)
@@ -303,7 +303,7 @@ CAT_DIR_RIGHT           = DIRECTION_HORIZONTAL | DIRECTION_POSITIVE
      REPEND
 
    ENDM
-   
+
 ;===============================================================================
 ; Z P - V A R I A B L E S
 ;===============================================================================
@@ -440,7 +440,7 @@ frameCount              ds 1
 
    SEG Bank0
    .org ROM_BASE
-   
+
 Start
 ;
 ; Set up everything so the power up state is known.
@@ -513,7 +513,7 @@ SetPlayerSprite
    dex
    bpl .setPlayerToDogSprite
    bmi .doneSetPlayerSprite         ; unconditional branch
-   
+
 .resetPlayerToMouse
    lda mouseLSBPointers,x
    cmp #<[MOUSE_SPRITE_OFFSET + H_KERNEL_SECTION + 3]
@@ -532,7 +532,7 @@ SetPlayerSprite
    jsr SetMazePlayfieldPointers
    ldy #4
    bne AlterMazePlayfieldGraphics   ; unconditional branch
-   
+
 .animateTrapDoors
    lda gameBoardStatus
    bmi .trapDoorOpen                ; branch if Trapdoor open
@@ -540,7 +540,7 @@ SetPlayerSprite
    jsr SetMazePlayfieldPointers
    ldy #20
    bne AlterMazePlayfieldGraphics   ; unconditional branch
-   
+
 .trapDoorOpen
    ldx #4
    jsr SetMazePlayfieldPointers
@@ -561,7 +561,7 @@ AlterMazePlayfieldGraphics
    dec tmpCoordinateX
    bpl .alterMazePlayfieldGraphics
    bmi CheckForActionButtonPressed  ; unconditional branch
-   
+
 .setPlayfieldGraphicForAlternativeMaze
    and #MAZE_BUILD_RAM_IDX_MASK
    tax
@@ -569,7 +569,7 @@ AlterMazePlayfieldGraphics
    lda mazeCheese,x
    ora AlternateMazeValues,y
    bne .alterPlayfieldGraphicsForAlternateMaze;unconditional branch
-   
+
 CheckForActionButtonPressed
    ldx actionButtonDebounce         ; get action button debounce value
    lda INPT4                        ; read left player action button value
@@ -586,7 +586,7 @@ CheckForActionButtonPressed
    jsr SetGameAudioValues
    lda #46
    bne .setActionButtonDebounce     ; unconditional branch
-   
+
 .checkToActivateDog
    txa                              ; move action button debounce to accumulator
    beq .doneCheckForActionButtonPressed
@@ -628,7 +628,7 @@ AnimateGameSprites
    lda #>AnimationSprites_01
    sta mouseGraphicPointer + 1
    bne CheckToAlternateMazeColorsForCollision;unconditional branch
-   
+
 .checkToAnimateSpritesStage_02
    cmp #10
    bne .checkToAnimateSpritesStage_03
@@ -637,7 +637,7 @@ AnimateGameSprites
    lda #>AnimationSprites_01
    sta catGraphicPointer + 1
    bne CheckToAlternateMazeColorsForCollision;unconditional branch
-   
+
 .checkToAnimateSpritesStage_03
    cmp #18
    bne .checkToAnimateSpritesStage_00
@@ -646,7 +646,7 @@ AnimateGameSprites
    lda #>AnimationSprites_00
    sta catGraphicPointer + 1
    bne CheckToAlternateMazeColorsForCollision;unconditional branch
-   
+
 .checkToAnimateSpritesStage_00
    cmp #20
    bne CheckToAlternateMazeColorsForCollision
@@ -668,7 +668,7 @@ CheckToAlternateMazeColorsForCollision
    sta currentMazeColor
 .doneAlternateMazeColorsForCollision
    jmp .convertBCDToDigits
-   
+
 CheckToMovePlayerObject
    ldy playerMazeCoordinates        ; get player maze coordinate value
    lda playerAllowedDirection       ; get player allowed direction
@@ -683,14 +683,14 @@ CheckToMovePlayerObject
    lda tmpObjectIntersectionState   ; get object intersection state
    beq CheckToStartRound            ; branch if object in intersection
    bne .convertBCDToDigits          ; unconditional branch
-   
+
 CheckToStartRound
    lda startRoundPauseTimer
    cmp #90
    bcc .checkToReduceRemainingLives
 .convertBCDToDigits
    jmp ConvertBCDToDigits
-   
+
 .checkToReduceRemainingLives
    cmp #89
    bne DeterminePlayerDirectionValues
@@ -753,11 +753,11 @@ DeterminePlayerDirectionValues
    bne .joystickPushedRight         ; branch if not moving left
    lda #DIR_ADJUSTMENT_NEGATIVE
    bne .joystickMovedHorizontally   ; unconditional branch
-   
+
 .joystickPushedRight
    lda #DIR_ADJUSTMENT_POSITIVE
    beq .joystickMovedHorizontally   ; unconditional branch
-   
+
 .checkForPlayerMovingVertically
    txa                              ; move allowed direction to accumulator
    and #P0_NO_MOVE
@@ -771,7 +771,7 @@ DeterminePlayerDirectionValues
    lda #MOUSE_SPRITE_OFFSET - H_KERNEL_SECTION + 1
    ldy #VERT_DIR_CHANGE | DIR_ADJUSTMENT_NEGATIVE | (H_KERNEL_SECTION - 1)
    bne .setPlayerVerticalDirectionValues;unconditional branch
-   
+
 .checkForPlayerMovingDown
    cmp #(MOVE_DOWN & P0_NO_MOVE)
    bne ConvertBCDToDigits           ; branch if player not moving down
@@ -786,7 +786,7 @@ DeterminePlayerDirectionValues
    sta mouseLSBPointers,x
    sty playerAllowedDirection
    bne ConvertBCDToDigits           ; unconditional branch
-   
+
 .joystickMovedHorizontally
    sta playerAllowedDirection
    lda playerHorizPos               ; get player horizontal position
@@ -802,7 +802,7 @@ DeterminePlayerDirectionValues
    ora playerAllowedDirection
    sta playerAllowedDirection
    bne ConvertBCDToDigits           ; unconditional branch
-   
+
 .determinePlayerHorizontalSteps
    lda playerAllowedDirection       ; get player allowed direction
    ldx playerHorizPos               ; get player horizontal position
@@ -857,10 +857,10 @@ DisplayKernel
 ;--------------------------------------
    lda SWCHB                  ; 4 = @72   read console switches
    and #BW_MASK               ; 2         keep B/W value
-   bne .drawRemainingBones    ; 2³        branch if set to COLOR
+   bne .drawRemainingBones    ; 2ï¿½        branch if set to COLOR
 ;--------------------------------------
    lda mouseCollisionTimer    ; 3         get Mouse collision timer value
-   bne .drawRemainingBones    ; 2³        branch if in Mouse collision routine
+   bne .drawRemainingBones    ; 2ï¿½        branch if in Mouse collision routine
    lda #BLACK                 ; 2
    sta COLUPF                 ; 3         hide playfield graphics
 .drawRemainingBones
@@ -884,13 +884,13 @@ DisplayKernel
 ;--------------------------------------
    lda dogTimer               ; 3         get Dog timer value
    cmp #41                    ; 2
-   bcs .colorDogSprite        ; 2³
+   bcs .colorDogSprite        ; 2ï¿½
    and #8                     ; 2
-   bne .colorDogSprite        ; 2³
+   bne .colorDogSprite        ; 2ï¿½
    lda #COLOR_MOUSE           ; 2
    sta COLUP0                 ; 3 = @16
    bne .colorCatSprites       ; 3         unconditional branch
-   
+
 .colorDogSprite
    lda #COLOR_DOG             ; 2
    sta COLUP0                 ; 3 = @13
@@ -917,29 +917,29 @@ DisplayKernel
    sta tmpMazeBoneGraphicsSE  ; 3
    lda leftPF1MazeCheese + 1  ; 3         get NW cheese value
    and #1 << 5                ; 2
-   bne .checkToEnableMazeBoneNE;2³
+   bne .checkToEnableMazeBoneNE;2ï¿½
    sta tmpMazeBoneGraphicsNW  ; 3         remove NW Bone
 .checkToEnableMazeBoneNE
    lda rightPF2MazeCheese + 1 ; 3         get NE cheese value
    and #1 << 1                ; 2
-   bne .checkToEnableMazeBoneSW;2³
+   bne .checkToEnableMazeBoneSW;2ï¿½
    sta tmpMazeBoneGraphicsNE  ; 3         remove NE Bone
 .checkToEnableMazeBoneSW
    lda leftPF1MazeCheese + 5  ; 3         get SW cheese value
    and #1 << 5                ; 2
-   bne .checkToEnableMazeBoneSE;2³
+   bne .checkToEnableMazeBoneSE;2ï¿½
    sta tmpMazeBoneGraphicsSW  ; 3         remove SW Bone
 .checkToEnableMazeBoneSE
    lda rightPF2MazeCheese + 5 ; 3         get SE cheese value
    and #1 << 1                ; 2
-   bne .doneCheckToEnableMazeBones;2³
+   bne .doneCheckToEnableMazeBones;2ï¿½
    sta tmpMazeBoneGraphicsSE  ; 3         remove SE Bone
 .doneCheckToEnableMazeBones
    sta WSYNC
 ;--------------------------------------
    sta HMCLR                  ; 3 = @03
    jmp DrawMazeKernel         ; 3
-   
+
 CheckToLaunchCatFromHome
    and catReleaseTimer,x
    stx tmpCatReleaseTimerIdx        ; save index for later...x gets trashed
@@ -952,7 +952,7 @@ SetIndicatorGraphics
 .setIndicatorGraphics
    lda #<AnimationSprites_02  ; 2
    dey                        ; 2
-   bmi .setIndicatorLSBValue  ; 2³
+   bmi .setIndicatorLSBValue  ; 2ï¿½
    lda indicatorsLSBValue     ; 3
 .setIndicatorLSBValue
    sta digitGraphicPtrs - 2,x ; 4
@@ -960,7 +960,7 @@ SetIndicatorGraphics
    sta digitGraphicPtrs - 1,x ; 4
    dex                        ; 2
    dex                        ; 2
-   bne .setIndicatorGraphics  ; 2³
+   bne .setIndicatorGraphics  ; 2ï¿½
    rts                        ; 6
 
 LaunchCatFromHome
@@ -974,7 +974,7 @@ LaunchCatFromHome
    dex
    bpl .launchCatFromHome
    bmi .doneLaunchCatFromHome
-   
+
 .checkToLaunchCat
    lda catAllowedDirections,x
    sta tmpCatAllowedDirection
@@ -991,7 +991,7 @@ LaunchCatFromHome
    lda tmpCatAllowedDirection
    sta catAllowedDirections,x
    bne .doneLaunchCatFromHome       ; unconditional branch
-   
+
 .launchCat
    lda LaunchedCatCoordinates,y
    sta catMazeCoordinates,x
@@ -1025,7 +1025,7 @@ PositionObjectHorizontally
    sec                        ; 2
 .coarsePositionObject
    sbc #15                    ; 2         divide position by 15
-   bcs .coarsePositionObject  ; 2³
+   bcs .coarsePositionObject  ; 2ï¿½
    eor #15                    ; 2         4-bit 1's complement for fine motion
    asl                        ; 2         shift remainder to upper nybbles
    asl                        ; 2
@@ -1069,7 +1069,7 @@ DrawMazeKernel
    sta ENABL                  ; 3 = @40
    ldy #H_KERNEL_SECTION - 3  ; 2
    lda catHorizPositionValues,x;4
-   bne .horizontallyPositionCat;2³
+   bne .horizontallyPositionCat;2ï¿½
 .bottomKernelSection
    lda (mouseGraphicPointer),y; 5
    tax                        ; 2
@@ -1080,9 +1080,9 @@ DrawMazeKernel
    sta GRP1                   ; 3 = @06
    iny                        ; 2
    cpy #H_KERNEL_SECTION      ; 2
-   bne .bottomKernelSection   ; 2³
+   bne .bottomKernelSection   ; 2ï¿½
    beq .newKernelSection      ; 3 + 1     unconditional branch
-   
+
 .horizontallyPositionCat
    sta tmpCatHorizPos         ; 3
    lda (mouseGraphicPointer),y; 5
@@ -1097,7 +1097,7 @@ DrawMazeKernel
    stx GRP0                   ; 3 = @03
 .coarsePositionCat
    sbc #15                    ; 2         divide position by 15
-   bcs .coarsePositionCat     ; 2³
+   bcs .coarsePositionCat     ; 2ï¿½
    eor #15                    ; 2         4-bit 1's complement for fine motion
    asl                        ; 2         shift remainder to upper nybbles
    asl                        ; 2
@@ -1148,7 +1148,7 @@ DrawMazeKernel
    stx GRP0                   ; 3 = @06
    iny                        ; 2
    cpy #H_KERNEL_SECTION - 14 ; 2
-   bne .topKernelSection      ; 2³
+   bne .topKernelSection      ; 2ï¿½
 .drawTopBoneSectionLoop
    lda (mouseGraphicPointer),y; 5
    tax                        ; 2
@@ -1159,9 +1159,9 @@ DrawMazeKernel
    stx GRP0                   ; 3 = @06
    ldx tmpKernelSection       ; 3
    cpx #1                     ; 2
-   beq .drawTopKernelSectionBone;2³
+   beq .drawTopKernelSectionBone;2ï¿½
    cpx #5                     ; 2
-   bne .doneTopDrawBoneSection; 2³
+   bne .doneTopDrawBoneSection; 2ï¿½
 .drawTopKernelSectionBone
    lda tmpMazeBoneGraphicsNW - 1,x;4
    sta PF1                    ; 3 = @24
@@ -1171,7 +1171,7 @@ DrawMazeKernel
 .doneTopDrawBoneSection
    iny                        ; 2
    cpy #H_KERNEL_SECTION - 12 ; 2
-   bne .drawTopBoneSectionLoop; 2³
+   bne .drawTopBoneSectionLoop; 2ï¿½
    lda (mouseGraphicPointer),y; 5
    tax                        ; 2
    lda (catGraphicPointer),y  ; 5
@@ -1200,7 +1200,7 @@ DrawMazeKernel
    tax                        ; 2
    lda (catGraphicPointer),y  ; 5
    cpy #H_KERNEL_SECTION - 10 ; 2
-   bne .drawCheeseKernel      ; 2³
+   bne .drawCheeseKernel      ; 2ï¿½
 ;--------------------------------------
    ldy tmpKernelMazeIdx       ; 3 = @01
    stx GRP0                   ; 3 = @04
@@ -1224,9 +1224,9 @@ DrawMazeKernel
    stx GRP0                   ; 3 = @06
    ldx tmpKernelSection       ; 3
    cpx #1                     ; 2
-   beq .drawBottomKernelSectionBone;2³
+   beq .drawBottomKernelSectionBone;2ï¿½
    cpx #5                     ; 2
-   bne .doneBottomDrawBoneSection;2³
+   bne .doneBottomDrawBoneSection;2ï¿½
 .drawBottomKernelSectionBone
    lda tmpMazeBoneGraphicsNW - 1,x;4
    sta PF1                    ; 3 = @24
@@ -1236,7 +1236,7 @@ DrawMazeKernel
 .doneBottomDrawBoneSection
    iny                        ; 2
    cpy #H_KERNEL_SECTION - 7  ; 2
-   bne .drawBottomBoneSectionLoop;2³
+   bne .drawBottomBoneSectionLoop;2ï¿½
 .drawBottomKernelSection
    lda (mouseGraphicPointer),y; 5
    tax                        ; 2
@@ -1252,15 +1252,15 @@ DrawMazeKernel
    ldy tmpHeightKernelSection ; 3
    iny                        ; 2
    cpy #H_KERNEL_SECTION - 4  ; 2
-   bne .drawBottomKernelSection;2³ + 1
+   bne .drawBottomKernelSection;2ï¿½ + 1
    inc tmpKernelMazeIdx       ; 5
    ldx tmpKernelSection       ; 3
    inx                        ; 2
    stx tmpKernelSection       ; 3
    cpx #8                     ; 2
-   beq .mazeKernelDone        ; 2³
+   beq .mazeKernelDone        ; 2ï¿½
    jmp .drawMazeKernel        ; 3
-   
+
 .mazeKernelDone
    ldy #16                    ; 2
    lda (pf0GraphicPointer),y  ; 5
@@ -1340,7 +1340,7 @@ DetermineToLaunchCatFromHome
    sta catAllowedDirections,x
    sty catMazeCoordinates,x
    jmp .checkToMoveCat
-   
+
 CheckToChangeCatDirection
    lda animationTimer               ; get animation timer value
    and #3
@@ -1388,7 +1388,7 @@ CheckPlayerCollisions
    lda tmpCatZoneConflictState      ; get Cat zone conflict state
    bmi .scoreForBitingCat           ; branch if Dog in Cat zone
    bpl NewFrame                     ; unconditional branch
-   
+
 .scoreForBitingCat
    tya                              ; move bitten Cat index to accumulator
    tax                              ; move bitten Cat index to x register
@@ -1412,7 +1412,7 @@ CheckPlayerCollisions
    jsr ResetCatHomePosition
 .newFrame
    jmp NewFrame
-   
+
 .resetRackPlayerPositionValues
    lda remainingLives
    bne .resetPlayerPositionValues   ; branch if lives remaining
@@ -1448,7 +1448,7 @@ NewFrame SUBROUTINE
    lda INTIM
    bne .vsyncWaitTime
    jmp VerticalBlank
-   
+
 TrapdoorClosedPF1MazeGraphics
    .byte $FF ; |XXXXXXXX|
    .byte $08 ; |....X...|
@@ -1467,7 +1467,7 @@ TrapdoorClosedPF1MazeGraphics
    .byte $8F ; |X...XXXX|
    .byte $80 ; |X.......|
    .byte $FF ; |XXXXXXXX|
-   
+
 AlternateMazeValues
    .byte <leftPF1MazeCheese  - mazeCheese + 4 | MAZE_BUILD_ADD_BIT
    .byte 1 << 3
@@ -1558,23 +1558,23 @@ DetermineMazeCoordinateValueY
 InitCatGraphicPointerLSBValues
    .byte CAT_FACING_RIGHT_SPRITE_OFFSET, CAT_FACING_LEFT_SPRITE_OFFSET
    .byte CAT_FACING_LEFT_SPRITE_OFFSET, CAT_FACING_RIGHT_SPRITE_OFFSET
-   
+
    IF COMPILE_REGION = NTSC
-   
+
    .byte $A0,$82,$A0,$B7            ; unused bytes
-   
+
    ELSE
-   
+
    .byte $B0,$B2,$E6,$A0
-   
+
    ENDIF
 
    BOUNDARY 0
-   
+
 AnimationSprites_00
 
    FILL_BOUNDARY MOUSE_SPRITE_OFFSET, 0
-   
+
    .byte $00 ; |........|
    .byte $6C ; |.XX.XX..|
    .byte $EE ; |XXX.XXX.|
@@ -1595,7 +1595,7 @@ AnimationSprites_00
    .byte $00 ; |........|
 
    FILL_BOUNDARY DOG_SPRITE_OFFSET, 0
-   
+
    .byte $00 ; |........|
    .byte $EE ; |XXX.XXX.|
    .byte $EE ; |XXX.XXX.|
@@ -1614,9 +1614,9 @@ AnimationSprites_00
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    FILL_BOUNDARY CAT_FACING_DOWN_SPRITE_OFFSET, 0
-   
+
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $54 ; |.X.X.X..|
@@ -1635,9 +1635,9 @@ AnimationSprites_00
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    FILL_BOUNDARY CAT_FACING_UP_SPRITE_OFFSET, 0
-   
+
    .byte $2A ; |..X.X.X.|
    .byte $4E ; |.X..XXX.|
    .byte $5F ; |.X.XXXXX|
@@ -1656,7 +1656,7 @@ AnimationSprites_00
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    FILL_BOUNDARY CAT_FACING_LEFT_SPRITE_OFFSET, 0
 
    .byte $00 ; |........|
@@ -1679,7 +1679,7 @@ AnimationSprites_00
    .byte $00 ; |........|
 
    FILL_BOUNDARY CAT_FACING_RIGHT_SPRITE_OFFSET, 0
-   
+
    .byte $00 ; |........|
    .byte $8A ; |X...X.X.|
    .byte $4E ; |.X..XXX.|
@@ -1698,7 +1698,7 @@ AnimationSprites_00
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 MazePF0Graphics
    .byte $F0 ; |XXXX....|
    .byte $10 ; |...X....|
@@ -1717,7 +1717,7 @@ MazePF0Graphics
    .byte $10 ; |...X....|
    .byte $10 ; |...X....|
    .byte $F0 ; |XXXX....|
-   
+
 MazePF1Graphics
    .byte $FF ; |XXXXXXXX|
    .byte $08 ; |....X...|
@@ -1736,7 +1736,7 @@ MazePF1Graphics
    .byte $8F ; |X...XXXX|
    .byte $80 ; |X.......|
    .byte $FF ; |XXXXXXXX|
-   
+
 MazePF2Graphics
    .byte $1F ; |...XXXXX|
    .byte $10 ; |...X....|
@@ -1755,7 +1755,7 @@ MazePF2Graphics
    .byte $F0 ; |XXXX....|
    .byte $10 ; |...X....|
    .byte $1F ; |...XXXXX|
-   
+
 AdvancedCatHomeCoordiateValues
    .byte INIT_BOTTOM_CAT_HOME_COORDINATES + (1 << 4);incremented x-coordinate
    .byte INIT_TOP_CAT_HOME_COORDINATES - (1 << 4);decremented x-coordinate
@@ -1769,11 +1769,11 @@ InitCatHomeCoordiateValues
    .byte INIT_LEFT_CAT_HOME_COORDINATES
 
    BOUNDARY 0
-   
+
 AnimationSprites_01
-   
+
    FILL_BOUNDARY MOUSE_SPRITE_OFFSET, 0
-   
+
    .byte $00 ; |........|
    .byte $60 ; |.XX.....|
    .byte $EC ; |XXX.XX..|
@@ -1794,7 +1794,7 @@ AnimationSprites_01
    .byte $00 ; |........|
 
    FILL_BOUNDARY DOG_SPRITE_OFFSET, 0
-   
+
    .byte $00 ; |........|
    .byte $6C ; |.XX.XX..|
    .byte $EE ; |XXX.XXX.|
@@ -1813,9 +1813,9 @@ AnimationSprites_01
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    FILL_BOUNDARY CAT_FACING_DOWN_SPRITE_OFFSET, 0
-   
+
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $51 ; |.X.X...X|
@@ -1834,7 +1834,7 @@ AnimationSprites_01
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    FILL_BOUNDARY CAT_FACING_UP_SPRITE_OFFSET, 0
 
    .byte $8A ; |X...X.X.|
@@ -1855,7 +1855,7 @@ AnimationSprites_01
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    FILL_BOUNDARY CAT_FACING_LEFT_SPRITE_OFFSET, 0
 
    .byte $00 ; |........|
@@ -1878,7 +1878,7 @@ AnimationSprites_01
    .byte $00 ; |........|
 
    FILL_BOUNDARY CAT_FACING_RIGHT_SPRITE_OFFSET, 0
-   
+
    .byte $00 ; |........|
    .byte $4A ; |.X..X.X.|
    .byte $8E ; |X...XXX.|
@@ -1897,7 +1897,7 @@ AnimationSprites_01
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 RemoveBittenCat
    lda catMazeCoordinates,x         ; get Cat maze coordinate value
    and #7                           ; keep y-coordinate value
@@ -1928,7 +1928,7 @@ DetermineDesiredCoordinateY
    beq .incrementDesiredYCoordinate ; branch if DIR_ADJUSTMENT_POSITIVE
    dey
    bpl .doneDetermineDesiredCoordinateY;unconditional branch
-   
+
 .incrementDesiredYCoordinate
    iny
 .doneDetermineDesiredCoordinateY
@@ -1941,7 +1941,7 @@ InitCatHorizontalPositionValues
    .byte 73, 87, 150, 10
 
    BOUNDARY 0
-   
+
 AnimationSprites_02
 
    FILL_BOUNDARY MOUSE_SPRITE_OFFSET, 0
@@ -1964,9 +1964,9 @@ AnimationSprites_02
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    FILL_BOUNDARY DOG_SPRITE_OFFSET, 0
-   
+
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $6C ; |.XX.XX..|
@@ -2001,20 +2001,20 @@ LivesIndicator
    .byte $FE ; |XXXXXXX.|
    .byte $EE ; |XXX.XXX.|
    .byte $6C ; |.XX.XX..|
-   
+
 MazePF0GraphicValues
    .word MazePF0Graphics
-   
+
 MazePF1GraphicValues
    .word MazePF1Graphics
    .word TrapdoorClosedPF1MazeGraphics
    .word TrapdoorOpenPF1MazeGraphics
-   
+
 MazePF2GraphicValues
    .word MazePF2Graphics
    .word TrapdoorClosedPF2MazeGraphics
    .word TrapdoorOpenPF2MazeGraphics
-   
+
 ROMCheeseDotPattern
    .byte $50, $50, $50, $00, $00, $50
    .byte $50, $50, $2A, $22, $22, $AA
@@ -2043,7 +2043,7 @@ TrapdoorOpenPF1MazeGraphics
    .byte $8F ; |X...XXXX|
    .byte $80 ; |X.......|
    .byte $FF ; |XXXXXXXX|
-   
+
 BonesIndicator
    .byte $CC ; |XX..XX..|
    .byte $CC ; |XX..XX..|
@@ -2051,7 +2051,7 @@ BonesIndicator
    .byte $30 ; |..XX....|
    .byte $CC ; |XX..XX..|
    .byte $CC ; |XX..XX..|
-   
+
 SetGameAudioValues
    lda AudioValues,x                ; get audio tone value
    sta AUDC0
@@ -2067,10 +2067,10 @@ LaunchedCatCoordinates
 
 InitCatKernelZoneValues
    .byte 7, 0, 4, 3
-   
+
 LaunchedCatKernelZoneValues
    .byte 6, 1, 4, 3
-   
+
 TrapdoorClosedPF2MazeGraphics
    .byte $1F ; |...XXXXX|
    .byte $10 ; |...X....|
@@ -2089,7 +2089,7 @@ TrapdoorClosedPF2MazeGraphics
    .byte $F1 ; |XXXX...X|
    .byte $10 ; |...X....|
    .byte $1F ; |...XXXXX|
-   
+
 SetMazePlayfieldPointers
    lda MazePF0GraphicValues
    sta pf0GraphicPointer
@@ -2129,9 +2129,9 @@ AnimationSprites_03
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    FILL_BOUNDARY DOG_SPRITE_OFFSET, 0
-   
+
    .byte $00 ; |........|
    .byte $6C ; |.XX.XX..|
    .byte $EE ; |XXX.XXX.|
@@ -2150,7 +2150,7 @@ AnimationSprites_03
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    FILL_BOUNDARY (CAT_FACING_DOWN_SPRITE_OFFSET + 1), 0
 
 MazeRules
@@ -2180,7 +2180,7 @@ MazeRules
    MAZE_RULES [MOVE_LEFT & MOVE_DOWN],     [MOVE_LEFT & MOVE_DOWN]
    MAZE_RULES MOVE_UP,                     [MOVE_RIGHT & MOVE_UP]
    MAZE_RULES P0_HORIZ_MOVE,               P0_HORIZ_MOVE
-   
+
    MAZE_RULES [MOVE_LEFT & MOVE_DOWN],     MOVE_LEFT
    MAZE_RULES [MOVE_RIGHT & P0_VERT_MOVE], [MOVE_RIGHT & MOVE_DOWN]
    MAZE_RULES [MOVE_LEFT & P0_VERT_MOVE],  [P0_HORIZ_MOVE & MOVE_UP]
@@ -2282,7 +2282,7 @@ SetColorForSixDigitKernel
    sta GRP0                   ; 3 = @47
    stx GRP1                   ; 3 = @50
    dey                        ; 2
-   bpl .drawIt                ; 2³
+   bpl .drawIt                ; 2ï¿½
    lda #0                     ; 2
    sta GRP0                   ; 3 = @59
    sta GRP1                   ; 3 = @62
@@ -2308,7 +2308,7 @@ TrapdoorOpenPF2MazeGraphics
    .byte $1F ; |...XXXXX|
 
    BOUNDARY 0
-   
+
 NumberFonts
 zero
    .byte $78 ; |.XXXX...|
@@ -2420,7 +2420,7 @@ nine
    .byte $CC ; |XX..XX..|
    .byte $FC ; |XXXXXX..|
    .byte $78 ; |.XXXX...|
-   
+
 IncrementScore
    sec
    ldx #1
@@ -2466,11 +2466,11 @@ DetermineObjectMovement
    bne .movePlayerLeft              ; branch if DIR_ADJUSTMENT_NEGATIVE
    inc playerHorizPos
    bne DecrementMovementSteps       ; unconditional branch
-   
+
 .movePlayerLeft
    dec playerHorizPos
    bne DecrementMovementSteps       ; unconditional branch
-   
+
 .moveCatHorizontally
    tya                              ; move maze coordinates to accumulator
    and #7                           ; keep y-coordinate value
@@ -2480,11 +2480,11 @@ DetermineObjectMovement
    bne .moveCatLeft                 ; branch if DIR_ADJUSTMENT_NEGATIVE
    inc catHorizPositionValues,x
    bcc DecrementMovementSteps       ; unconditional branch
-   
+
 .moveCatLeft
    dec catHorizPositionValues,x
    bcc DecrementMovementSteps       ; unconditional branch
-   
+
 .moveObjectVertically
    txa                              ; move directional values to accumulator
    and #DIR_ADJUSTMENT_MASK
@@ -2494,19 +2494,19 @@ DetermineObjectMovement
    dec mouseLSBPointers,x
    dec mouseLSBPointers + 1,x
    bcc DecrementMovementSteps       ; unconditional branch
-   
+
 .moveCatDown
    dec catLSBPointers,x
    dec catLSBPointers + 1,x
    bcc DecrementMovementSteps       ; unconditional branch
-   
+
 .moveObjectUp
    jsr DetermineMazeCoordinateValueY
    bne .moveCatUp
    inc mouseLSBPointers,x
    inc mouseLSBPointers - 1,x
    bcc DecrementMovementSteps       ; unconditional branch
-   
+
 .moveCatUp
    inc catLSBPointers,x
    inc catLSBPointers - 1,x
@@ -2526,7 +2526,7 @@ DecrementMovementSteps
    lda #1
    sta tmpObjectIntersectionState   ; set to show object not in intersection
    jmp .doneDetermineObjectMovement
-   
+
 .removeObjectFromZone
    lda tmpAllowedDirection
    and #DIR_CHANGE_MASK             ; keep DIR_CHANGE value
@@ -2536,7 +2536,7 @@ DecrementMovementSteps
    lda #BLANK_MOUSE_SPRITE_OFFSET
    sta mouseLSBPointers,x
    beq .setNewMazeCoordinateValues  ; unconditional branch
-   
+
 .removeCatFromZone
    lda #BLANK_CAT_SPRITE_OFFSET
    sta catLSBPointers,x
@@ -2554,7 +2554,7 @@ DecrementMovementSteps
    jsr DetermineMazeCoordiateValue
    inx                              ; increment y-coordinate value
    bpl .setCoordinateNewYValue      ; unconditional branch
-   
+
 .determineNewMovingUpYCoordinateValue
    jsr DetermineMazeCoordiateValue
    dex                              ; decrement y-coordinate value
@@ -2562,7 +2562,7 @@ DecrementMovementSteps
    txa                              ; move y-coordinate value to accumulator
    ora tmpCoordinateX               ; combine with x-coordinate value
    bcc CheckForMouseEatingCheese    ; unconditional branch
-   
+
 .determineNewXCoordinateValue
    ldx #16
    lda tmpAllowedDirection
@@ -2621,12 +2621,12 @@ CheckForMouseEatingCheese
    ldy playerMazeCoordinates        ; get player maze coordinate value
 .doneMouseEatingCheese
    jmp .doneCheckForMouseEatingCheese
-   
+
 .checkMouseEatingLeftBone
    cmp #1 << 4 | 0
    beq .incrementNumberOfBonesCollected
    bne .mouseEatingCheese
-   
+
 .checkMouseEatingRightBone
    cmp #8 << 4 | 0
    bne .mouseEatingCheese
@@ -2647,7 +2647,7 @@ CheckForMouseEatingCheese
    bmi .setToSlowCatDelayValue
    ora #$80
    bne .setNewRackCatMovementDelay  ; unconditional branch
-   
+
 .setToSlowCatDelayValue
    asl
    ora #1
@@ -2656,7 +2656,7 @@ CheckForMouseEatingCheese
    ldx #$FF
    txs                              ; reset stack to the beginning
    jmp NewFrame
-   
+
 .cheeseAlreadyEaten
    sta mazeCheese,y
    ldy playerMazeCoordinates        ; get Player Maze coordinate value
@@ -2744,7 +2744,7 @@ DetermineToChangeCatDirection
    lda tmpCatZoneConflictState      ; get Cat zone conflict state
    sec
    bcs .determineCatZoneConflictPriority;unconditional branch
-   
+
 .horizontalDistancePriority
    beq .setTopPriorityDirectionIndexValue;branch if same distances
    lda catMazeCoordinates,x         ; get Cat maze coordinate value
@@ -2823,7 +2823,7 @@ DetermineDesiredPriorityDirection
    and #3                           ; keep current allowed direction value
    sta tmpCatDirection
    bpl .determineCatAllowedDesiredDirection;unconditional branch
-   
+
 .foundCatDesiredDirection
    lda catMazeCoordinates,x         ; get Cat maze coordinate value
    cmp #5 << 4 | 0
@@ -2847,7 +2847,7 @@ DetermineCatAllowedInZone
    bne .decrementDesiredYCoordinate ; branch if Cat not moving moving down
    iny                              ; increment desired y-coordinate for Top Cat
    bne .setDesiredLaunchCoordinates ; unconditional branch
-   
+
 .decrementDesiredYCoordinate
    dey                              ; decrement y-coordinate for Bottom Cat
 .setDesiredLaunchCoordinates
@@ -2871,7 +2871,7 @@ SetDesiredUpdatedCoordinates
    beq .incrementCatYCoordinate     ; branch if DIR_ADJUSTMENT_POSITIVE
    dec tmpCatCoordinateY
    jmp .checkCatSharingZones
-   
+
 .incrementCatYCoordinate
    inc tmpCatCoordinateY
 .checkCatSharingZones
@@ -2912,14 +2912,14 @@ DetermineCatFacingDirection
    sta catLSBPointers,x             ; set to CAT_FACING_LEFT
    lda #CURRENTLY_MOVING | HORIZ_DIR_CHANGE | DIR_ADJUSTMENT_NEGATIVE
    jmp .determineCatHorizontalSteps
-   
+
 .setCatToFacingRight
    jsr MoveYCoordinateToXRegister
    lda #CAT_FACING_RIGHT_SPRITE_OFFSET
    sta catLSBPointers,x             ; set to CAT_FACING_RIGHT
    lda #CURRENTLY_MOVING | HORIZ_DIR_CHANGE | DIR_ADJUSTMENT_POSITIVE
    beq .determineCatHorizontalSteps ; unconditional branch
-   
+
 .checkToSetCatVerticalDirection
    txa                              ; move Cat direction value to accumulator
    bne .checkToSetCatFacingDown     ; branch if CAT_DIRECTION_POSITIVE
@@ -2934,7 +2934,7 @@ DetermineCatFacingDirection
    sta catLSBPointers - 1,x
    lda #VERT_DIR_CHANGE | DIR_ADJUSTMENT_NEGATIVE | 17
    bne .doneDetermineObjectDirectionalSteps;unconditional branch
-   
+
 .checkToSetCatFacingDown
    cmp #CAT_DIR_DOWN
    bne .doneDetermineObjectDirectionalSteps
@@ -2945,7 +2945,7 @@ DetermineCatFacingDirection
    sta catLSBPointers + 1,x
    lda #VERT_DIR_CHANGE | DIR_ADJUSTMENT_POSITIVE | 17
    bne .doneDetermineObjectDirectionalSteps;unconditional branch
-   
+
 .determineCatHorizontalSteps
    pha                              ; push Cat desired direction value to stack
    tya                              ; move maze coordinate value to accumulator
@@ -2965,31 +2965,31 @@ DetermineObjectHorizontalSteps
    cpx #102
    beq .setHorizStepsForXCoordinate06;branch if in x-coordinate 6
    bne .setHorizStepValueTo16Moves  ; unconditional branch
-   
+
 .setHorizStepsForXCoordinate03
    and #ALLOW_MOVEMENT_MASK | DIR_CHANGE_MASK | DIR_ADJUSTMENT_MASK
    beq .setHorizStepValueTo15Moves  ; branch if MOVE_RIGHT
    bne .setHorizStepValueTo16Moves  ; unconditional branch
-   
+
 .setHorizStepsForXCoordinate04
    and #DIR_ADJUSTMENT_MASK         ; keep DIR_ADJUSTMENT value
    bne .setHorizStepValueTo15Moves  ; branch if MOVE_LEFT
    beq .setHorizStepValueTo14Moves  ; unconditional branch
-   
+
 .setHorizStepsForXCoordinate05
    and #ALLOW_MOVEMENT_MASK | DIR_CHANGE_MASK | DIR_ADJUSTMENT_MASK
    beq .setHorizStepValueTo15Moves  ; branch if MOVE_RIGHT
 .setHorizStepValueTo14Moves
    lda #14
    bne .setObjectHorizontalStepValue; unconditional branch
-   
+
 .setHorizStepsForXCoordinate06
    and #DIR_ADJUSTMENT_MASK         ; keep DIR_ADJUSTMENT value
    bne .setHorizStepValueTo15Moves  ; branch if MOVE_LEFT
 .setHorizStepValueTo16Moves
    lda #16
    bne .setObjectHorizontalStepValue; unconditional branch
-   
+
 .setHorizStepValueTo15Moves
    lda #15
 .setObjectHorizontalStepValue
@@ -3033,7 +3033,7 @@ MazeAllowedDirectionValues
    CAT_DIR_PRIORITY CAT_DIR_UP,    CAT_DIR_RIGHT, CAT_DIR_UP,    CAT_DIR_DOWN
    CAT_DIR_PRIORITY CAT_DIR_DOWN,  CAT_DIR_RIGHT, CAT_DIR_UP,    CAT_DIR_DOWN
    CAT_DIR_PRIORITY CAT_DIR_LEFT,  CAT_DIR_UP,    CAT_DIR_UP,    CAT_DIR_LEFT
-   
+
    CAT_DIR_PRIORITY CAT_DIR_RIGHT, CAT_DIR_RIGHT, CAT_DIR_RIGHT, CAT_DIR_RIGHT
    CAT_DIR_PRIORITY CAT_DIR_LEFT,  CAT_DIR_RIGHT, CAT_DIR_LEFT,  CAT_DIR_LEFT
    CAT_DIR_PRIORITY CAT_DIR_DOWN,  CAT_DIR_DOWN,  CAT_DIR_DOWN,  CAT_DIR_DOWN
@@ -3049,7 +3049,7 @@ MazeAllowedDirectionValues
    CAT_DIR_PRIORITY CAT_DIR_RIGHT, CAT_DIR_RIGHT, CAT_DIR_RIGHT, CAT_DIR_RIGHT
    CAT_DIR_PRIORITY CAT_DIR_RIGHT, CAT_DIR_RIGHT, CAT_DIR_RIGHT, CAT_DIR_RIGHT
    CAT_DIR_PRIORITY CAT_DIR_RIGHT, CAT_DIR_RIGHT, CAT_DIR_RIGHT, CAT_DIR_DOWN
-   CAT_DIR_PRIORITY CAT_DIR_UP,    CAT_DIR_UP,    CAT_DIR_UP,    CAT_DIR_DOWN   
+   CAT_DIR_PRIORITY CAT_DIR_UP,    CAT_DIR_UP,    CAT_DIR_UP,    CAT_DIR_DOWN
    CAT_DIR_PRIORITY CAT_DIR_UP,    CAT_DIR_UP,    CAT_DIR_UP,    CAT_DIR_UP
 
    CAT_DIR_PRIORITY CAT_DIR_LEFT,  CAT_DIR_DOWN,  CAT_DIR_DOWN,  CAT_DIR_DOWN
@@ -3060,7 +3060,7 @@ MazeAllowedDirectionValues
    CAT_DIR_PRIORITY CAT_DIR_LEFT,  CAT_DIR_RIGHT, CAT_DIR_UP,    CAT_DIR_LEFT
    CAT_DIR_PRIORITY CAT_DIR_LEFT,  CAT_DIR_DOWN,  CAT_DIR_LEFT,  CAT_DIR_DOWN
    CAT_DIR_PRIORITY CAT_DIR_UP,    CAT_DIR_RIGHT, CAT_DIR_UP,    CAT_DIR_UP
-   
+
    CAT_DIR_PRIORITY CAT_DIR_DOWN,  CAT_DIR_DOWN,  CAT_DIR_DOWN,  CAT_DIR_DOWN
    CAT_DIR_PRIORITY CAT_DIR_LEFT,  CAT_DIR_UP,    CAT_DIR_UP,    CAT_DIR_LEFT
    CAT_DIR_PRIORITY CAT_DIR_LEFT,  CAT_DIR_RIGHT, CAT_DIR_LEFT,  CAT_DIR_LEFT
@@ -3192,12 +3192,12 @@ CheeseBitMaskingValues
    .byte <~(1 << 1)
    .byte <rightPF2MazeCheese - mazeCheese
    .byte <~(1 << 5)
-   
+
 InitMazeGraphicPointers
    .word MazePF0Graphics
    .word MazePF1Graphics
    .word MazePF2Graphics
-   
+
 ResetCatHomePosition
    lda #STOPPED_AT_INTERSECTION
    sta catAllowedDirections,x       ; disable Cat movement
@@ -3249,24 +3249,24 @@ PlayGameAudioSounds
    rts
 
    IF COMPILE_REGION = NTSC
-   
+
    .byte $BB,$D2,$A0,$A0,$A0,$A0,$E0,$A0,$E0,$A0;unused bytes
-   
+
    ELSE
-   
+
    .byte $A9,$B3,$CA,$B1,$DB,$A0,$A0,$FE,$CC,$85;unused bytes
-   
+
    ENDIF
-   
+
    .org ROM_BASE + 4096 - 4, 0
    .word Start                      ; RESET vector
-   
+
    IF COMPILE_REGION = NTSC
-   
+
    .byte $A5,$FF                    ; BRK vector (unused bytes)
-   
+
    ELSE
-   
+
    .byte $E0,$88                    ; BRK vector (unused bytes)
-   
+
    ENDIF

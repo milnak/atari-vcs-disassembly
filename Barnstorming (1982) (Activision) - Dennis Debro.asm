@@ -16,7 +16,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1982, ACTIVISION                                   =
+; = THE ASSEMBLED CODE IS ï¿½ 1982, ACTIVISION                                   =
 ; =                                                                            =
 ; ==============================================================================
 ;
@@ -32,20 +32,20 @@
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -89,7 +89,7 @@ COMPILE_REGION          = NTSC      ; change to compile for different regions
       err
 
    ENDIF
-   
+
 ;===============================================================================
 ; F R A M E - T I M I N G S
 ;===============================================================================
@@ -101,13 +101,13 @@ VBLANK_TIME             = 48
 OVERSCAN_TIME           = 33
 
    ELSE
-   
+
 FPS                     = 50        ; ~50 frames per second
 VBLANK_TIME             = 87
 OVERSCAN_TIME           = 54
-   
+
    ENDIF
-   
+
 ;===============================================================================
 ; C O L O R - C O N S T A N T S
 ;===============================================================================
@@ -255,7 +255,7 @@ SPAWN_NO_GOOSE          = %000
 SPAWN_TOP_GOOSE         = %001
 SPAWN_MIDDLE_GOOSE      = %010
 SPAWN_BOTTOM_GOOSE      = %100
-   
+
 BLANK_OFFSET = (Blank - NumberFonts) / H_FONT
 
 ;===============================================================================
@@ -281,10 +281,10 @@ BLANK_OFFSET = (Blank - NumberFonts) / H_FONT
    MAC SLEEP_3
       sta waste3Cycles
    ENDM
-   
+
    MAC SLEEP_5
       dec loopCount
-   ENDM   
+   ENDM
 
 ;-------------------------------------------------------
 ; FILL_BOUNDARY byte#
@@ -323,7 +323,7 @@ FREE_BYTES SET FREE_BYTES + 1
 ;===============================================================================
    SEG.U variables
    .org $80
-   
+
 gameSelection              ds 1
 frameCount                 ds 1
 randomSeed                 ds 1
@@ -463,7 +463,7 @@ tmpScrollingGooseIndex     = tmpBarnClearance
 waste3Cycles               ds 1           ; used to waste 3 cycles in kernel
 
    echo "***",(* - $80 - 4)d, "BYTES OF RAM USED", ($100 - * + 4)d, "BYTES FREE"
-   
+
 ;===============================================================================
 ; R O M - C O D E
 ;===============================================================================
@@ -567,7 +567,7 @@ DisplayKernel SUBROUTINE
 ;--------------------------------------
    sta HMOVE                  ; 3
    dex                        ; 2
-   bpl .emptyScanlinesForStatusKernel;2³
+   bpl .emptyScanlinesForStatusKernel;2ï¿½
    ldy #H_FONT - 1            ; 2
 .drawBarnCount
    sta WSYNC
@@ -578,9 +578,9 @@ DisplayKernel SUBROUTINE
    lda (barnCountOnesPointers),y;5
    sta GRP1                   ; 3 = @19
    dey                        ; 2
-   bpl .drawBarnCount         ; 2³
+   bpl .drawBarnCount         ; 2ï¿½
    jmp ElapsedTimeKernel      ; 3
-       
+
 GameColorTable
    .byte DK_GREEN + 6               ; grass field color
    .byte BLACK                      ; copyright background color
@@ -590,7 +590,7 @@ GameColorTable
    .byte WHITE                      ; geese color
    .byte YELLOW + 4                 ; ground color
    .byte YELLOW + 2                 ; mountain color
-       
+
 BarnColors
    .byte ORANGE + 2, ORANGE + 2, ORANGE + 2, ORANGE + 2, ORANGE + 2, ORANGE + 2
    .byte ORANGE + 2, ORANGE + 2, ORANGE + 2, ORANGE + 2, ORANGE + 2, ORANGE + 2
@@ -600,7 +600,7 @@ BarnColors
    .byte BLACK + 6, BLACK + 6, BLACK + 4, BLACK + 4, BLACK + 4, BLACK + 4
    .byte BLACK + 4, BLACK + 4, BLACK + 4, BLACK + 2, BLACK + 2, BLACK + 2
    .byte BLACK + 2, BLACK + 2, BLACK + 2, BLACK + 2, DK_GREEN, DK_GREEN + 6
-   
+
 MountainsPF0Graphics
    .byte $FF ; |XXXXXXXX|
    .byte $FF ; |XXXXXXXX|
@@ -610,13 +610,13 @@ MountainsPF0Graphics
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
- 
+
 InitBarnNumber
    DEC2BCD HEDGE_HOPPER_BARN_COUNT
    DEC2BCD CROP_DUSTER_BARN_COUNT
    DEC2BCD STUNT_PILOT_BARN_COUNT
    DEC2BCD FLYING_ACE_BARN_COUNT
-       
+
 ElapsedTimeKernel
    sta WSYNC
 ;--------------------------------------
@@ -646,8 +646,8 @@ ElapsedTimeKernel
    cmp #<Blank                ; 2
    dex                        ; 2
    sta HMCLR                  ; 3 = @28
-   bpl .emptyScanlinesForElapsedTime;2³
-   bcc .setColonMask          ; 2³
+   bpl .emptyScanlinesForElapsedTime;2ï¿½
+   bcc .setColonMask          ; 2ï¿½
    sty NUSIZ0                 ; 3 = @35   set sprite size to ONE_COPY
    sty NUSIZ1                 ; 3 = @38
    dex                        ; 2         x = #$FE
@@ -675,7 +675,7 @@ ElapsedTimeKernel
    stx GRP1                   ; 3 = @36
    sty GRP0                   ; 3 = @39
    dec loopCount              ; 5
-   bpl .drawElapsedTime       ; 2³
+   bpl .drawElapsedTime       ; 2ï¿½
    sta WSYNC
 ;--------------------------------------
    sta HMOVE                  ; 3
@@ -683,7 +683,7 @@ ElapsedTimeKernel
    sta GRP0                   ; 3 = @08
    sta GRP1                   ; 3 = @11
    jmp HorizonKernel          ; 3
-       
+
 GroundColors
    .byte YELLOW + 4
    .byte YELLOW + 4
@@ -699,7 +699,7 @@ GroundColors
    .byte YELLOW + 4
    .byte YELLOW + 4
    .byte YELLOW + 4
-       
+
 HorizonKernel
    ldx #H_HORIZON             ; 2
 .drawHorizon
@@ -707,7 +707,7 @@ HorizonKernel
    eor colorEOR               ; 3
    and colorBWMask            ; 3
    cpx #8                     ; 2
-   bcs .skipMountainDraw      ; 2³
+   bcs .skipMountainDraw      ; 2ï¿½
    sta WSYNC
 ;--------------------------------------
    sta HMOVE                  ; 3
@@ -721,7 +721,7 @@ HorizonKernel
    lda MountainsPF2Graphics,x ; 4
    sta PF2                    ; 3 = @33
    jmp .nextHorizonScanline   ; 3
-       
+
 .skipMountainDraw
    sta WSYNC
 ;--------------------------------------
@@ -729,7 +729,7 @@ HorizonKernel
    sta COLUBK                 ; 3 = @06
 .nextHorizonScanline
    dex                        ; 2
-   bpl .drawHorizon           ; 2³
+   bpl .drawHorizon           ; 2ï¿½
    ldx #$00                   ; 2
    ldy grassFieldColor        ; 3
    lda planeColor             ; 3
@@ -762,7 +762,7 @@ AirObstacleKernel
 ;--------------------------------------
    sta HMOVE                  ; 3
    cpy #H_PILOT               ; 2
-   bcs .skipPilotDrawAirKernel_0;2³ + 1
+   bcs .skipPilotDrawAirKernel_0;2ï¿½ + 1
    lda (pilotGraphicPointers),y;5
    sta GRP1                   ; 3 = @15
    lda AirplanePlayfieldGraphic,y;4
@@ -777,7 +777,7 @@ AirObstacleKernel
    sta PF1                    ; 3 = @42
    dey                        ; 2
    cpy #H_PILOT               ; 2
-   bcs .skipPilotDrawAirKernel_1;2³ + 1
+   bcs .skipPilotDrawAirKernel_1;2ï¿½ + 1
    lda (pilotGraphicPointers),y;5
    sta GRP1                   ; 3 = @56
    lda AirplanePlayfieldGraphic,y;4
@@ -785,34 +785,34 @@ AirObstacleKernel
    sty tmpPilotGraphicIndex   ; 3
    sta PF1                    ; 3 = @66
    jmp CoarsePositionObstacle ; 3
-   
+
 .skipPilotDrawAirKernel_0
    lda #$00                   ; 2 = @11
    sta PF1                    ; 3 = @14
    sta GRP1                   ; 3 = @17
    SLEEP_3                    ; 3
    jmp .decrementAirKernelIndex;3
-   
+
 .skipPilotDrawAirKernel_1
    lda #$00                   ; 2 = @52
    sta PF1                    ; 3 = @55
    sta GRP1                   ; 3 = @58
    jmp .coarsePositionObstacle; 3
-   
+
 CoarsePositionObstacle SUBROUTINE
    sta WSYNC                  ; 3
 ;--------------------------------------
    sta HMOVE                  ; 3
    lda obstacleHorizCoarseValues,x;4
    tax                        ; 2         move coarse value to x register
-   bmi .coarsePositionObstacleCycle25;2³
+   bmi .coarsePositionObstacleCycle25;2ï¿½
    cpx #5                     ; 2
-   bcs .positionObstacleRight ; 2³
+   bcs .positionObstacleRight ; 2ï¿½
    cpx #2                     ; 2
-   bcs .coarsePositionObstacleMid;2³
+   bcs .coarsePositionObstacleMid;2ï¿½
 .coarsePositionObstacleLeft
    dex                        ; 2
-   bpl .coarsePositionObstacleLeft;2³
+   bpl .coarsePositionObstacleLeft;2ï¿½
    SLEEP 2                    ; 2
    sta RESP0                  ; 3 = @33
 .jmpIntoMoveObstacleLeft
@@ -821,7 +821,7 @@ CoarsePositionObstacle SUBROUTINE
    sta PF1                    ; 3 = @50
    dey                        ; 2
    cpy #H_PILOT               ; 2
-   bcs .jmpDoneCoarsePositionObstacleLeft;2³
+   bcs .jmpDoneCoarsePositionObstacleLeft;2ï¿½
    lda (pilotGraphicPointers),y;5
    sta GRP1                   ; 3 = @59
 .jmpDoneCoarsePositionObstacleLeft
@@ -835,7 +835,7 @@ CoarsePositionObstacle SUBROUTINE
    lda #HMOVE_L6              ; 2
    sta HMP0                   ; 3         set to pixel 69
    jmp .jmpIntoMoveObstacleLeft;3
-       
+
 .coarsePositionObstacleMid
    SLEEP_3                    ; 3 = @23
    dex                        ; 2
@@ -843,13 +843,13 @@ CoarsePositionObstacle SUBROUTINE
    SLEEP_3                    ; 3 = @30
 .coarsePositionObstacle
    dex                        ; 2
-   bpl .coarsePositionObstacle; 2³
+   bpl .coarsePositionObstacle; 2ï¿½
    sta.w RESP0                ; 4 = @48
    lda #$00                   ; 2
    sta PF1                    ; 3 = @53
    dey                        ; 2
    cpy #H_PILOT               ; 2
-   bcs .doneCoarsePositionObstacleMid;2³
+   bcs .doneCoarsePositionObstacleMid;2ï¿½
    lda (pilotGraphicPointers),y;5
    sta GRP1                   ; 3 = @67
 .doneCoarsePositionObstacleMid
@@ -860,11 +860,11 @@ CoarsePositionObstacle SUBROUTINE
    tax                        ; 2
    dey                        ; 2
    cpy #H_PILOT               ; 2
-   bcc .drawPilotSprite       ; 2³
+   bcc .drawPilotSprite       ; 2ï¿½
    SLEEP_3                    ; 3
    SLEEP_5                    ; 5
    jmp .clearRightPF1Register ; 3
-       
+
 .drawPilotSprite
    lda (pilotGraphicPointers),y;5
    SLEEP 2                    ; 2
@@ -875,24 +875,24 @@ CoarsePositionObstacle SUBROUTINE
    SLEEP_3                    ; 3
 .coarsePositionObstacleRight
    dex                        ; 2
-   bpl .coarsePositionObstacleRight;2³
+   bpl .coarsePositionObstacleRight;2ï¿½
    sta.w RESP0                ; 4
 .doneCoarsePositioning
    sta WSYNC
 ;--------------------------------------
    sta HMOVE                  ; 3
    cpy #H_PILOT               ; 2
-   bcc .drawAirplaneGraphic   ; 2³
+   bcc .drawAirplaneGraphic   ; 2ï¿½
    SLEEP 2                    ; 2
    SLEEP_3                    ; 3
    jmp DetermineObstacleKernel; 3
-       
+
 .drawAirplaneGraphic
    lda AirplanePlayfieldGraphic,y;4
    sta PF1                    ; 3 = @15
 DetermineObstacleKernel
    ldx kernelIndex            ; 3         get kernel index
-   beq GroundObstacleKernel   ; 2² + 1    branch if time to draw ground kernel
+   beq GroundObstacleKernel   ; 2ï¿½ + 1    branch if time to draw ground kernel
    lda.w flyingGeeseGraphicLSB; 4
    sta obstacleGraphicPointers; 3
    lda obstacleFineMotion     ; 3
@@ -905,7 +905,7 @@ DetermineObstacleKernel
    sta PF1                    ; 3 = @48
    dey                        ; 2
    cpy #H_PILOT               ; 2
-   bcs .skipPilotDrawAirKernelLoop;2³
+   bcs .skipPilotDrawAirKernelLoop;2ï¿½
    lda (pilotGraphicPointers),y;5
    sta GRP1                   ; 3 = @62
    lda AirplanePlayfieldGraphic,y;4
@@ -913,7 +913,7 @@ DetermineObstacleKernel
    sty tmpPilotGraphicIndex   ; 3
    txa                        ; 2
    tay                        ; 2
-.nextAirKernelScanline 
+.nextAirKernelScanline
 ;--------------------------------------
    sta HMOVE                  ; 3
    ldx kernelIndex            ; 3
@@ -928,7 +928,7 @@ DetermineObstacleKernel
    SLEEP_3                    ; 3
    sta HMCLR                  ; 3         clear horizontal motions
    dex                        ; 2
-   bpl .airObstacleKernel     ; 2³
+   bpl .airObstacleKernel     ; 2ï¿½
    ldx #$00                   ; 2
    stx obstacleFineMotion     ; 3
    stx PF1                    ; 3 = @49
@@ -939,7 +939,7 @@ DetermineObstacleKernel
    sta collisionArray,x       ; 4
    sta CXCLR                  ; 3
    jmp AirObstacleKernel      ; 3
-       
+
 .skipPilotDrawAirKernelLoop
    sta GRP1                   ; 3
    sty tmpPilotGraphicIndex   ; 3
@@ -950,7 +950,7 @@ DetermineObstacleKernel
    SLEEP 2                    ; 2
    SLEEP 2                    ; 2
    jmp .nextAirKernelScanline ; 3
-       
+
 GroundObstacleKernel
    lda obstacleFineMotion     ; 3
    sta HMP0                   ; 3 = @28
@@ -959,7 +959,7 @@ GroundObstacleKernel
    ldx #H_WINDMILL + 14       ; 2
    dey                        ; 2
    cpy #H_PILOT               ; 2
-   bcs .skipPilotDrawGroundKernelLoop;2³
+   bcs .skipPilotDrawGroundKernelLoop;2ï¿½
    lda #$00                   ; 2
    sta PF1                    ; 3 = @47
    lda (pilotGraphicPointers),y;5
@@ -970,7 +970,7 @@ GroundObstacleKernel
    SLEEP 2                    ; 2
    sta PF1                    ; 3 = @68
    jmp .nextGroundObstacleKernelScanline;3
-       
+
 .skipPilotDrawGroundKernelLoop
    lda #$00                   ; 2
    sta PF1                    ; 3 = @48
@@ -988,25 +988,25 @@ GroundObstacleKernel
    dec tmpPilotGraphicIndex   ; 5
    dey                        ; 2
    cpy #H_PILOT               ; 2
-   bcs .determineGroundObstacleSkipPilotDraw;2³
+   bcs .determineGroundObstacleSkipPilotDraw;2ï¿½
    lda (pilotGraphicPointers),y;5
    sta GRP1                   ; 3 = @62
    lda AirplanePlayfieldGraphic,y;4
    sta PF1                    ; 3 = @69
    jmp DetermineGroundObstacleKernel; 3
-       
+
 .determineGroundObstacleSkipPilotDraw
    lda #$00                   ; 2
    sta GRP1                   ; 3 = @60
    sta PF1                    ; 3 = @63
    jmp DetermineGroundObstacleKernel;3    could have fallen through
-       
+
 DetermineGroundObstacleKernel
    sta WSYNC                  ; 3
 ;--------------------------------------
    sta HMOVE                  ; 3
    lda groundObstacleType     ; 3   get the ground obstacle type
-   bne BarnKernel             ; 2³  branch if Barn
+   bne BarnKernel             ; 2ï¿½  branch if Barn
    jsr Sleep12Cycles          ; 6
    lda windmillColor          ; 3
    sta COLUP0                 ; 3 = @26
@@ -1019,12 +1019,12 @@ DetermineGroundObstacleKernel
    lda #$00                   ; 2
    sta PF1                    ; 3 = @41
    cpy #H_PILOT               ; 2
-   bcc .drawPlaneWindmillKernel;2³
+   bcc .drawPlaneWindmillKernel;2ï¿½
    sty tmpPilotGraphicIndex   ; 3
    txa                        ; 2
    tay                        ; 2
    jmp .nextWindmillScanline  ; 3
-       
+
 .drawPlaneWindmillKernel
    lda (pilotGraphicPointers),y;5
    sta GRP1                   ; 3 = @54
@@ -1038,10 +1038,10 @@ DetermineGroundObstacleKernel
 ;--------------------------------------
    sta HMOVE                  ; 3
    cpx #H_WINDMILL            ; 2
-   bcs .drawWindmillBlades    ; 2³
+   bcs .drawWindmillBlades    ; 2ï¿½
    lda WindmillGraphics,y     ; 4
    jmp .maskWindmillGraphics  ; 3
-       
+
 .drawWindmillBlades
    lda (windmillBladesGraphicPointer),y;5
 .maskWindmillGraphics
@@ -1049,9 +1049,9 @@ DetermineGroundObstacleKernel
    sta GRP0                   ; 3 = @19
    ldy tmpPilotGraphicIndex   ; 3
    dex                        ; 2
-   bpl .windmillKernel        ; 2³
+   bpl .windmillKernel        ; 2ï¿½
    jmp CopyrightKernel        ; 3
-       
+
 BarnKernel
    jsr Sleep18Cycles          ; 6
    SLEEP 2                    ; 2
@@ -1062,13 +1062,13 @@ BarnKernel
    lda #$00                   ; 2
    sta PF1                    ; 3 = @41
    cpy #H_PILOT               ; 2
-   bcc .drawPlaneBarnKernel   ; 2³
+   bcc .drawPlaneBarnKernel   ; 2ï¿½
    sta GRP1                   ; 3 = @48
    sty tmpPilotGraphicIndex   ; 3
    txa                        ; 2
    tay                        ; 2
    jmp .drawWeatherVane       ; 3
-       
+
 .drawPlaneBarnKernel
    lda (pilotGraphicPointers),y;5
    sta GRP1                   ; 3 = @54
@@ -1091,17 +1091,17 @@ BarnKernel
    SLEEP 2                    ; 2
    SLEEP 2                    ; 2
    cpx #H_BARN                ; 2
-   beq DrawBarn               ; 2³
+   beq DrawBarn               ; 2ï¿½
    dex                        ; 2
    bpl .barnKernel            ; 3         unconditional branch
-   
+
    FILL_BOUNDARY 3, 234             ;  push next routine 3 bytes into next page
 
 .skipPilotDrawForBarnRoof
    sta GRP1                   ; 3 = @50
    sty tmpPilotGraphicIndex   ; 3
    jmp .nextBarnRoofScanline  ; 3
-       
+
 DrawBarn
    dex                        ; 2
 .drawBarnRoof
@@ -1109,7 +1109,7 @@ DrawBarn
    lda #$00                   ; 2
    sta PF1                    ; 3 = @42
    cpy #H_PILOT               ; 2
-   bcs .skipPilotDrawForBarnRoof;2³
+   bcs .skipPilotDrawForBarnRoof;2ï¿½
    lda (pilotGraphicPointers),y;5
    sta GRP1                   ; 3 = @54
    lda AirplanePlayfieldGraphic,y;4
@@ -1133,7 +1133,7 @@ DrawBarn
    ldy tmpPilotGraphicIndex   ; 3
    dex                        ; 2
    cpx #H_BARN / 2            ; 2
-   bcs .drawBarnRoof          ; 2³
+   bcs .drawBarnRoof          ; 2ï¿½
    lda #HMOVE_R2              ; 2
    sta HMP0                   ; 3 = @39   shift barn side right 2 pixels
 .drawBarnSide
@@ -1141,7 +1141,7 @@ DrawBarn
    lda #$00                   ; 2
    sta PF1                    ; 3 = @46
    cpy #H_PILOT               ; 2
-   bcs .skipPilotDrawForBarnSide;2³
+   bcs .skipPilotDrawForBarnSide;2ï¿½
    lda (pilotGraphicPointers),y;5
    sta GRP1                   ; 3 = @58
    lda AirplanePlayfieldGraphic,y;4
@@ -1165,9 +1165,9 @@ DrawBarn
    sta HMCLR                  ; 3 = @31
    SLEEP_3                    ; 3
    dex                        ; 2
-   bpl .drawBarnSide          ; 2³
+   bpl .drawBarnSide          ; 2ï¿½
    jmp CopyrightKernel        ; 3
-   
+
 .skipPilotDrawForBarnSide
    sta GRP1                   ; 3
    sty tmpPilotGraphicIndex   ; 3
@@ -1176,7 +1176,7 @@ DrawBarn
    SLEEP 2                    ; 2
    SLEEP 2                    ; 2
    jmp .nextBarnSideScanline  ; 3
-       
+
 CopyrightKernel
    lda CXPPMM                 ; 3         read player collision values
    ora CXP0FB                 ; 3         combine with playfield collision
@@ -1201,7 +1201,7 @@ CopyrightKernel
 .drawFence
    cpy #7                     ; 2
    ldx #DISABLE_BM            ; 2
-   bcs .nextFenceLine         ; 2³
+   bcs .nextFenceLine         ; 2ï¿½
    ldx #ENABLE_BM             ; 2
 .nextFenceLine
    sta WSYNC
@@ -1214,7 +1214,7 @@ CopyrightKernel
    and colorBWMask            ; 3
    sta COLUBK                 ; 3 = @22
    dey                        ; 2
-   bpl .drawFence             ; 2³
+   bpl .drawFence             ; 2ï¿½
    ldy #2                     ; 2
 .drawGround
    lda #DISABLE_BM            ; 2
@@ -1226,7 +1226,7 @@ CopyrightKernel
    sta ENAM1                  ; 3 = @09
    stx COLUBK                 ; 3 = @12
    dey                        ; 2
-   bpl .drawGround            ; 2³
+   bpl .drawGround            ; 2ï¿½
    sta WSYNC                  ; 3
 ;--------------------------------------
    sta HMOVE                  ; 3
@@ -1255,7 +1255,7 @@ CopyrightKernel
    lda (gameSelectionPointers),y;5
    sta tmpGameSelectionGraphic; 3
    sta WSYNC
-;--------------------------------------   
+;--------------------------------------
    sta HMOVE                  ; 3
    lda Copyright_0,y          ; 4
    sta GRP0                   ; 3 = @10
@@ -1271,7 +1271,7 @@ CopyrightKernel
    sta GRP1                   ; 3 = @42
    sta HMCLR                  ; 3 = @45
    dey                        ; 2
-   bpl .drawActivitionCopyright;2³
+   bpl .drawActivitionCopyright;2ï¿½
    iny                        ; 2         y = 0
    sty GRP0                   ; 3 = @54
    sty GRP1                   ; 3 = @57
@@ -1427,7 +1427,7 @@ ReadConsoleSwitches
    lda #0
    sta colorCycleMode
    jmp .checkForSelectAndReset
-       
+
 .checkForJoystickButtonPress
    bit INPT4                        ; read left port action button
    bpl .clearAttractMode            ; branch if button pressed
@@ -1437,7 +1437,7 @@ ReadConsoleSwitches
    bcs .skipGameReset               ; check for SELECT if RESET not pressed
    ldx #<colorCycleMode
    jmp ClearRAM
-   
+
 .skipGameReset
    ldy #0
    lsr                              ; SELECT now in carry
@@ -1483,7 +1483,7 @@ JumpIntoConsoleSwitchCheck
    bit INPT4                        ; read left port action button
    bpl .setToPilotLaunched          ; branch if button pressed
    jmp MainLoop
-   
+
 .setToPilotLaunched
    lda #1
    sta pilotLaunchStatus
@@ -1511,7 +1511,7 @@ JumpIntoConsoleSwitchCheck
    bne .reducePilotRPMForLanding
    dec pilotSpeed                   ; reduce pilot speed every fourth frame
    jmp .reducePilotRPMForLanding
-       
+
 .rapidlyReducePilotSpeedForLanding
    and #1
    bne .reducePilotRPMForLanding    ; branch if odd frame
@@ -1582,7 +1582,7 @@ IncrementElapsedTime
    bcs .deceleratePilot             ; branch if greater than 36% of max speed
    inc pilotSpeed                   ; increment pilot speed
    jmp .determineEngineRPMValue
-       
+
 .deceleratePilot
    beq .determineEngineRPMValue
    dec pilotSpeed                   ; reduce pilot speed
@@ -1656,7 +1656,7 @@ ScrollGeese
    sta obstacleSizeAndFineMotion,x
    lda tmpGooseHorizPosition        ; get derived horizontal position
    jmp .setGooseHorizontalPosition  ; set goose new horizontal position
-       
+
 .gooseScrollOutOfView
    lda obstacleSizeAndFineMotion,x  ; get obstacle size and fine motion
    and #$0F                         ; keep obstacle NUSIZ value
@@ -1671,7 +1671,7 @@ ScrollGeese
    lda #ONE_COPY
    sta geeseNUSIZValues - 1,x
    jmp .nextGooseScroll
-       
+
 .setGooseNUSIZValue
    inc geeseNUSIZIndexes - 1,x      ; increment index to NUSIZ table
    lda geeseNUSIZIndexes - 1,x      ; get index for NUSIZ table
@@ -1699,7 +1699,7 @@ ScrollGeese
    dex
    beq AnimatePilotAndWindmillBlades
    jmp .scrollGooseLoop
-       
+
 AnimatePilotAndWindmillBlades
    lda gameState                    ; get current game state
    bne .reducePilotCrashTimer       ; branch if GAME_OVER
@@ -1813,14 +1813,14 @@ SetGeeseGraphicPointers
    dex                              ; decrement ground collision timer value
    stx groundObstacleCollisionTimer
    jmp DeterminePlaneShakeFromCollision
-       
+
 .checkCollisions
    dex                              ; x = -1
    stx collisionIndicator
    bit collisionArray               ; check ground obstacle collision registers
    bmi PilotCollidedWithGroundObstacle; branch if a collision occurred
    jmp CheckGeeseCollision
-       
+
 PilotCollidedWithGroundObstacle
    lda tmpGameVariationValue        ; get current obstacle value
    lsr
@@ -1866,7 +1866,7 @@ PilotCollidedWithGroundObstacle
 .doneCheckBarnCollision
    cld
    jmp CheckGeeseCollision
-       
+
 .pilotCrashIntoGroundObstacle
    lda #70
    sta pilotCrashTimer
@@ -1925,7 +1925,7 @@ DeterminePlaneShakeFromCollision
    lsr
    bcs .pilotHitBarnRoofInsideBarn
    jmp .setPilotSpeedForGroundCollision
-       
+
 .continuePilotCollisionChecks
    lda tmpGameVariationValue        ; get current obstacle value
    lsr
@@ -1944,7 +1944,7 @@ DeterminePlaneShakeFromCollision
    lda #PILOT_MAX_SPEED - (PILOT_MAX_SPEED * 90 / 100)
    sta pilotSpeed                   ; set to 90% of max speed
    jmp CheckGeeseCollision
-       
+
 .pilotHitTopOfGroundObstacle
    lda #1
    sta horizMotionDelay             ; set horizontal motion delay
@@ -1953,7 +1953,7 @@ DeterminePlaneShakeFromCollision
    lda #0
    sta collisionIndicator
    jmp CheckGeeseCollision
-       
+
 .pilotCollidedWithWindmill
    lda groundObstacleHorizPosition  ; get Windmill horizontal position
    cmp #PLAYER_XMIN + 8
@@ -1966,7 +1966,7 @@ DeterminePlaneShakeFromCollision
    lda #2
    sta collisionIndicator
    jmp CheckGeeseCollision
-       
+
 CheckGeeseCollision
    ldx #3
 .checkGeeseCollision
@@ -1993,7 +1993,7 @@ CheckGeeseCollision
    lda #0
    sta collisionArray,x             ; clear collision register
    jmp .nextGooseCollision
-       
+
 .reduceSpeedForGooseCollision
    lda collisionArray,x             ; check collision value for goose
    bpl .nextGooseCollision          ; branch if didn't collide with goose
@@ -2083,7 +2083,7 @@ ScrollFencePosts
    bne .scrollFencePosts            ; branch if not on right side
    lda #XMIN
    jmp .setFencePostHorizPosition
-       
+
 .scrollFencePosts
    cmp #XMAX
    bcc .setFencePostHorizPosition   ; branch if less than horizontal max
@@ -2109,7 +2109,7 @@ ScrollFencePosts
    sta barnHorizPosition            ; set barn horizontal position
    bne .jmpToSetBarnGraphics        ; branch if not reached left side
    jmp SpawnGroundObstacle
-       
+
 .jmpToSetBarnGraphics
    jmp SetBarnGraphics
 
@@ -2124,7 +2124,7 @@ ScrollWindmill
    sta groundObstacleHorizPosition  ; set ground obstacle horizontal position
    beq SpawnGroundObstacle
    jmp .determineGeeseSpawningValues
-       
+
 SpawnGroundObstacle
    ldx #0
    stx collisionArray               ; clear ground collision values
@@ -2145,7 +2145,7 @@ SpawnGroundObstacle
    lsr
    bcs .setToSpawnWindmillObstacle
    jmp .setToSpawnBarnObstacle
-       
+
 .setToNoGroundObstacle
    lda #TYPE_WINDMILL
    sta groundObstacleType           ; set obstacle type to TYPE_WINDMILL
@@ -2153,7 +2153,7 @@ SpawnGroundObstacle
    lda #W_SCREEN - 1
    sta groundObstacleHorizPosition  ; set ground obstacle horizontal position
    jmp .determineGeeseSpawningValues
-       
+
 .setToSpawnWindmillObstacle
    ldx #TYPE_WINDMILL
    stx groundObstacleType           ; set obstacle type to TYPE_WINDMILL
@@ -2162,13 +2162,13 @@ SpawnGroundObstacle
    lda #W_SCREEN - 1
    sta groundObstacleHorizPosition  ; set ground obstacle horizontal position
    jmp .determineGeeseSpawningValues
-       
+
 .setToSpawnBarnObstacle
    sta groundObstacleType
    lda #W_SCREEN + 23
    sta barnHorizPosition
    jmp SetBarnGraphics
-       
+
 SetBarnGraphics
    lda #$FF
    sta barnRoofGraphics             ; set barn roof graphic value
@@ -2182,13 +2182,13 @@ SetBarnGraphics
    lsr
    tax
    jmp ScrollBarn
-       
+
 .checkForBarnScrollingOffLeftSide
    cmp #PLAYER_XMIN
    bcc .barnScrollingOffLeftSide    ; branch if barn left of player plane
    ldx #6
    jmp ScrollBarn
-       
+
 .barnScrollingOffLeftSide
    ldx #0
    stx groundObstacleMask           ; set to not show ground obstacle
@@ -2245,7 +2245,7 @@ ScrollBarn
    jmp MainLoop
 
    FILL_BOUNDARY 0, 234
-   
+
 GroundObstacleGenerationTable
 HedgeHopperGroundObstacleGenerationValues
    .byte SHOW_WINDMILL_OBSTACLE, SHOW_WINDMILL_OBSTACLE, SHOW_BARN_OBSTACLE
@@ -2338,25 +2338,25 @@ GoundObstacleGenerationLSBValues
    .byte <CropDusterGroundObstacleGenerationValues
    .byte <StuntPilotGroundObstacleGenerationValues
    .byte <FlyingAceGroundObstacleGenerationValues
-   
+
 GeeseSpawningLSBValues
    .byte <HedgeHopperGeeseSpawingValues
    .byte <CropDusterGeeseSpawingValues
    .byte <StuntPilotGeeseSpawningValues
    .byte <FlyingAceGeeseSpawningValues
-   
+
 GeeseNUSIZLSBValues
    .byte <HedgeHopperGeeseNUSIZTable
    .byte <CropDusterGeeseNUZIZTable
    .byte <StuntPilotGeeseNUSIZTable
    .byte <FlyingAceGeeseNUSIZTable
-   
+
 GooseSpawningValues
    .byte SPAWN_NO_GOOSE             ; never used or referenced
    .byte SPAWN_BOTTOM_GOOSE
    .byte SPAWN_MIDDLE_GOOSE
    .byte SPAWN_TOP_GOOSE
-   
+
 ScrollingBarnGraphicsMaskValues
    .byte $FC ; |XXXXXX..|
    .byte $F8 ; |XXXXX...|
@@ -2371,21 +2371,21 @@ ScrollingBarnGraphicsMaskValues
    .byte $1F ; |...XXXXX|
    .byte $3F ; |..XXXXXX|
    .byte $7F ; |.XXXXXXX|
-   
+
 InitialGooseHorizPosition
    .byte XMIN                       ; ONE_COPY...not used
    .byte 16                         ; TWO_COPIES
    .byte 32                         ; TWO_MED_COPIES
    .byte 32                         ; THREE_COPIES
    .byte 64                         ; TWO_WIDE_COPIES
-   
+
 GooseNUSIZMaxHorizPosition
    .byte XMIN                       ; ONE_COPY
    .byte 144                        ; TWO_COPIES
    .byte 128                        ; TWO_MED_COPIES
    .byte 128                        ; THREE_COPIES
    .byte 96                         ; TWO_WIDE_COPIES
-   
+
 GeeseNUSIZTable
 HedgeHopperGeeseNUSIZTable
 CropDusterGeeseNUZIZTable
@@ -2403,7 +2403,7 @@ FlyingAceGeeseNUSIZTable
    .byte ONE_COPY
    .byte TWO_MED_COPIES
    .byte TWO_WIDE_COPIES
-   
+
 GeeseSpawningVariationValues
 HedgeHopperGeeseSpawingValues
 CropDusterGeeseSpawingValues
@@ -2424,7 +2424,7 @@ CropDusterGeeseSpawingValues
    .byte SPAWN_TOP_GOOSE
    .byte SPAWN_MIDDLE_GOOSE
 
-StuntPilotGeeseSpawningValues   
+StuntPilotGeeseSpawningValues
    .byte SPAWN_NO_GOOSE
    .byte SPAWN_MIDDLE_GOOSE
    .byte SPAWN_MIDDLE_GOOSE
@@ -2459,7 +2459,7 @@ FlyingAceGeeseSpawningValues
    .byte SPAWN_MIDDLE_GOOSE
    .byte SPAWN_TOP_GOOSE
    .byte SPAWN_MIDDLE_GOOSE
-       
+
 InitializeGameVariables
    lda #<GeeseGraphics_00
    sta obstacleGraphicPointers
@@ -2521,7 +2521,7 @@ CalculateObjectHorizPosition
    tay                              ; save result for later
    and #$0F                         ; keep lower nybbles
    sta div16Remainder               ; keep div16 remainder
-   tya                              
+   tya
    lsr                              ; divide horizontal position by 16
    lsr
    lsr
@@ -2580,7 +2580,7 @@ TimeDigitDecimalSprite
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 MountainsPF1Graphics
    .byte $FF ; |XXXXXXXX|
    .byte $FF ; |XXXXXXXX|
@@ -2590,7 +2590,7 @@ MountainsPF1Graphics
    .byte $1F ; |...XXXXX|
    .byte $0E ; |....XXX.|
    .byte $04 ; |.....X..|
-   
+
 MountainsPF2Graphics
    .byte $7F ; |.XXXXXXX|
    .byte $7F ; |.XXXXXXX|
@@ -2600,9 +2600,9 @@ MountainsPF2Graphics
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
    FILL_BOUNDARY 0, 234
-       
+
 NumberFonts
 zero
    .byte $78 ; |.XXXX...|
@@ -2694,7 +2694,7 @@ nine
    .byte $CC ; |XX..XX..|
    .byte $CC ; |XX..XX..|
    .byte $78 ; |.XXXX...|
-       
+
 Blank
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -2704,7 +2704,7 @@ Blank
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-       
+
 Copyright_0
    .byte $00 ; |........|
    .byte $AD ; |X.X.XX.X|
@@ -2741,10 +2741,10 @@ Copyright_3
    .byte $E9 ; |XXX.X..X|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 PilotGraphicLSBValues
    .byte <PilotAnimation_00, <PilotAnimation_01, <PilotAnimation_02
-   
+
 PilotAnimation_00
    .byte $00 ; |........|
    .byte $04 ; |.....X..|
@@ -2789,7 +2789,7 @@ PilotAnimation_01
    .byte $04 ; |.....X..|
    .byte $7E ; |.XXXXXX.|
    .byte $7E ; |.XXXXXX.|
-PilotAnimation_02   
+PilotAnimation_02
    .byte $00 ; |........|
    .byte $04 ; |.....X..|
    .byte $0A ; |....X.X.|
@@ -2811,13 +2811,13 @@ PilotAnimation_02
    .byte $04 ; |.....X..|
    .byte $7E ; |.XXXXXX.|
    .byte $7E ; |.XXXXXX.|
-   
+
 GeeseGraphicLSBValues
    .byte <GeeseGraphics_01, <GeeseGraphics_01
    .byte <GeeseGraphics_01, <GeeseGraphics_00
    .byte <GeeseGraphics_02, <GeeseGraphics_02
    .byte <GeeseGraphics_00, <GeeseGraphics_01
-   
+
 StationaryPilotSprite
    .byte $00 ; |........|
    .byte $04 ; |.....X..|
@@ -2840,12 +2840,12 @@ StationaryPilotSprite
    .byte $04 ; |.....X..|
    .byte $7E ; |.XXXXXX.|
    .byte $7E ; |.XXXXXX.|
-   
+
 WindmillBladeGraphicLSBValues
    .byte <WindmillBladeGraphic_00 - H_WINDMILL + 1
    .byte <WindmillBladeGraphic_01 - H_WINDMILL + 1
    .byte <WindmillBladeGraphic_02 - H_WINDMILL + 1
-   
+
    FILL_BOUNDARY 0, 234
 
 GeeseGraphics
@@ -2900,7 +2900,7 @@ GeeseGraphics_02
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 WeatherVaneGraphics
    .byte $80 ; |X.......|
    .byte $11 ; |...X...X|
@@ -2923,7 +2923,7 @@ WeatherVaneGraphics
    .byte $00 ; |........|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 AirplanePlayfieldGraphic
    .byte $00 ; |........|
    .byte $00 ; |........|
@@ -2946,7 +2946,7 @@ AirplanePlayfieldGraphic
    .byte $80 ; |X.......|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
+
 WindmillGraphics
    .byte $82 ; |X.....X.|
    .byte $82 ; |X.....X.|
@@ -3005,7 +3005,7 @@ WindmillGraphics
    .byte $28 ; |..X.X...|
    .byte $28 ; |..X.X...|
    .byte $FE ; |XXXXXXX.|
-   
+
 HorizonColors
    .byte HORIZON_COLOR_LINE_01, HORIZON_COLOR_LINE_02, HORIZON_COLOR_LINE_03
    .byte HORIZON_COLOR_LINE_04, HORIZON_COLOR_LINE_05, HORIZON_COLOR_LINE_06
@@ -3013,7 +3013,7 @@ HorizonColors
    .byte HORIZON_COLOR_LINE_10, HORIZON_COLOR_LINE_11, HORIZON_COLOR_LINE_12
    .byte HORIZON_COLOR_LINE_13, HORIZON_COLOR_LINE_14, HORIZON_COLOR_LINE_15
    .byte HORIZON_COLOR_LINE_16
-   
+
 WindmillBladeGraphics
 WindmillBladeGraphic_00
    .byte $FE ; |XXXXXXX.|
@@ -3066,12 +3066,12 @@ WindmillBladeGraphic_02
    .byte $80 ; |X.......|
    .byte $00 ; |........|
    .byte $00 ; |........|
-   
-   FILL_BOUNDARY 252, 234           ; push to RESET vector (this was done 
+
+   FILL_BOUNDARY 252, 234           ; push to RESET vector (this was done
                                     ; instead of using an .ORG to easily keep
                                     ; track of free ROM)
 
    echo "***", (FREE_BYTES)d, "BYTES OF ROM FREE"
-       
+
    .word Start                      ; RESET vector
    .word Start                      ; BRK vector

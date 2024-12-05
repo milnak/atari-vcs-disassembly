@@ -23,7 +23,7 @@
 ; = EXACT GAME ROM, THE LABELS AND COMMENTS ARE THE INTERPRETATION OF MY OWN   =
 ; = AND MAY NOT REPRESENT THE ORIGINAL VISION OF THE AUTHOR.                   =
 ; =                                                                            =
-; = THE ASSEMBLED CODE IS © 1982, US GAMES CORPORATION                         =
+; = THE ASSEMBLED CODE IS ï¿½ 1982, US GAMES CORPORATION                         =
 ; =                                                                            =
 ; ==============================================================================
 ;
@@ -54,7 +54,7 @@
 ; frequencies were not adjusted for the PAL timing.
 
    processor 6502
-      
+
 ;
 ; Set the read address base so this runs on the real VCS and compiles to the
 ; exact ROM image. This must be done before including the vcs.h header file.
@@ -63,20 +63,20 @@ TIA_BASE_READ_ADDRESS = $30
 
    include "vcs.h"
    include "macro.h"
-   include "tia_constants.h"
+   include "tia_constants_100.h"
 
 ;
 ; Make sure we are using vcs.h version 1.05 or greater.
 ;
    IF VERSION_VCS < 105
-   
+
       echo ""
       echo "*** ERROR: vcs.h file *must* be version 1.05 or higher!"
       echo "*** Updates to this file, DASM, and associated tools are"
       echo "*** available at https://dasm-assembler.github.io/"
       echo ""
       err
-      
+
    ENDIF
 ;
 ; Make sure we are using macro.h version 1.01 or greater.
@@ -128,11 +128,11 @@ VSYNC_TIME              = 40
 OVERSCAN_LINES          = 28        ; number of scan lines in overscan
 
    IF COMPILE_REGION = NTSC
-   
+
 VBLANK_TIME             = 45
 
    ELSE
-   
+
 VBLANK_TIME             = 106
 
    ENDIF
@@ -166,20 +166,20 @@ GREEN_BROWN             = YELLOW
 BRIGHT_GREEN            = $50
 BRICK_RED               = $60
 RED                     = $80
-PURPLE                  = $A0   
+PURPLE                  = $A0
 BLUE                    = $D0
 BROWN                   = YELLOW
 LT_BROWN                = BROWN + 4
 SIREN_LIGHT             = RED
 
    ENDIF
-   
+
 ;===============================================================================
 ; U S E R - C O N S T A N T S
 ;===============================================================================
 
 ROM_BASE                = $F000
-   
+
 ; objectType ids:
 ID_BALLOON              = 0
 ID_JET_PLANE            = 1
@@ -188,7 +188,7 @@ ID_PROP_PLANE           = 3
 ID_HOUSE                = 4
 ID_TREE                 = 5
 ID_TANK_0               = 6
-ID_TANK_1               = 7 
+ID_TANK_1               = 7
 
 ; game selection values
 OPTION_PLAYER_MOVE_MISSILE = %01
@@ -221,7 +221,7 @@ MISSILE_XMAX            = 162
 
 SPACE_JOCKEY_MISSILE_OFFSET = 3
 ENEMY_MISSILE_OFFSET    = 8
-                           
+
 INITIAL_START_COUNT     = 32
 NUMBER_OF_GROUPS        = 3         ; number of enemy groups
 STARTING_LIVES          = 2         ; number of lives at the start of a game
@@ -244,7 +244,7 @@ ENEMY_ACTIVE            = %00000001
 ;===============================================================================
    SEG.U zpVars
    .org $80
-   
+
 spaceJockeyColors       ds SPACE_JOCKEY_HEIGHT
 scoreColor              ds 1
 playfieldColor          ds 1
@@ -314,14 +314,14 @@ highScore               ds 3
 gameSelection           ds 1
 
    echo "***",(*-$80 - 2)d, "BYTES OF RAM USED", ($100 - * + 2)d, "BYTES FREE"
-   
+
 ;===============================================================================
 ; R O M - C O D E (Part 1)
 ;===============================================================================
 
    SEG Bank0
    .org ROM_BASE
-   
+
 Start
 ;
 ; Set up everything so the power up state is known.
@@ -400,7 +400,7 @@ ClearGameRAM
    bne .clearRAM
    jsr InitializeGame
    bmi .convertDigits               ; unconditional branch
-   
+
 .skipReset
    ldx #0
    lsr                              ; shift SELECT to carry
@@ -442,7 +442,7 @@ ClearGameRAM
    sty playerScore + 2
    sty showHighScore                ; show the score
    beq .convertDigits               ; unconditional branch
-       
+
 .checkToShowHighScore
    lda SWCHA                        ; read the joystick values
    and #$F0                         ; only concerned with left joystick port
@@ -453,7 +453,7 @@ ClearGameRAM
    sty showHighScore                ; set flag to trigger showing high score
 .convertDigits
    jmp BCD2DigitPtrs
-   
+
 .skipAttactModeProcessing
    lda spaceJockeyHit               ; check if the space jocky was hit
    bmi CheckGameCollisions          ; skip joystick routine if true
@@ -537,7 +537,7 @@ CheckGameCollisions
    lda spaceJockeyHorzPos
    clc
    adc #16
-   sta spaceJockeyMissileHoriz 
+   sta spaceJockeyMissileHoriz
    lda INPT4                        ; read left player fire button
    ora spaceJockeyHit               ; or the value with space jockey hit state
    bmi RollingMountainAnimation     ; skip the missile fire routine
@@ -649,7 +649,7 @@ RollingMountainAnimation
    jsr InitLoop
    sty AUDC1                        ; clear audio channel (y = 0)
    bmi .moveEnemies                 ; unconditional branch
-       
+
 .determineDeathAnimation
    cpx #5
    bcs .playSpaceJockeyDeathSound
@@ -673,7 +673,7 @@ RollingMountainAnimation
    sta AUDC1                        ; set the death sound channel
 .moveEnemies
    jmp MoveEnemies
-   
+
 .spaceJockeyAnimation
    ldy #%11010101
    lda #8
@@ -696,7 +696,7 @@ MoveEnemies
    lsr                              ; shift ENEMY_ACTIVE to carry
    bcs .determineEnemyMovement      ; check to move enemy
    jmp CheckToLaunchNewAttack
-   
+
 .determineEnemyMovement
    dec enemyMotion,x
    bpl .checkForEnemyShot
@@ -740,7 +740,7 @@ MoveEnemies
    lda #INITIAL_START_COUNT
    sta enemyMotion,x
    bne .nextEnemy                   ; unconditional branch
-   
+
 .checkForEnemyShot
    lda enemyAttributes,x            ; get the enemy attribute value
    bpl .setEnemyAnimation           ; branch if enemy not destroyed
@@ -765,7 +765,7 @@ MoveEnemies
    sta AUDV0
 .jumpNextEnemy
    jmp .nextEnemy
-   
+
 .setEnemyAnimation
    ldy objectIds,x                  ; object id used for table index
    lda #2
@@ -779,7 +779,7 @@ MoveEnemies
    sta enemyLSB,x
 .nextEnemy
    jmp .nextEnemyGroup
-   
+
 CheckToLaunchNewAttack
    lda spaceJockeyHit
    bmi .nextEnemyGroup
@@ -825,7 +825,7 @@ CheckToLaunchNewAttack
    dex
    bmi MoveEnemyMissile
    jmp .moveEnemyLoop
-   
+
 MoveEnemyMissile
    lda spaceJockeyHit
    bmi .checkSpaceJockeyCollisions  ; branch if the Space Jockey was hit
@@ -857,9 +857,9 @@ MoveEnemyMissile
    sta AUDV1
    lda #$08
    sta AUDC1
-   sta AUDF1 
+   sta AUDF1
    bne .checkSpaceJockeyCollisions  ; unconditional branch
-   
+
 EnemyNotFiring
    lda #$40
    sta enemyShotVolume              ; reset the enemy shot volume
@@ -977,7 +977,7 @@ DisplayKernel
    sta playerColors           ; 3
    ldy #NUMBER_HEIGHT - 1     ; 2
    jsr SixCharacterDisplay    ; 6
-;--------------------------------------   
+;--------------------------------------
    ldx #1                     ; 2 = @07
    lda spaceJockeyHorzPos     ; 3
    jsr HorizPositionObject    ; 6
@@ -1011,18 +1011,18 @@ DisplayKernel
    sta scanline               ; 3
 .newKernelZone
    lda kernelZone             ; 3         get the current kernel zone
-   beq .jumpToMountainKernel  ; 2³        jump to mountain kernel if 0
+   beq .jumpToMountainKernel  ; 2ï¿½        jump to mountain kernel if 0
    tay                        ; 2 = @20   y = kernelZone
    lda scanline               ; 3
    and #$FE                   ; 2
    cmp spaceJockeyMissileVert ; 3
    php                        ; 3
    cmp spaceJockeyVertPos     ; 3
-   bcs PositionEnemy          ; 2³
+   bcs PositionEnemy          ; 2ï¿½
    lda spaceJockeyColors,x    ; 4 = @40   get the space jockey colors
    sta playerColors           ; 3         store them here for later use
    lda spaceJockeyGraphics,x  ; 4         read the space jockey graphics
-   beq .storeSpaceJockeyGraph ; 2³        skip the index increment if reached
+   beq .storeSpaceJockeyGraph ; 2ï¿½        skip the index increment if reached
    inx                        ; 2 = @51   the end of the graphic data
 .storeSpaceJockeyGraph
    sta tempGRP0Graphic        ; 3
@@ -1033,7 +1033,7 @@ PositionEnemy
    sec                        ; 2
 .coarseMoveEnemy
    sbc #15                    ; 2         divide position by 15
-   bcs .coarseMoveEnemy       ; 2³
+   bcs .coarseMoveEnemy       ; 2ï¿½
    eor #15                    ; 2         4-bit 1's complement for fine motion
    asl                        ; 2         shift remainder to upper nybbles
    asl                        ; 2
@@ -1069,17 +1069,17 @@ PositionEnemy
    sta enemyScanline          ; 3
    ldy #0                     ; 2
    dec kernelZone             ; 5
-   bpl .spaceJockeyScanline   ; 2³
+   bpl .spaceJockeyScanline   ; 2ï¿½
 .jumpToMountainKernel
    jmp MountainKernel         ; 3
-   
+
 .kernelZoneLoop
    dec scanline               ; 5         reduce scan line count
    lda scanline               ; 3
    cmp kernelZoneEnd          ; 3         see if we reached end of kernel zone
-   beq .newKernelZone         ; 2³
+   beq .newKernelZone         ; 2ï¿½
    lsr                        ; 2
-   bcc .spaceJockeyScanline   ; 2³        space jockey updated on even lines
+   bcc .spaceJockeyScanline   ; 2ï¿½        space jockey updated on even lines
    lda enemyMissileVert       ; 3
    cmp scanline               ; 3
    php                        ; 3
@@ -1087,11 +1087,11 @@ PositionEnemy
    sta ENABL                  ; 3 = @45   enable/disable enemy missile
    lda enemyScanline          ; 3
    cmp scanline               ; 3
-   bcc .clearEnemyGraphics    ; 2³
+   bcc .clearEnemyGraphics    ; 2ï¿½
    lda (enemyColorPointer),y  ; 5         get the enemy colors
    sta playerColors           ; 3         save the value for later
    lda (enemyGraphicPointer),y; 5         get the enemy graphics
-   beq .drawEnemyGraphic      ; 2³        skip index increment if zero
+   beq .drawEnemyGraphic      ; 2ï¿½        skip index increment if zero
    iny                        ; 2         increment enemy index
    bne .drawEnemyGraphic      ; 3         unconditional branch
 .clearEnemyGraphics
@@ -1103,7 +1103,7 @@ PositionEnemy
    lda playerColors           ; 3
    sta COLUP0                 ; 3 = @09
    jmp .kernelZoneLoop        ; 3
-   
+
 .spaceJockeyScanline
    lda spaceJockeyMissileVert ; 3 = @33
    cmp scanline               ; 3
@@ -1112,11 +1112,11 @@ PositionEnemy
    sta ENAM1                  ; 3 = @46   enable/disable space jockey missile
    lda scanline               ; 3
    cmp spaceJockeyVertPos     ; 3
-   bcs .spaceJockeyOutOfRange ; 2³
+   bcs .spaceJockeyOutOfRange ; 2ï¿½
    lda spaceJockeyColors,x    ; 4         get the space jockey colors
    sta playerColors           ; 3         save the value for later
    lda spaceJockeyGraphics,x  ; 4         get the space jockey graphics
-   beq .drawSpaceJockey       ; 2³        skip index increment if zero
+   beq .drawSpaceJockey       ; 2ï¿½        skip index increment if zero
    inx                        ; 2         increment space jockey index
    bne .drawSpaceJockey       ; 3         unconditional branch
 .spaceJockeyOutOfRange
@@ -1130,12 +1130,12 @@ PositionEnemy
    lda playerColors           ; 3
    sta COLUP1                 ; 3 = @09
    jmp .kernelZoneLoop        ; 3
-       
+
 KernelZoneEndValues
    .byte (KERNEL_ZONE_HEIGHT * 3) - KERNEL_HEIGHT + 3
    .byte KERNEL_HEIGHT - (KERNEL_ZONE_HEIGHT * 2) + 2
    .byte KERNEL_HEIGHT - KERNEL_ZONE_HEIGHT
-   
+
 MountainKernel SUBROUTINE
    lda playfieldColor         ; 3 = @35
    sta COLUPF                 ; 3 = @38
@@ -1153,16 +1153,16 @@ MountainKernel SUBROUTINE
 .mountainZoneLoop
    dec scanline               ; 5         reduce scan line count
    lda scanline               ; 3
-   beq LivesKernel            ; 2²        do lives kernel if done
+   beq LivesKernel            ; 2ï¿½        do lives kernel if done
    lsr                        ; 2
-   bcc .mountainScanline      ; 2²        mountain updated on even scan line
+   bcc .mountainScanline      ; 2ï¿½        mountain updated on even scan line
    lda enemyScanline          ; 3
    cmp scanline               ; 3
-   bcc .clearEnemyGraphics    ; 2³
+   bcc .clearEnemyGraphics    ; 2ï¿½
    lda (enemyColorPointer),y  ; 5 = @46   get the enemy colors
    sta playerColors           ; 3         save the value for later
    lda (enemyGraphicPointer),y; 5         get the enemy graphics
-   beq .drawEnemyGraphic      ; 2³        skip index increment if zero
+   beq .drawEnemyGraphic      ; 2ï¿½        skip index increment if zero
    iny                        ; 2 = @58   increment enemy index
    bne .drawEnemyGraphic      ; 3         unconditional branch
 .clearEnemyGraphics
@@ -1187,18 +1187,18 @@ LivesKernel
    sta PF2                    ; 3 = @15
    ldx #10                    ; 2
    lda gameState              ; 3
-   bpl DrawGameLogo           ; 2³           game is over -- draw the logo
+   bpl DrawGameLogo           ; 2ï¿½           game is over -- draw the logo
    ldy numberOfLives          ; 3 = @25
 livesIndicatorLoop
    lda #<LivesIndicator       ; 2
    dey                        ; 2
-   bpl .storeIndicatorIcon    ; 2³           draw the indicator icon until
+   bpl .storeIndicatorIcon    ; 2ï¿½           draw the indicator icon until
    lda #<Blank                ; 2            y or lives = 0
 .storeIndicatorIcon
    sta digitPointer,x         ; 4
    dex                        ; 2
    dex                        ; 2
-   bpl livesIndicatorLoop     ; 2³
+   bpl livesIndicatorLoop     ; 2ï¿½
    bmi .drawIt                ; 3
 DrawGameLogo
    lda #<SpaceJockeyLogo      ; 2
@@ -1208,15 +1208,15 @@ DrawGameLogo
    adc #LOGO_HEIGHT           ; 2
    dex                        ; 2
    dex                        ; 2
-   bpl .drawGameLogoLoop      ; 2³
+   bpl .drawGameLogoLoop      ; 2ï¿½
 .drawIt
 
    IF COMPILE_REGION = PAL50
-   
+
    sta WSYNC
-   
+
    ENDIF
-   
+
    ldy livesColor             ; 3
    sty playerColors           ; 3
    ldx #0                     ; 2
@@ -1249,7 +1249,7 @@ HorizPositionObject
    sec                        ; 2
 .coarseMoveLoop
    sbc #15                    ; 2   divide position by 15
-   bcs .coarseMoveLoop        ; 2³
+   bcs .coarseMoveLoop        ; 2ï¿½
    eor #15                    ; 2   4-bit 1's complement for fine motion
    asl                        ; 2   shift remainder to upper nybbles
    asl                        ; 2
@@ -1305,7 +1305,7 @@ SixCharacterDisplay
    sty GRP0                   ; 3 = @54
    ldy loopCount              ; 3
    dey                        ; 2
-   bpl .drawGraphicsLoop      ; 2³
+   bpl .drawGraphicsLoop      ; 2ï¿½
    lda #$00                   ; 2
    sta VDELP0                 ; 3 = @66
    sta VDELP1                 ; 3 = @69
@@ -1354,15 +1354,15 @@ IncrementScore
 EnemyAnimationTable0
    .byte <Balloon, <JetPlane, <Helicopter0
    .byte <PropPlane0, <House, <Tree, <Tank0, <Tank0
-       
+
 EnemyAnimationTable1
    .byte <Balloon, <JetPlane, <Helicopter1
    .byte <PropPlane1, <House, <Tree, <Tank1, <Tank1
-       
+
 EnemyColorTable
    .byte <BalloonColor, <JetPlaneColor, <HelicopterColor, <PropPlaneColor
    .byte <HouseColor, <TreeColor, <TankColor, <TankColor
-   
+
 ExplosionAnimationTable
    .byte <Explosion1, <Explosion2, <Explosion3, <JetPlane - 1
 
@@ -1378,7 +1378,7 @@ EnemyAttibutesTable
    .byte ENEMY_ACTIVE                                       ; tree
    .byte ENEMY_FIRES_SHOTS | ENEMY_ACTIVE                   ; tank 0
    .byte ENEMY_FIRES_SHOTS | 2 | ENEMY_ACTIVE               ; tank 1
-       
+
 SpaceJockeyDeathSprites
 SpaceJockeyDeath1
    .byte $18 ; |...XX...|
@@ -1394,53 +1394,53 @@ SpaceJockeyDeath2
    .byte $24 ; |..X..X..|
    .byte $81 ; |X......X|
    .byte $00 ; |........|
-SpaceJockeyDeath3       
+SpaceJockeyDeath3
    .byte $24 ; |..X..X..|
    .byte $81 ; |X......X|
    .byte $42 ; |.X....X.|
    .byte $81 ; |X......X|
    .byte $24 ; |..X..X..|
    .byte $00 ; |........|
-   
+
    BOUNDARY 130
-       
+
 SpaceJockeyLogo
    .byte $E8 ; |XXX.X...|
    .byte $28 ; |..X.X...|
    .byte $EE ; |XXX.XXX.|
    .byte $8A ; |X...X.X.|
    .byte $FE ; |XXXXXXX.|
-   
+
    .byte $B7 ; |X.XX.XXX|
    .byte $B5 ; |X.XX.X.X|
    .byte $F4 ; |XXXX.X..|
    .byte $B5 ; |X.XX.X.X|
    .byte $F7 ; |XXXX.XXX|
-   
+
    .byte $73 ; |.XXX..XX|
    .byte $41 ; |.X.....X|
    .byte $71 ; |.XXX...X|
    .byte $41 ; |.X.....X|
    .byte $71 ; |.XXX...X|
-   
+
    .byte $BD ; |X.XXXX.X|
    .byte $B5 ; |X.XX.X.X|
    .byte $B5 ; |X.XX.X.X|
    .byte $B5 ; |X.XX.X.X|
    .byte $BD ; |X.XXXX.X|
-   
+
    .byte $D6 ; |XX.X.XX.|
    .byte $56 ; |.X.X.XX.|
    .byte $1C ; |...XXX..|
    .byte $5A ; |.X.XX.X.|
    .byte $DA ; |XX.XX.X.|
-   
+
    .byte $E6 ; |XXX..XX.|
    .byte $86 ; |X....XX.|
    .byte $ED ; |XXX.XX.X|
    .byte $8D ; |X...XX.X|
    .byte $ED ; |XXX.XX.X|
-       
+
 NumberFonts
 zero
    .byte $3C ; |..XXXX..|
@@ -1451,7 +1451,7 @@ zero
    .byte $72 ; |.XXX..X.|
    .byte $72 ; |.XXX..X.|
    .byte $3C ; |..XXXX..|
-one   
+one
    .byte $18 ; |...XX...|
    .byte $18 ; |...XX...|
    .byte $18 ; |...XX...|
@@ -1460,7 +1460,7 @@ one
    .byte $18 ; |...XX...|
    .byte $18 ; |...XX...|
    .byte $38 ; |..XXX...|
-two   
+two
    .byte $7E ; |.XXXXXX.|
    .byte $46 ; |.X...XX.|
    .byte $40 ; |.X......|
@@ -1469,7 +1469,7 @@ two
    .byte $0E ; |....XXX.|
    .byte $4E ; |.X..XXX.|
    .byte $3C ; |..XXXX..|
-three   
+three
    .byte $3E ; |..XXXXX.|
    .byte $4E ; |.X..XXX.|
    .byte $0E ; |....XXX.|
@@ -1478,7 +1478,7 @@ three
    .byte $0E ; |....XXX.|
    .byte $4E ; |.X..XXX.|
    .byte $3C ; |..XXXX..|
-four   
+four
    .byte $0C ; |....XX..|
    .byte $0C ; |....XX..|
    .byte $7E ; |.XXXXXX.|
@@ -1487,7 +1487,7 @@ four
    .byte $4C ; |.X..XX..|
    .byte $4C ; |.X..XX..|
    .byte $4C ; |.X..XX..|
-five   
+five
    .byte $7C ; |.XXXXX..|
    .byte $4E ; |.X  XXX.|
    .byte $0E ; |....XXX.|
@@ -1496,7 +1496,7 @@ five
    .byte $40 ; |.X......|
    .byte $40 ; |.X......|
    .byte $7E ; |.XXXXXX.|
-six   
+six
    .byte $3C ; |..XXXX..|
    .byte $4E ; |.X..XXX.|
    .byte $4E ; |.X..XXX.|
@@ -1505,7 +1505,7 @@ six
    .byte $40 ; |.X......|
    .byte $42 ; |.X....X.|
    .byte $3C ; |..XXXX..|
-seven   
+seven
    .byte $18 ; |...XX...|
    .byte $18 ; |...XX...|
    .byte $0C ; |....XX..|
@@ -1514,7 +1514,7 @@ seven
    .byte $06 ; |.....XX.|
    .byte $46 ; |.X...XX.|
    .byte $7E ; |.XXXXXX.|
-eight   
+eight
    .byte $3C ; |..XXXX..|
    .byte $4E ; |.X..XXX.|
    .byte $4E ; |.X..XXX.|
@@ -1523,7 +1523,7 @@ eight
    .byte $72 ; |.XXX..X.|
    .byte $72 ; |.XXX..X.|
    .byte $3C ; |..XXXX..|
-nine   
+nine
    .byte $3C ; |..XXXX..|
    .byte $42 ; |.X....X.|
    .byte $02 ; |......X.|
@@ -1547,37 +1547,37 @@ LivesIndicator
    .byte $B4 ; |X.XX.X..|
    .byte $78 ; |.XXXX...|
    .byte $30 ; |..XX....|
-   
+
 EnemyVerticalCeiling
    .byte KERNEL_ZONE_HEIGHT
    .byte (KERNEL_ZONE_HEIGHT * 2) - 1
    .byte (KERNEL_ZONE_HEIGHT * 3) - 2
-   
+
 EnemyVerticalFloor
    .byte KERNEL_ZONE_HEIGHT / 2
    .byte (KERNEL_ZONE_HEIGHT * 2) - (KERNEL_ZONE_HEIGHT / 2) - 1
    .byte (KERNEL_ZONE_HEIGHT * 3) - (KERNEL_ZONE_HEIGHT / 2) - 3
-       
+
 ScoreTable
    .byte BALLOON_SCORE, JET_PLANE_SCORE, HELICOPTER_SCORE
    .byte PROP_PLANE_SCORE, HOUSE_SCORE, TREE_SCORE, TANK_SCORE, TANK_SCORE
-       
+
 InitTable
 ;
 ; Space Jockey Colors
 ;
    IF COMPILE_REGION = NTSC
-   
+
       .byte GREEN + 12, GREEN + 8, GREEN + 4, GREEN + 8
       .byte GREEN + 12, BRICK_RED + 14, GREEN + 12
-      
+
    ELSE
-   
+
       .byte GREEN + 12, GREEN + 10, GREEN + 8, GREEN + 10
       .byte GREEN + 12, BRICK_RED + 14, GREEN + 12
-      
+
    ENDIF
-   
+
    .byte BLUE + 10                  ; scoreColor
    .byte LT_BROWN                   ; playfieldColor
    .byte BLACK                      ; backgroundColor
@@ -1610,7 +1610,7 @@ InitTable
    .word JetPlane - 1               ; enemyGraphicPointer
    .word JetPlane - 1               ; enemyColorPointer
    .byte STARTING_LIVES             ; numberOfLives
-   
+
 EnemySprites
 Balloon
    .byte $3C ; |..XXXX..|
@@ -1743,7 +1743,7 @@ Explosion2
    .byte $24 ; |..X..X..|
    .byte $81 ; |X......X|
    .byte $00 ; |........|
-   
+
 EnemyColors
 BalloonColor
    .byte BLUE + 2, BLUE + 4, BLUE + 6, BLUE + 8, BLUE + 6, BLUE + 4
@@ -1770,7 +1770,7 @@ TankColor
    .byte BLACK + 6, BLACK + 6, BLACK + 6, BLACK + 6
 ExplosionColor
    .byte WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE
-   
+
 Explosion3
    .byte $24 ; |..X..X..|
    .byte $81 ; |X......X|
@@ -1780,7 +1780,7 @@ Explosion3
    .byte $42 ; |.X....X.|
    .byte $81 ; |X......X|
    .byte $24 ; |..X..X..|
-       
+
    .org ROM_BASE + 2048 - 4, 0      ; 2K ROM
    .word Start                      ; RESET vector
    .word Start                      ; BRK vector
