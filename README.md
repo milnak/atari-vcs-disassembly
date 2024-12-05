@@ -51,6 +51,10 @@ Get-ChildItem -File -LiteralPath '..\atari-vcs-disassembly' -Filter '*.asm' `
 }
 ```
 
+## Testing
+
+I use the [Stella](https://stella-emu.github.io/) emulator.
+
 ## Disassembling
 
 To start disassembly of a VCS cartridge,  use [distella](https://github.com/johnkharvey/distella).
