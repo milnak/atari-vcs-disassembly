@@ -581,7 +581,7 @@ From [Wikipedia](https://en.wikipedia.org/wiki/List_of_Atari_2600_games)
 |Lady Bug||AtariAge|2006|Clone of arcade game of the same name.|
 |Mappy||AtariAge|2019|Clone of arcade game of the same name, AtariVox Enhanced|
 |Marble Craze||XYPE|2002||
-|Mean Santa||2600 Connection 2009||
+|Mean Santa||2600 Connection|2009||
 |Medieval Mayhem||AtariAge|2006|Remake of Warlords that adds arcade features missing from the original home version.|
 |Monkey King|||2018|Strategic endless runner.|
 |Okie Dokie||Retroware|1996|Included in the Activision Anthology|
