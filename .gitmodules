@@ -1,0 +1,3 @@
+[submodule "Grizzards"]
+	path = Homebrew/Grizzards (2002) (AtariAge)
+	url = git@github.com:brpocock/Grizzards.git
