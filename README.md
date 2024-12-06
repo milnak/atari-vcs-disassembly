@@ -13,14 +13,12 @@ git submodule update
 
 If "git submodule update" returns `git@github.com: Permission denied (publickey)`, then you need to add a SSH key to your GitHub account.
 
-```PowerShell
+```text
 # choose all defaults
 ssh-keygen
-
-Get-Content C:\Users\jeffm\.ssh\id_ed25519.pub | Set-Clipboard
 ```
 
-Then go to the [GitHub SSH page](https://github.com/settings/ssh/new), give a title, paste the public key from the clipboard and click "Add SSH key". Redo the "git submodule update" command and you should be good.
+Copy the output of the generated file, e.g. .ssh\id_ed25519.pub to the clipboard, then go to the [GitHub SSH page](https://github.com/settings/ssh/new), give a title, paste the public key from the clipboard and click "Add SSH key". Redo the "git submodule update" command and you should be good.
 
 ## Assembling
 
