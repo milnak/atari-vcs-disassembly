@@ -566,7 +566,7 @@ From [Wikipedia](https://en.wikipedia.org/wiki/List_of_Atari_2600_games)
 |Four-Play||AtariAge|2006||
 |Galactopus!||AtariAge|2015||
 |Galagon||AtariAge|2019|Supports AtariVox/Savekey for saving high scores|
-|Grizzards||AtariAge|2022|Supports AtariVox for voice. Contains save-to-cartridge circuitry on physical release, or uses AtariVox/Savekey for demo/download version.|
+|Grizzards|Bruce-Robert Pocock (with Zephyr né Salz Pocock)|AtariAge|2022|Supports AtariVox for voice. Contains save-to-cartridge circuitry on physical release, or uses AtariVox/Savekey for demo/download version.|
 |Go Fish!||AtariAge|2005||
 |Gunfight||XYPE|2001||
 |Halo 2600||AtariAge|2010|Based on Bungie's Halo series; Fries was involved in Microsoft's acquisition of Bungie|
