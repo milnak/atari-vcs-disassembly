@@ -2,6 +2,26 @@
 
 Collection of Atari VCS (2600) dissembly. Some in complete state, some in early stages.
 
+## Cloning
+
+This repo contains submodules.  After cloning, you need to update the submodules.  If you already know how to do this, skip this section.
+
+```PowerShell
+git submodule init
+git submodule update
+```
+
+If "git submodule update" returns `git@github.com: Permission denied (publickey)`, then you need to add a SSH key to your GitHub account.
+
+```PowerShell
+# choose all defaults
+ssh-keygen
+
+Get-Content C:\Users\jeffm\.ssh\id_ed25519.pub | Set-Clipboard
+```
+
+Then go to the [GitHub SSH page](https://github.com/settings/ssh/new), give a title, paste the public key from the clipboard and click "Add SSH key". Redo the "git submodule update" command and you should be good.
+
 ## Assembling
 
 To assembly binary from source,  use [dasm](https://dasm-assembler.github.io/).
