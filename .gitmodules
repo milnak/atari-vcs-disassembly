@@ -7,3 +7,6 @@
 [submodule "Homebrew/Pac Man 4K (2007) (Dennis Debro)"]
 	path = Homebrew/Pac Man 4K (2007) (Dennis Debro)
 	url = git@github.com:DNSDEBRO/Pacman4K.git
+[submodule "Atari/Video Checkers (1980) (Atari)"]
+	path = Atari/Video Checkers (1980) (Atari)
+	url = https://github.com/white-flame/vcs-checkers.git
