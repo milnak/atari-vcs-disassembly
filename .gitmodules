@@ -1,3 +1,9 @@
 [submodule "Homebrew/Grizzards (2022) (AtariAge)"]
 	path = Homebrew/Grizzards (2022) (AtariAge)
 	url = git@github.com:brpocock/Grizzards.git
+[submodule "Homebrew/Climber 5 (2004) (XYPE)"]
+	path = Homebrew/Climber 5 (2004) (XYPE)
+	url = git@github.com:DNSDEBRO/Climber5.git
+[submodule "Homebrew/Pac Man 4K (2007) (Dennis Debro)"]
+	path = Homebrew/Pac Man 4K (2007) (Dennis Debro)
+	url = git@github.com:DNSDEBRO/Pacman4K.git
