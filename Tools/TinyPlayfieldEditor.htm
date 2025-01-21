@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Tiny VCS Playfield Editor</title>
+    <meta name="description" content="A tiny playfield editor for the Atari VCS (Atari 2600)." />
+    <meta property="og:image" content="https://www.masswerk.at/vcs-tools/TinyPlayfieldEditor/preview.png" />
+    <meta name="twitter:image" content="https://www.masswerk.at/vcs-tools/TinyPlayfieldEditor/preview.png" />
+    <link rel="image_src" href="https://www.masswerk.at/vcs-tools/TinyPlayfieldEditor/preview.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="shortcut icon" type="image/png" href="favicon.png" />
+    <script type="text/javascript">
+        /*
+            A tiny playfield editor for the Atari VCS (Atari 2600)
+            N. Landsteiner, masswerk.at, 2020
+
+            Outputs assembler lines of hex or binary data statements.
+            Imports data lines of
+              * hex      $[0-9A-Fa-f]{1,2}  (also 0x...)
+              * bin      %[01]{1,8}         (also 0b...)
+              * decimal  [0-9]{1,3}
+            (first occurence per line, comments and assembler instructions are ignored.)
+
+            Public methods:
+            @import(data:String, reverseOrder:Boolean):void - imports assembly data (lines of byte values)
+        */
+
+        "use strict";
+
+        var TinyPlayfieldEditor = (function () {
+
+            var kernelHeight = 192,    // scanlines total
+                lineHeight = 1,        // height in px
+                useBinary = false,     // output selectNumberFormat (bin or hex)
+                flipOutput = false,    // output lines in reverse order
+                pfSym = 'sym',         // 'sym' | 'asym'
+                pfRepeat = 'repeat',   // 'repeat' | 'mirror'
+                outputPerRow = true,
+                outputPictStrings = true,
+                outputLineNumbers = true,
+                kernelHeightMin = 150,
+                kernelHeightMax = 280;
+
+            var words = [],
+                wordsMax,
+                drawing = false,
+                erasing = false,
+                EtPtrDown, EtPtrEnter, EtPtrUp,
+                editorTable,
+                modeString,
+                streams,
+                importOptions,
+                preferredLabels = [];
+
+            if (typeof document.onpointerdown !== 'undefined' || window.navigator.pointerEnabled) {
+                EtPtrDown = 'pointerdown';
+                EtPtrEnter = 'pointerenter';
+                EtPtrUp = 'pointerup';
+            }
+            else if (window.DocumentTouch && document instanceof window.DocumentTouch) {
+                EtPtrDown = 'touchstart';
+                EtPtrEnter = 'touchenter'; // no longer supported (used as a dummy here)
+                EtPtrUp = 'touchend';
+            }
+            else {
+                EtPtrDown = 'mousedown';
+                EtPtrEnter = 'mouseover'; // over is more sensitive than enter...
+                EtPtrUp = 'mouseup';
+            }
+
+            var editHistory = (function () {
+                var hist = [],
+                    ptr = -1,
+                    histMaxLength = 25;
+
+                function store() {
+                    if (hist.length === histMaxLength) {
+                        hist.shift();
+                        ptr--;
+                    }
+                    if (hist.length > ptr + 1) hist.length = ptr + 1;
+                    hist[++ptr] = {
+                        kernelHeight: kernelHeight,
+                        lineHeight: lineHeight,
+                        pfSym: pfSym,
+                        pfRepeat: pfRepeat,
+                        words: words.slice(0)
+                    };
+                    adjustButtons();
+                }
+
+                function undo() {
+                    if (ptr >= 0) {
+                        applyBuffer(hist[--ptr]);
+                        adjustButtons();
+                    }
+                }
+
+                function redo() {
+                    if (ptr < hist.length - 1) {
+                        applyBuffer(hist[++ptr]);
+                        adjustButtons();
+                    }
+                }
+
+                function applyBuffer(buffer) {
+                    kernelHeight = buffer.kernelHeight,
+                        lineHeight = buffer.lineHeight,
+                        pfSym = buffer.pfSym,
+                        pfRepeat = buffer.pfRepeat
+                    words = buffer.words.slice(0);
+                    console.log(words);
+                    setDirIndicator();
+                    setUIProperties([
+                        { id: "selectPFSym", value: pfSym },
+                        { id: "selectPFRepeat", value: pfRepeat },
+                        { id: "selectLineHeight", value: lineHeight },
+                        { id: "displayKernelHeight", value: kernelHeight }
+                    ]);
+                    adjustTableClassName();
+                    adjustByteLength();
+                    updateEditor();
+                    adjustModeString();
+                    renderBytes();
+                    adjustButtons();
+                }
+
+                function adjustButtons() {
+                    var btn = document.getElementById('btnUndo');
+                    if (ptr < 1) btn.setAttribute('disabled', 'true');
+                    else btn.removeAttribute('disabled');
+                    btn = document.getElementById('btnRedo');
+                    if (ptr >= hist.length - 1) btn.setAttribute('disabled', 'true');
+                    else btn.removeAttribute('disabled');
+                }
+
+                function reset() {
+                    hist.length = 0;
+                    ptr = -1;
+                    store();
+                    adjustButtons();
+                }
+
+                return {
+                    'store': store,
+                    'undo': undo,
+                    'redo': redo,
+                    'reset': reset
+                };
+            })();
+
+            function adjustTableClassName() {
+                editorTable.className = pfSym + ' ' + pfRepeat + ' lh' + lineHeight;
+            }
+
+            function adjustModeString() {
+                modeString = '; mode: ' +
+                    (pfSym === 'sym' ? 'symmetric' : 'asymmetric') + ' ' +
+                    (pfRepeat === 'repeat' ? 'repeat' : 'mirrored') + ' ' +
+                    'line-height ' + lineHeight + '\n';
+            }
+
+            function startDrawigAtPx() {
+                erasing = !setCell(this, true);
+                drawing = true;
+                document.addEventListener(EtPtrUp, stopDrawing, false);
+            }
+
+            function stopDrawing() {
+                drawing = false;
+                renderBytes();
+                document.removeEventListener(EtPtrUp, stopDrawing);
+                editHistory.store();
+            }
+
+            function drawPx() {
+                if (drawing) setCell(this, false);
+            }
+
+            function setCell(cell, fresh) {
+                var x, y, b, n, hi, cx, cy, className = 'left ';
+                if (cell.dataset) {
+                    x = parseInt(cell.dataset.x, 10);
+                    y = parseInt(cell.dataset.y, 10);
+                }
+                else {
+                    x = parseInt(cell.getAttribute('data-x'), 10);
+                    y = parseInt(cell.getAttribute('data-y'), 10);
+                }
+                cy = y;
+                if (pfSym === 'asym') {
+                    y *= 2;
+                    cx = x;
+                    if (x >= 20) {
+                        x -= 20;
+                        if (pfRepeat === 'mirror') x = 20 - x;
+                        y++;
+                        className = 'right ';
+                    }
+                }
+                else {
+                    if (pfRepeat === 'mirror') {
+                        if (x >= 20) x = 19 - (x - 20);
+                        cx = x;
+                    }
+                    else {
+                        if (x >= 20) x -= 20;
+                        cx = x;
+                    }
+                }
+                b = 1 << x;
+                if (fresh) {
+                    n = words[y] ^= b;
+                    hi = Boolean(n & b);
+                }
+                else if (erasing) {
+                    words[y] &= b ^ 0xFFFFF;
+                    hi = false;
+                }
+                else {
+                    words[y] |= b;
+                    hi = true;
+                }
+                document.getElementById('cell_' + cy + '_' + cx).className = className + (hi ? 'on' : 'off');
+                if (pfSym === 'sym') {
+                    if (pfRepeat === 'mirror') document.getElementById('cell_' + cy + '_' + (39 - x)).className = 'right ' + (hi ? 'on' : 'off');
+                    else document.getElementById('cell_' + cy + '_' + (x + 20)).className = 'right ' + (hi ? 'on' : 'off');
+                }
+                return hi;
+            }
+
+            function reverseByte(b) {
+                var r = 0;
+                b &= 0xff;
+                for (var i = 0, s = 7; i < 8; i++, s--) r |= ((b >> i) & 1) << s;
+                return r;
+            }
+
+            function renderBytes() {
+                function getByteString(b) {
+                    return useBinary ?
+                        '%' + (0x100 | b).toString(2).substring(1) :
+                        '$' + (0x100 | b).toString(16).substring(1).toUpperCase();
+                }
+                function getPattern(w) {
+                    var s = '';
+                    for (var i = 0; i < 20; i++) s += (w & (1 << i)) ? 'X' : ' ';
+                    return s;
+                }
+                function getPatternRvs(w) {
+                    var s = '';
+                    for (var i = 19; i >= 0; i--) s += (w & (1 << i)) ? 'X' : ' ';
+                    return s;
+                }
+                if (outputPerRow) {
+                    var out = [],
+                        r = 0,
+                        rl = 1 + Math.floor(Math.log10(pfSym === 'asym' ? wordsMax / 2 : wordsMax)),
+                        addCmt = outputLineNumbers || outputPictStrings;
+                    for (var i = 0; i < wordsMax; i++) {
+                        var word = words[i],
+                            bytes = [
+                                getByteString((word & 0x0F) << 4),
+                                getByteString(reverseByte((word & 0x0FF0) >> 4)),
+                                getByteString((word & 0xFF000) >> 12)
+                            ],
+                            cmt = addCmt ? ' ;' : '',
+                            pattern,
+                            rs;
+                        if (outputPictStrings) pattern = getPattern(word);
+                        if (outputLineNumbers) {
+                            rs = String(r);
+                            while (rs.length < rl) rs = ' ' + rs;
+                        }
+                        if (pfSym === 'asym') {
+                            word = words[++i];
+                            bytes.push(
+                                getByteString((word & 0x0F) << 4),
+                                getByteString(reverseByte((word & 0x0FF0) >> 4)),
+                                getByteString((word & 0xFF000) >> 12)
+                            );
+                            if (outputPictStrings) pattern += '||' + (pfRepeat === 'mirror' ? getPatternRvs(word) : getPattern(word));
+                        }
+                        if (outputPictStrings) cmt += '|' + pattern + '|';
+                        if (outputLineNumbers) cmt += ' (' + rs + ')';
+
+                        out.push('.byte ' + bytes.join(',') + cmt);
+                        r++;
+                    }
+                    if (flipOutput) out.reverse();
+                    document.getElementById('bytes').innerHTML = modeString + out.join('\n');
+                }
+                else {
+                    var pf = [[], [], []];
+                    for (var i = 0; i < wordsMax; i++) {
+                        var word = words[i];
+                        pf[0].push(getByteString((word & 0x0F) << 4));
+                        pf[1].push(getByteString(reverseByte((word & 0x0FF0) >> 4)));
+                        pf[2].push(getByteString((word & 0xFF000) >> 12));
+                    }
+                    var s = modeString;
+                    for (var i = 0; i < 3; i++) {
+                        s += '\n' + (preferredLabels[i] || ('DataPF' + i));
+                        s += ':';
+                        if (flipOutput) pf[i].reverse();
+                        for (var d = pf[i], k = 0; k < d.length; k++) {
+                            s += (k % 8 === 0 ? '\n\t.byte ' : ',') + d[k];
+                        }
+                    }
+                    document.getElementById('bytes').innerHTML = s;
+                }
+            }
+
+            function clear() {
+                for (var i = 0; i < wordsMax; i++) words[i] = 0;
+                preferredLabels.length = 0;
+                updateEditor();
+                renderBytes();
+                editHistory.store();
+            }
+
+            function shiftLeft() {
+                if (pfSym === 'asym') {
+                    if (pfRepeat === 'mirror') {
+                        for (var i = 0; i < wordsMax; i += 2) {
+                            var b = words[i] & 1;
+                            words[i] = (words[i] >> 1) | (words[i + 1] & 0x80000);
+                            words[i + 1] = (words[i + 1] << 1) | b;
+                        }
+                    }
+                    else {
+                        for (var i = 0; i < wordsMax; i += 2) {
+                            var b = (words[i] & 1) << 19;
+                            words[i] = (words[i] >> 1) | ((words[i + 1] & 1) << 19);
+                            words[i + 1] = (words[i + 1] >> 1) | b;
+                        }
+                    }
+                }
+                else {
+                    for (var i = 0; i < wordsMax; i++) {
+                        words[i] = (words[i] >> 1) | ((words[i] & 1) << 19);
+                    }
+                }
+                updateEditor();
+                renderBytes();
+                editHistory.store();
+            }
+
+            function shiftRight() {
+                if (pfSym === 'asym') {
+                    if (pfRepeat === 'mirror') {
+                        for (var i = 0; i < wordsMax; i += 2) {
+                            var b = (words[i] & 0x80000);
+                            words[i] = ((words[i] << 1) & 0xFFFFF) | (words[i + 1] & 1);
+                            words[i + 1] = ((words[i + 1] >> 1) & 0xFFFFF) | b;
+                        }
+                    }
+                    else {
+                        for (var i = 0; i < wordsMax; i += 2) {
+                            var b = (words[i] >> 19) & 1;
+                            words[i] = ((words[i] << 1) & 0xFFFFF) | ((words[i + 1] >> 19) & 1);
+                            words[i + 1] = ((words[i + 1] << 1) & 0xFFFFF) | b;
+                        }
+                    }
+                }
+                else {
+                    for (var i = 0; i < wordsMax; i++) {
+                        words[i] = ((words[i] << 1) & 0xFFFFF) | ((words[i] >> 19) & 1);
+                    }
+                }
+                updateEditor();
+                renderBytes();
+                editHistory.store();
+            }
+
+            function shiftUp() {
+                words.shift();
+                words.push(0);
+                if (pfSym === 'asym') {
+                    words.shift();
+                    words.push(0);
+                }
+                updateEditor();
+                renderBytes();
+                editHistory.store();
+            }
+
+            function shiftDown() {
+                words.pop();
+                words.unshift(0);
+                if (pfSym === 'asym') {
+                    words.pop();
+                    words.unshift(0);
+                }
+                updateEditor();
+                renderBytes();
+                editHistory.store();
+            }
+
+            function updateEditor() {
+                var tbody = editorTable.getElementsByTagName('tbody')[0],
+                    r = 0;
+                for (var y = 0; y < wordsMax; y++) {
+                    var n = words[y],
+                        tr = document.getElementById('row_' + r);
+                    if (!tr) addEditorRows(tbody, r, 1);
+                    for (var x = 0; x < 20; x++) {
+                        var v = n & (1 << x);
+                        var el = document.getElementById('cell_' + r + '_' + x);
+                        if (el) el.className = 'left ' + (v ? 'on' : 'off');
+                        if (pfSym === 'sym') {
+                            if (pfRepeat === 'mirror') {
+                                el = document.getElementById('cell_' + r + '_' + (39 - x));
+                                if (el) el.className = 'right ' + (v ? 'on' : 'off');
+                            }
+                            else {
+                                el = document.getElementById('cell_' + r + '_' + (20 + x));
+                                if (el) el.className = 'right ' + (v ? 'on' : 'off');
+                            }
+                        }
+                    }
+                    if (pfSym === 'asym') {
+                        var n = words[++y];
+                        for (var x = 0; x < 20; x++) {
+                            v = n & (1 << x);
+                            el = document.getElementById('cell_' + r + '_' + (pfRepeat === 'mirror' ? 39 - x : 20 + x));
+                            if (el) el.className = 'right ' + (v ? 'on' : 'off');
+                        }
+                    }
+                    r++;
+                }
+                tr = document.getElementById('row_' + r);
+                while (tr) {
+                    tbody.removeChild(tr);
+                    tr = document.getElementById('row_' + (++r));
+                }
+            }
+
+            function toggleImportPane(visible) {
+                var el = document.getElementById('importPane');
+                if (el) {
+                    if (visible == !el.hidden) visible = !visible; // toggle
+                    var ta = document.getElementById('importTA');
+                    ta.value = '';
+                    el.hidden = !visible;
+                    if (visible) ta.select();
+                }
+            }
+
+            function showImportPane() {
+                toggleImportPane(true);
+            }
+
+            function hideImportPane() {
+                toggleImportPane(false);
+            }
+
+            function parseImport() {
+                parseData(document.getElementById('importTA').value, false);
+                toggleImportPane(false);
+            }
+
+            function parseImportReverse() {
+                parseData(document.getElementById('importTA').value, true);
+                toggleImportPane(false);
+            }
+
+            function parseData(s, reverseOrder) {
+                function Stream(label) {
+                    this.bytes = [];
+                    this.label = label;
+                }
+                var reMode = /^\s*;\s*mode:/i,
+                    reOpts = /\b(a?sym(?:metric)?|repeat|mirror(?:ed)|line-?height:?\s*[0-9]+)\b/gi,
+                    reLabel = /^\s*([a-z_][a-z0-9_]+):?\b(.*)/i,
+                    reHexValue = /(?:\$|0x)([0-9a-f]{1,2})\b/i,
+                    reBinValue = /(?:%|0b)([01]{1,8})\b/i,
+                    reDecValue = /\b([0-9]{1,3})\b/;
+                streams = [];
+                importOptions = {};
+                importOptions.reverseOrder = reverseOrder;
+                if (s && !(/^\s+$/).test(s)) {
+                    streams.push(new Stream('.generic'));
+                    var lns = s.split(/[\r\n]+/),
+                        parsed = streams[0].bytes;
+                    for (var i = 0; i < lns.length; i++) {
+                        var matches,
+                            ln = lns[i];
+                        if (reMode.test(ln)) {
+                            matches = ln.match(reOpts);
+                            for (var k = 0; k < matches.length; k++) {
+                                var m = matches[k].toLowerCase();
+                                switch (m) {
+                                    case 'asym':
+                                    case 'asymmetric': importOptions.sym = 'asym'; break;
+                                    case 'sym':
+                                    case 'symmetric': importOptions.sym = 'sym'; break;
+                                    case 'repeat': importOptions.repeat = 'repeat'; break;
+                                    case 'mirror':
+                                    case 'mirrored': importOptions.repeat = 'mirror'; break;
+                                    default: importOptions.lineHeight = parseInt(m.replace(/[^0-9]/g, ''), 10); break;
+                                }
+                            }
+                            continue;
+                        }
+                        else if (reLabel.test(ln)) {
+                            matches = reLabel.exec(ln);
+                            var label = matches[1];
+                            ln = matches[2];
+                            var stream = new Stream(label);
+                            parsed = stream.bytes;
+                            streams.push(stream);
+                        }
+                        ln = ln.replace(/\s*;.*/, '').replace(/\.[\w\.]+/, '');
+                        var bytes = ln.split(/\s*,\s*/);
+                        for (var k = 0; k < bytes.length; k++) {
+                            var b = bytes[k];
+                            matches = reHexValue.exec(b);
+                            if (matches) parsed.push(parseInt(matches[1], 16) & 0XFF);
+                            else {
+                                matches = reBinValue.exec(b);
+                                if (matches) parsed.push(parseInt(matches[1], 2) & 0XFF);
+                                else {
+                                    matches = reDecValue.exec(b);
+                                    if (matches) parsed.push(parseInt(matches[1], 10) & 0xFF);
+                                }
+                            }
+                        }
+                    }
+                    for (var i = 0; i < streams.length; i++) {
+                        if (!streams[i].bytes.length) {
+                            streams.splice(i, 1);
+                            i--;
+                        }
+                    }
+                    if (streams.length === 1 && streams[0].bytes.length) {
+                        parsed = streams[0].bytes;
+                        words = [];
+                        for (var i = 0; i < parsed.length; i += 3) {
+                            words.push((parsed[i] >> 4) | (reverseByte(parsed[i + 1]) << 4) | (parsed[i + 2] << 12));
+                        }
+                        importOptions.outputFormat = 'rows';
+                        if (!importOptions.lineHeight) {
+                            var h = kernelHeight;
+                            if (importOptions.sym == 'asym' || (!importOptions.sym && pfSym == 'asym')) h *= 2;
+                            importOptions.lineHeight = Math.min(16, Math.ceil(h / words.length));
+                        }
+                        importRowData();
+                    }
+                    else if (streams.length > 1) {
+                        for (var i = 0; i < 3; i++) {
+                            var select = document.getElementById('importPromptSelectPF' + i),
+                                opt;
+                            select.options.length = 0;
+                            for (var k = 0; k < streams.length; k++) {
+                                opt = document.createElement('option');
+                                opt.textContent = opt.value = streams[k].label;
+                                select.options[select.options.length] = opt;
+                            }
+                            opt = document.createElement('option');
+                            opt.value = '.';
+                            opt.textContent = 'All Zero';
+                            select.options[select.options.length] = opt;
+                            select.selectedIndex = Math.min(i, select.options.length - 1);
+                        }
+                        document.getElementById('importPrompt').hidden = false;
+                    }
+                    else {
+                        alert('Import: No data found.');
+                    }
+                }
+            }
+
+            function importRowData() {
+                if (importOptions.reverseOrder) words.reverse();
+                flipOutput = !!importOptions.reverseOrder;
+                var uiOptions = [];
+                if (importOptions.sym) {
+                    pfSym = importOptions.sym;
+                    uiOptions.push({ id: "selectPFSym", value: pfSym });
+                }
+                if (importOptions.repeat) {
+                    pfRepeat = importOptions.repeat;
+                    uiOptions.push({ id: "selectPFRepeat", value: pfRepeat });
+                }
+                if (importOptions.lineHeight) {
+                    lineHeight = importOptions.lineHeight;
+                    adjustTableClassName();
+                    adjustByteLength();
+                    uiOptions.push({ id: "selectLineHeight", value: lineHeight });
+                }
+                if (importOptions.outputFormat) {
+                    outputPerRow = Boolean(importOptions.outputFormat == 'rows');
+                    adjustOutputOptions();
+                    uiOptions.push({ id: "selectOutputFormat", value: importOptions.outputFormat });
+                }
+                if (uiOptions.length) setUIProperties(uiOptions);
+                adjustModeString();
+                updateEditor();
+                renderBytes();
+                editHistory.reset();
+                streams = importOptions = null;
+            }
+
+            function closeImportPrompt(ok) {
+                document.getElementById('importPrompt').hidden = true;
+                if (ok) {
+                    var pf = [],
+                        max = 0;
+                    for (var i = 0; i < 3; i++) {
+                        var select = document.getElementById('importPromptSelectPF' + i),
+                            idx = select.selectedIndex;
+                        if (idx < streams.length) {
+                            pf[i] = streams[idx].bytes;
+                            var label = select.options[idx].value;
+                            preferredLabels[i] = label != '.generic' ? label : '';
+                            if (pf[i].length > max) max = pf[i].length;
+                        }
+                        else {
+                            pf[i] = [];
+                            preferredLabels[i] = '';
+                        }
+                    }
+                    words = [];
+                    for (var i = 0; i < max; i++) {
+                        words.push(((pf[0][i] || 0) >> 4) | (reverseByte((pf[1][i]) || 0) << 4) | ((pf[2][i] || 0) << 12));
+                    }
+                    if (!importOptions.lineHeight) {
+                        var h = kernelHeight;
+                        if (importOptions.sym == 'asym' || (!importOptions.sym && pfSym == 'asym')) h *= 2;
+                        importOptions.lineHeight = Math.min(16, Math.ceil(h / max));
+                    }
+                    importOptions.outputFormat = 'pf';
+                    importRowData();
+                }
+                else {
+                    streams = importOptions = null;
+                }
+            }
+
+            function setPFMode() {
+                var symSelect = document.getElementById('selectPFSym'),
+                    repeatSelect = document.getElementById('selectPFRepeat');
+                pfSym = symSelect.options[symSelect.selectedIndex].value;
+                pfRepeat = repeatSelect.options[repeatSelect.selectedIndex].value;
+                setDirIndicator();
+                adjustTableClassName();
+                adjustModeString();
+                adjustByteLength();
+                updateEditor();
+                renderBytes();
+                editHistory.store();
+                if (this.blur) this.blur();
+            }
+
+            function setDirIndicator() {
+                document.getElementById('dirIndicatorRight').innerHTML = pfRepeat === 'mirror' ? '&larr;' : '&rarr;';
+            }
+
+            function setLineHeight() {
+                lineHeight = parseInt(this.options[this.selectedIndex].value, 10);
+                adjustByteLength();
+                adjustTableClassName();
+                adjustModeString();
+                updateEditor();
+                renderBytes();
+                editHistory.store();
+                if (this.blur) this.blur();
+            }
+
+            function setKernelHeight() {
+                if (!editorTable) return;
+                var n = parseInt(prompt('Number of total kernel scanlines (standard NTSC: 192, PAL: 228):', kernelHeight), 10);
+                if (!isNaN(n) && n > 0) {
+                    n = Math.max(kernelHeightMin, Math.min(kernelHeightMax, n));
+                    if (n !== kernelHeight) {
+                        kernelHeight = n;
+                        adjustByteLength();
+                        updateEditor();
+                        renderBytes();
+                        document.getElementById('displayKernelHeight').innerHTML = kernelHeight;
+                        editHistory.store();
+                    }
+                }
+            }
+
+            function adjustByteLength() {
+                wordsMax = Math.ceil(kernelHeight / lineHeight);
+                if (pfSym === 'asym') wordsMax *= 2;
+                for (var i = words.length; i < wordsMax; i++) words[i] = 0;
+            }
+
+            function addEditorRows(tbody, start, n) {
+                var c = pfSym === 'asym' ? 2 : 1;
+                for (var y = start, end = start + n; y < end; y++) {
+                    var tr = document.createElement('tr');
+                    tr.id = 'row_' + y;
+                    for (var x = 0; x < 40; x++) {
+                        var td = document.createElement('td');
+                        td.id = 'cell_' + y + '_' + x;
+                        if (td.dataset) {
+                            td.dataset.y = y;
+                            td.dataset.x = x;
+                        }
+                        else {
+                            td.setAttribute('data-y', y);
+                            td.setAttribute('data-x', x);
+                        }
+                        td.className = (x < 20 ? 'left' : 'right') + ' off';
+                        td.addEventListener(EtPtrDown, startDrawigAtPx, false);
+                        td.addEventListener(EtPtrEnter, drawPx, false);
+                        tr.appendChild(td);
+                    }
+                    tbody.appendChild(tr);
+                    while (words.length < y * c) words.push(0);
+                }
+            }
+
+            function selectOutput() {
+                var selection = window.getSelection(),
+                    range = range = document.createRange();
+                selection.removeAllRanges();
+                range.selectNodeContents(document.getElementById('bytes'));
+                selection.addRange(range);
+            }
+
+            function setOutputPictStrings() {
+                outputPictStrings = this.checked;
+                renderBytes();
+                if (this.blur) this.blur();
+            }
+
+            function setOutputLineNumbers() {
+                outputLineNumbers = this.checked;
+                renderBytes();
+                if (this.blur) this.blur();
+            }
+
+            function setOutputFormat() {
+                var opt = this.options[this.selectedIndex];
+                if (opt) outputPerRow = Boolean(opt.value == 'rows');
+                adjustOutputOptions();
+                renderBytes();
+                if (this.blur) this.blur();
+            }
+
+            function setNumberFormat() {
+                var opt = this.options[this.selectedIndex];
+                if (opt) useBinary = Boolean(opt.value == 'bin');
+                renderBytes();
+                if (this.blur) this.blur();
+            }
+
+            function btnFlipLineOrder() {
+                flipOutput = !flipOutput;
+                renderBytes();
+            }
+
+            function adjustOutputOptions() {
+                var cbxPictStrings = document.getElementById('cbxPictStrings'),
+                    cbxLineNumbers = document.getElementById('cbxLineNumbers');
+                if (outputPerRow) {
+                    cbxPictStrings.removeAttribute('disabled');
+                    cbxLineNumbers.removeAttribute('disabled');
+                }
+                else {
+                    cbxPictStrings.setAttribute('disabled', true);
+                    cbxLineNumbers.setAttribute('disabled', true);
+                }
+            }
+
+            function setUIProperties(items) {
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i],
+                        element = document.getElementById(item.id);
+                    if (!element) continue;
+                    if (element.tagName === 'SELECT') {
+                        for (var opts = element.options, j = 0; j < opts.length; j++) {
+                            if (opts[j].value == item.value) {
+                                element.selectedIndex = j;
+                                break;
+                            }
+                        }
+                    }
+                    else if (element.tagName === 'INPUT' && element.type === 'checkbox') {
+                        element.checked = !!item.value;
+                    }
+                    else if (element.tagName === 'SPAN') {
+                        element.innerHTML = item.value;
+                    }
+                }
+            }
+
+            function init() {
+                adjustByteLength();
+                var table = document.createElement('table'),
+                    tbody = document.createElement('tbody'),
+                    thead = document.createElement('thead'),
+                    tfoot = document.createElement('tfoot'),
+                    trh = document.createElement('tr'),
+                    trf = document.createElement('tr');
+                for (var i = 0; i < 40; i++) {
+                    var th = document.createElement('th');
+                    th.innerHTML = (i < 10 ? '0' : '') + i;
+                    trh.appendChild(th);
+                    th = document.createElement('th');
+                    th.innerHTML = (i < 10 ? '0' : '') + i;
+                    trf.appendChild(th);
+                }
+                thead.appendChild(trh);
+                tfoot.appendChild(trf);
+                addEditorRows(tbody, 0, Math.ceil(kernelHeight / lineHeight));
+                table.appendChild(thead);
+                table.appendChild(tbody);
+                table.appendChild(tfoot);
+                table.className = pfSym + ' ' + pfRepeat + ' lh' + lineHeight;
+                document.getElementById('editor').appendChild(table);
+                editorTable = table;
+                adjustModeString();
+                renderBytes();
+
+                editHistory.reset();
+
+                document.getElementById('btMoveUp').addEventListener('click', shiftUp, false);
+                document.getElementById('btMoveDown').addEventListener('click', shiftDown, false);
+                document.getElementById('btMoveLeft').addEventListener('click', shiftLeft, false);
+                document.getElementById('btMoveRight').addEventListener('click', shiftRight, false);
+                document.getElementById('btnReset').addEventListener('click', clear, false);
+                document.getElementById('btnUndo').addEventListener('click', editHistory.undo, false);
+                document.getElementById('btnRedo').addEventListener('click', editHistory.redo, false);
+                document.getElementById('btnImport').addEventListener('click', showImportPane, false);
+                document.getElementById('importCancel').addEventListener('click', hideImportPane, false);
+                document.getElementById('importTopDown').addEventListener('click', parseImport, false);
+                document.getElementById('importBtmUp').addEventListener('click', parseImportReverse, false);
+                document.getElementById('btnKernelLines').addEventListener('click', setKernelHeight, false);
+                document.getElementById('btnFlipLineOrder').addEventListener('click', btnFlipLineOrder, false);
+                document.getElementById('selectPFSym').addEventListener('change', setPFMode, false);
+                document.getElementById('selectPFRepeat').addEventListener('change', setPFMode, false);
+                document.getElementById('selectLineHeight').addEventListener('change', setLineHeight, false);
+                document.getElementById('selectNumberFormat').addEventListener('change', setNumberFormat, false);
+                document.getElementById('btnSelect').addEventListener('click', selectOutput, false);
+                document.getElementById('cbxPictStrings').addEventListener('change', setOutputPictStrings, false);
+                document.getElementById('cbxLineNumbers').addEventListener('change', setOutputLineNumbers, false);
+                document.getElementById('selectOutputFormat').addEventListener('change', setOutputFormat, false);
+                document.getElementById('importPromptBtnCancel').addEventListener('click', function () { closeImportPrompt(false); }, false);
+                document.getElementById('importPromptBtnOK').addEventListener('click', function () { closeImportPrompt(true); }, false);
+
+                // set selects to config values
+                setDirIndicator();
+                adjustOutputOptions();
+                setUIProperties([
+                    { id: "selectNumberFormat", value: useBinary ? 'bin' : 'hex' },
+                    { id: "selectPFSym", value: pfSym },
+                    { id: "selectPFRepeat", value: pfRepeat },
+                    { id: "selectLineHeight", value: lineHeight },
+                    { id: "cbxPictStrings", value: outputPictStrings },
+                    { id: "cbxLineNumbers", value: outputLineNumbers },
+                    { id: "displayKernelHeight", value: kernelHeight },
+                    { id: "selectOutputFormat", value: outputPerRow ? 'rows' : 'pf' }
+                ]);
+            }
+
+            document.addEventListener('DOMContentLoaded', init, false);
+
+            return {
+                'import': parseData
+            };
+        })();
+
+    </script>
+    <style type="text/css">
+        body {
+            max-width: 960px;
+            margin: 2em auto;
+            font-family: sans-serif;
+        }
+
+        h1 {
+            font-weight: normal;
+            color: #2b5987;
+        }
+
+        table {
+            border-collapse: collapse;
+            min-width: 400px;
+            margin: 0 auto 0.5em auto;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -o-user-select: none;
+            user-select: none;
+            cursor: default !important;
+            touch-action: pinch-zoom;
+        }
+
+        td {
+            width: 24px;
+            min-width: 24px;
+            height: 4px;
+            border: 1px #bbb solid;
+            cursor: default;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        td.on {
+            background-color: #1eaecc;
+        }
+
+        td.off {
+            background-color: #eee;
+        }
+
+        table.sym td.right.on {
+            background-color: #19a3c1;
+        }
+
+        table.sym td.right.off {
+            background-color: #ddd;
+        }
+
+        td.on:hover,
+        table.asym td.left.on:hover {
+            background-color: #f84a50;
+        }
+
+        table.sym td.right.on:hover {
+            background-color: #f73d44;
+        }
+
+        td.off:hover,
+        table.asym td.left.off:hover {
+            background-color: #abbbca;
+        }
+
+        table.sym td.right.off:hover {
+            background-color: #a5b5c4;
+        }
+
+        th {
+            width: 24px;
+            min-width: 24px;
+            box-sizing: border-box;
+            color: #bbb;
+            font-size: 10px;
+            text-align: center;
+            font-weight: normal;
+            line-height: normal;
+        }
+
+        table.lh1 td {
+            height: 4px;
+        }
+
+        table.lh2 td {
+            height: 8px;
+        }
+
+        table.lh3 td {
+            height: 12px;
+        }
+
+        table.lh4 td {
+            height: 16px;
+        }
+
+        table.lh5 td {
+            height: 20px;
+        }
+
+        table.lh6 td {
+            height: 24px;
+        }
+
+        table.lh7 td {
+            height: 28px;
+        }
+
+        table.lh8 td {
+            height: 32px;
+        }
+
+        table.lh9 td {
+            height: 36px;
+        }
+
+        table.lh10 td {
+            height: 40px;
+        }
+
+        table.lh11 td {
+            height: 44px;
+        }
+
+        table.lh12 td {
+            height: 48px;
+        }
+
+        table.lh13 td {
+            height: 52px;
+        }
+
+        table.lh14 td {
+            height: 56px;
+        }
+
+        table.lh15 td {
+            height: 60px;
+        }
+
+        table.lh16 td {
+            height: 64px;
+        }
+
+        td[data-x='3'],
+        td[data-x='11'],
+        td[data-x='19'],
+        table.repeat td[data-x='23'],
+        table.repeat td[data-x='31'],
+        table.mirror td[data-x='27'],
+        table.mirror td[data-x='35'] {
+            border-right-color: #a4a4a4;
+        }
+
+        #dirIndicators {
+            color: #2b5987;
+            margin: 0;
+            font-size: 12px;
+        }
+
+        #dirIndicators span {
+            display: inline-block;
+            width: 50%;
+            text-align: center;
+        }
+
+        pre {
+            padding: 1em;
+            background-color: #eee;
+            max-width: 940px;
+            margin: 1em auto;
+            border-radius: 7px;
+            font-size: 12px;
+        }
+
+        #importTA {
+            margin: 0;
+            padding: 0;
+            width: 740px;
+            height: 16em;
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        h1,
+        div,
+        p {
+            text-align: center;
+        }
+
+        p.footer {
+            font-size: 12px;
+            margin: 4em 0 2em 0;
+            color: #aaa;
+        }
+
+        p.footer a {
+            text-decoration: none;
+            color: #779;
+        }
+
+        p.footer a:hover,
+        p.footer a:focus {
+            text-decoration: underline;
+            color: #00c;
+        }
+
+        p.footer a:active {
+            text-decoration: underline;
+            color: #c00;
+        }
+
+        button {
+            padding: 3px 3px;
+            font-size: 12px;
+            line-heigh: normal;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0.2em 0.02em;
+        }
+
+        button.ctrl span {
+            display: inline-block;
+            width: 3.2em;
+            padding: 0;
+            margin: 0;
+        }
+
+        button.move span {
+            display: inline-block;
+            width: 12px;
+            padding: 0;
+            margin: 0;
+        }
+
+        button.gapBefore {
+            margin-left: 0.75em;
+        }
+
+        label,
+        select {
+            padding: 0 1px;
+            font-size: 13px;
+            line-heigh: normal;
+            vertical-align: middle;
+        }
+
+        label {
+            white-space: nowrap;
+            margin-left: 0.3em;
+        }
+
+        input[type=checkbox] {
+            margin-left: 0.5em;
+        }
+
+        input[type=checkbox]+label {
+            margin-left: 0;
+            margin-right: 0.3em;
+        }
+
+        input[type=checkbox]:disabled+label {
+            color: #707070;
+        }
+
+        #control p {
+            margin: 0;
+        }
+
+        #control p+p {
+            margin-top: 0.3em;
+        }
+
+        #displayKernelHeight {
+            color: #2b5987;
+        }
+
+        #importPrompt {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 99999;
+        }
+
+        #importPromptContent {
+            display: block;
+            width: 440px;
+            max-width: 90%;
+            margin: 20% auto 0 auto;
+            padding: 25px 25px 30px 25px;
+            background-color: #fcfcfc;
+            border-radius: 2px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+            text-align: left;
+        }
+
+        #importPromptTitle {
+            font-weight: bold;
+            font-size: 13px;
+            text-align: center;
+            margin: 0 0 1.5em 0;
+        }
+
+        #importPromptBtns {
+            text-align: right;
+            margin: 0.5em 1em 0 0;
+        }
+
+        #importPromptBtnOK {
+            margin-left: 0.5em;
+        }
+
+        #importPromptContent ul {
+            margin: 0;
+        }
+
+        #importPromptContent li {
+            padding-bottom: 0.5em;
+            white-space: nowrap;
+        }
+
+        /* MSIE fix */
+        [hidden] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tiny VCS Playfield Editor</h1>
+    <noscript>
+        <p><em>JavaScript required!</em></p>
+    </noscript>
+    <div id="control">
+        <p>
+            <label for="selectPFSym">Playfield Mode:</label>
+            <select id="selectPFSym">
+                <option value="sym">Symmetric</option>
+                <option value="asym">Asymmetric</option>
+            </select>
+            <label for="selectPFRepeat">Right Side:</label>
+            <select id="selectPFRepeat">
+                <option value="repeat">Repeat</option>
+                <option value="mirror">Mirror</option>
+            </select>
+            <label for="lblKernelHeight">Kernel Height: <span id="displayKernelHeight">192</span></label>
+            <button id="btnKernelLines" title="Change kernel height&hellip;" class="ctrl"><span>Set</span></button>
+            <label for="selectLineHeight">Line Height:</label>
+            <select id="selectLineHeight">
+                <option value="1">&#8199;1px</option>
+                <option value="2">&#8199;2px</option>
+                <option value="3">&#8199;3px</option>
+                <option value="4">&#8199;4px</option>
+                <option value="5">&#8199;5px</option>
+                <option value="6">&#8199;6px</option>
+                <option value="7">&#8199;7px</option>
+                <option value="8">&#8199;8px</option>
+                <option value="9">&#8199;9px</option>
+                <option value="10">10px</option>
+                <option value="11">11px</option>
+                <option value="12">12px</option>
+                <option value="13">13px</option>
+                <option value="14">14px</option>
+                <option value="15">15px</option>
+                <option value="16">16px</option>
+            </select>
+        </p>
+        <p>
+            <button id="btMoveLeft" class="move"><span>&larr;</span></button>
+            <button id="btMoveRight" class="move"><span>&rarr;</span></button>
+            <button id="btMoveUp" class="move"><span>&uarr;</span></button>
+            <button id="btMoveDown" class="move"><span>&darr;</span></button>
+            <button id="btnReset" class="ctrl gapBefore"><span>Clear</span></button>
+            <button id="btnUndo" disabled class="ctrl gapBefore"><span>Undo</span></button>
+            <button id="btnRedo" disabled class="ctrl"><span>Redo</span></button>
+        </p>
+    </div>
+    <div id="editor">
+        <p id="dirIndicators"><span id="dirIndicatorLeft">&rarr;</span><span id="dirIndicatorRight">&rarr;</span></p>
+    </div>
+    <div id="ctrl2">
+        <label for="selectOutputFormat">Oder by:</label>
+        <select id="selectOutputFormat">
+            <option value="rows">Rows</option>
+            <option value="pf">PF-Registers</option>
+        </select>
+        <label for="selectNumberFormat">Number Format:</label>
+        <select id="selectNumberFormat">
+            <option value="hex">Hex</option>
+            <option value="bin">Bin</option>
+        </select>
+        <input type="checkbox" id="cbxPictStrings"> <label for="cbxPictStrings">Add Picture Strings</label>
+        <input type="checkbox" id="cbxLineNumbers"> <label for="cbxLineNumbers">Add Line Numbers</label>
+        <button id="btnFlipLineOrder" title="Reverse for VCS sprites.">Reverse Order &#8597;</button>
+        <button id="btnSelect">Select Output</button>
+        <button id="btnImport">Import Code</button>
+    </div>
+    <div id="importPane" hidden>
+        <p><small>Paste code here <em>(bytes: hex, bin, decimal, as rows or as labeled arrays per PF-register).</em>
+                Adjust playfield properties after import.</small></p>
+        <textarea id="importTA" translate="no" autocomplete="off" autocorrect="off" autocapitalize="off"
+            spellcheck="false"></textarea>
+        <p><button id="importCancel">Cancel</button> &nbsp; <button id="importBtmUp">Import Bottom-Up</button> <button
+                id="importTopDown">Import Normal</button></p>
+    </div>
+    <pre id="bytes" translate="no"></pre>
+    <p class="footer">&ldquo;Tiny VCS Playfield Editor&rdquo; by N. Landsteiner, <a
+            href="https://www.masswerk.at/">masswerk.at</a>, 2020.</p>
+    <div id="importPrompt" hidden>
+        <div id="importPromptContent">
+            <p id="importPromptTitle">Please map labels to PF0, PF1, and PF2.</p>
+            <ul>
+                <li>
+                    <label for="importPromptSelectPF0">PF0:</label>
+                    <select id="importPromptSelectPF0">
+                        <option value="0">All Zeros</option>
+                    </select>
+                </li>
+                <li>
+                    <label for="importPromptSelectPF1">PF1:</label>
+                    <select id="importPromptSelectPF1">
+                        <option value="0">All Zeros</option>
+                    </select>
+                </li>
+                <li>
+                    <label for="importPromptSelectPF2">PF2:</label>
+                    <select id="importPromptSelectPF2">
+                        <option value="0">All Zeros</option>
+                    </select>
+                </li>
+            </ul>
+            <p id="importPromptBtns">
+                <button id="importPromptBtnCancel">Cancel</button>
+                <button id="importPromptBtnOK">Import Labeled Data</button>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

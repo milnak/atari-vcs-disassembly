@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Tiny 8-Bit Sprite Editor</title>
+    <meta name="description" content="A tiny 8-bit sprite editor for the Atari VCS (Atari 2600)." />
+    <meta property="og:image" content="https://www.masswerk.at/vcs-tools/TinySpriteEditor/preview.png" />
+    <meta name="twitter:image" content="https://www.masswerk.at/vcs-tools/TinySpriteEditor/preview.png" />
+    <link rel="image_src" href="https://www.masswerk.at/vcs-tools/TinySpriteEditor/preview.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="shortcut icon" type="image/png" href="favicon.png" />
+    <script type="text/javascript">
+        /*
+            A tiny 8-bit sprite editor for the Atari VCS (Atari 2600)
+            N. Landsteiner, masswerk.at, 2018
+
+            Outputs assembler lines of hex or binary data statements.
+            Imports data lines of
+              * hex      $[0-9A-Fa-f]{1,2}  (also 0x...)
+              * bin      %[01]{1,8}         (also 0b...)
+              * decimal  [0-9]{1,3}
+            (first occurence per line, comments and assembler instructions are ignored.)
+
+            Public methods:
+            @import(data:String, reverseOrder:Boolean):void - imports assembly data (lines of byte values)
+        */
+
+        "use strict";
+
+        var TinySpriteEditor = (function () {
+
+            var lines = 16,           // editor rows / assembly lines
+                autoExpand = true,    // automatically add rows on import as needed
+                useBinary = false,    // output format (bin or hex)
+                flipOutput = false,   // output lines in reverse order
+                pixelAspect = 'vcs',  // 'vcs' | '1x1' | 'wide'
+                maxRowsToAdd = 64;    // max number of rows to epand the editor by at once
+
+            var bytes = [],
+                drawing = false,
+                erasing = false,
+                EtPtrDown, EtPtrEnter, EtPtrUp,
+                editorTable;
+
+            if (typeof document.onpointerdown !== 'undefined' || window.navigator.pointerEnabled) {
+                EtPtrDown = 'pointerdown';
+                EtPtrEnter = 'pointerenter';
+                EtPtrUp = 'pointerup';
+            }
+            else if (window.DocumentTouch && document instanceof window.DocumentTouch) {
+                EtPtrDown = 'touchstart';
+                EtPtrEnter = 'touchenter'; // no longer supported (used as a dummy here)
+                EtPtrUp = 'touchend';
+            }
+            else {
+                EtPtrDown = 'mousedown';
+                EtPtrEnter = 'mouseover'; // over is more sensitive than enter...
+                EtPtrUp = 'mouseup';
+            }
+
+            function startDrawigAtPx() {
+                var x, y, b, n, hi;
+                if (this.dataset) {
+                    x = parseInt(this.dataset.x, 10);
+                    y = parseInt(this.dataset.y, 10);
+                }
+                else {
+                    x = parseInt(this.getAttribute('data-x'), 10);
+                    y = parseInt(this.getAttribute('data-y'), 10);
+                }
+                b = 1 << x;
+                n = bytes[y] ^= b;
+                hi = Boolean(n & b);
+                this.className = hi ? 'px on' : 'px off';
+                drawing = true;
+                erasing = !hi;
+                document.addEventListener(EtPtrUp, stopDrawing, false);
+            }
+
+            function stopDrawing() {
+                drawing = false;
+                renderBytes();
+                document.removeEventListener(EtPtrUp, stopDrawing);
+            }
+
+            function drawPx() {
+                if (drawing) {
+                    var x, y, b;
+                    if (this.dataset) {
+                        x = parseInt(this.dataset.x, 10);
+                        y = parseInt(this.dataset.y, 10);
+                    }
+                    else {
+                        x = parseInt(this.getAttribute('data-x'), 10);
+                        y = parseInt(this.getAttribute('data-y'), 10);
+                    }
+                    b = 1 << x;
+                    if (erasing) {
+                        bytes[y] &= b ^ 255;
+                        this.className = 'px off';
+                    }
+                    else {
+                        bytes[y] |= b;
+                        this.className = 'px on';
+                    }
+                }
+            }
+
+            function renderBytes() {
+                var out = [];
+                for (var i = 0; i < lines; i++) {
+                    var n = bytes[i],
+                        val = useBinary ?
+                            '%' + (0x100 | n).toString(2).substring(1) :
+                            '$' + (0x100 | n).toString(16).substring(1).toUpperCase(),
+                        pattern = '';
+                    for (var b = 7; b >= 0; b--) pattern += (n & (1 << b)) ? 'X' : ' ';
+                    out.push('\t.byte ' + val + ' ; |' + pattern + '|');
+                }
+                if (flipOutput) out.reverse();
+                document.getElementById('bytes').innerHTML = out.join('\n');
+            }
+
+            function reset() {
+                for (var i = 0; i < lines; i++) bytes[i] = 0;
+                updateEditor();
+                renderBytes();
+            }
+
+            function shiftRight() {
+                for (var i = 0; i < lines; i++) bytes[i] >>= 1;
+                updateEditor();
+                renderBytes();
+            }
+
+            function shiftLeft() {
+                for (var i = 0; i < lines; i++) bytes[i] = (bytes[i] << 1) & 0xFF;
+                updateEditor();
+                renderBytes();
+            }
+
+            function shiftUp() {
+                bytes.shift();
+                bytes.push(0);
+                updateEditor();
+                renderBytes();
+            }
+
+            function shiftDown() {
+                bytes.pop();
+                bytes.unshift(0);
+                updateEditor();
+                renderBytes();
+            }
+
+            function updateEditor() {
+                for (var i = 0; i < lines; i++) {
+                    var n = bytes[i],
+                        s = 'td[data-y=\'' + i + '\'][data-x=\'';
+                    for (var b = 7; b >= 0; b--) {
+                        var el = document.querySelector(s + b + '\']');
+                        if (el) el.className = (n & (1 << b)) ? 'px on' : 'px off';
+                    }
+                }
+            }
+
+            function toggleImportPane(visible) {
+                var el = document.getElementById('importPane');
+                if (el) {
+                    if (visible == !el.hidden) visible = !visible; // toggle
+                    var ta = document.getElementById('importTA');
+                    ta.value = '';
+                    el.hidden = !visible;
+                    if (visible) ta.select();
+                }
+            }
+
+            function showImportPane() {
+                toggleImportPane(true);
+            }
+
+            function hideImportPane() {
+                toggleImportPane(false);
+            }
+
+            function parseImport() {
+                parseData(document.getElementById('importTA').value, false);
+                toggleImportPane(false);
+            }
+
+            function parseImportReverse() {
+                parseData(document.getElementById('importTA').value, true);
+                toggleImportPane(false);
+            }
+
+            function parseData(s, reverseOrder) {
+                if (s && !(/^\s+$/).test(s)) {
+                    var lns = s.split(/[\r\n]+/), parsed = [];
+                    for (var i = 0; i < lns.length && (autoExpand || parsed.length < lines); i++) {
+                        var matches,
+                            ln = lns[i].replace(/\s*;.*/, '').replace(/\.[\w\.]+/, '');
+                        matches = /(?:\$|0x|0X)([0-9A-Fa-f]{1,2})\b/.exec(ln);
+                        if (matches) parsed.push(parseInt(matches[1], 16));
+                        else {
+                            matches = /(?:%|0b|0B)([01]{1,8})\b/.exec(ln);
+                            if (matches) parsed.push(parseInt(matches[1], 2));
+                            else {
+                                matches = /\b([0-9]{1,3})\b/.exec(ln);
+                                if (matches) parsed.push(parseInt(matches[1], 10) & 0xFF);
+                            }
+                        }
+                    }
+                    if (parsed.length) {
+                        if (reverseOrder) parsed.reverse();
+                        while (parsed.length < lines) parsed.push(0);
+                        if (parsed.length > lines) {
+                            addEditorRows(editorTable.getElementsByTagName('tbody')[0], lines, parsed.length - lines);
+                            lines = parsed.length;
+                        }
+                        bytes = parsed;
+                        updateEditor();
+                        renderBytes();
+                    }
+                    else {
+                        alert('Import: No data found.');
+                    }
+                }
+            }
+
+            function setPixelRatio() {
+                editorTable.className = this.options[this.selectedIndex].value;
+                if (this.blur) this.blur();
+            }
+
+            function setFormat() {
+                var opt = this.options[this.selectedIndex];
+                if (opt) useBinary = Boolean(opt.value == 'bin');
+                renderBytes();
+                if (this.blur) this.blur();
+            }
+
+            function flipLineOrder() {
+                flipOutput = !flipOutput;
+                renderBytes();
+            }
+
+            function addLines() {
+                if (!editorTable) return;
+                var n = parseInt(prompt('Editor rows to add (max ' + maxRowsToAdd + ' at once):'), 10);
+                if (!isNaN(n) && n > 0) {
+                    if (n > maxRowsToAdd) n = maxRowsToAdd;
+                    addEditorRows(editorTable.getElementsByTagName('tbody')[0], lines, n);
+                    lines += n;
+                    renderBytes();
+                }
+            }
+
+            function addEditorRows(tbody, start, n) {
+                for (var i = start, end = start + n; i < end; i++) {
+                    var tr = document.createElement('tr');
+                    var num = document.createElement('td');
+                    num.className = 'leftNum';
+                    num.innerHTML = i;
+                    tr.appendChild(num);
+                    for (var j = 7; j >= 0; j--) {
+                        var td = document.createElement('td');
+                        if (td.dataset) {
+                            td.dataset.y = i;
+                            td.dataset.x = j;
+                        }
+                        else {
+                            td.setAttribute('data-y', i);
+                            td.setAttribute('data-x', j);
+                        }
+                        td.className = "px off";
+                        td.addEventListener(EtPtrDown, startDrawigAtPx, false);
+                        td.addEventListener(EtPtrEnter, drawPx, false);
+                        tr.appendChild(td);
+                    }
+                    var num2 = document.createElement('td');
+                    num2.className = 'rightNum';
+                    tr.appendChild(num2);
+                    tbody.appendChild(tr);
+                    bytes.push(0);
+                }
+            }
+
+            function init() {
+                var table = document.createElement('table'),
+                    tbody = document.createElement('tbody');
+                addEditorRows(tbody, 0, lines);
+                table.className = pixelAspect;
+                table.appendChild(tbody);
+                document.getElementById('editor').appendChild(table);
+                editorTable = table;
+                renderBytes();
+
+                document.getElementById('moveUp').addEventListener('click', shiftUp, false);
+                document.getElementById('moveDown').addEventListener('click', shiftDown, false);
+                document.getElementById('moveLeft').addEventListener('click', shiftLeft, false);
+                document.getElementById('moveRight').addEventListener('click', shiftRight, false);
+                document.getElementById('resetBtn').addEventListener('click', reset, false);
+                document.getElementById('importBtn').addEventListener('click', showImportPane, false);
+                document.getElementById('importCancel').addEventListener('click', hideImportPane, false);
+                document.getElementById('importTopDown').addEventListener('click', parseImport, false);
+                document.getElementById('importBtmUp').addEventListener('click', parseImportReverse, false);
+                document.getElementById('addLinesBtn').addEventListener('click', addLines, false);
+                document.getElementById('flipLineOrder').addEventListener('click', flipLineOrder, false);
+                document.getElementById('pixelRatio').addEventListener('change', setPixelRatio, false);
+                document.getElementById('format').addEventListener('change', setFormat, false);
+
+                // set selects to config values
+                (function (items) {
+                    for (var i = 0; i < items.length; i++) {
+                        var item = items[i],
+                            select = document.getElementById(item.id);
+                        if (select) {
+                            for (var opts = select.options, j = 0; j < opts.length; j++) {
+                                if (opts[j].value == item.value) {
+                                    select.selectedIndex = j;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                })([
+                    { id: "format", value: useBinary ? 'bin' : 'hex' },
+                    { id: "pixelRatio", value: pixelAspect }
+                ]);
+            }
+
+            document.addEventListener('DOMContentLoaded', init, false);
+
+            return {
+                'import': parseData
+            };
+        })();
+
+    </script>
+    <style type="text/css">
+        body {
+            max-width: 400px;
+            margin: 2em auto;
+            font-family: sans-serif;
+        }
+
+        h1 {
+            font-weight: normal;
+            color: #2b5987;
+        }
+
+        table {
+            border-collapse: collapse;
+            min-width: 109px;
+            margin: 1em auto;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -o-user-select: none;
+            user-select: none;
+            cursor: default !important;
+            touch-action: pinch-zoom;
+        }
+
+        td.px {
+            width: 10px;
+            height: 10px;
+            border: 1px #bbb solid;
+            cursor: default;
+        }
+
+        td.leftNum,
+        td.rightNum {
+            width: 10px;
+            height: 10px;
+            padding-right: 2px;
+            font-size: 10px;
+            vertical-align: middle;
+            text-align: right;
+            color: #bbb;
+            cursor: default;
+        }
+
+        td.on {
+            background-color: #800;
+        }
+
+        td.off {
+            background-color: #eee;
+        }
+
+        table.vcs td.px {
+            width: 18px;
+        }
+
+        table.wide td.px {
+            width: 36px;
+        }
+
+        pre {
+            padding: 1em 0;
+            background-color: #eee;
+            max-width: 320px;
+            margin: 1em auto;
+            border-radius: 7px;
+        }
+
+        #importTA {
+            margin: 0;
+            padding: 0;
+            width: 320px;
+            height: 16em;
+        }
+
+        h1,
+        div,
+        p {
+            text-align: center;
+        }
+
+        p.footer {
+            font-size: 12px;
+            margin: 4em 0 2em 0;
+            color: #aaa;
+        }
+
+        p.footer a {
+            text-decoration: none;
+            color: #779;
+        }
+
+        p.footer a:hover,
+        p.footer a:focus {
+            text-decoration: underline;
+            color: #00c;
+        }
+
+        p.footer a:active {
+            text-decoration: underline;
+            color: #c00;
+        }
+
+        button {
+            padding: 3px 3px;
+            font-size: 12px;
+            line-heigh: normal;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        button.move span {
+            display: inline-block;
+            width: 12px;
+            padding: 0;
+            margin: 0;
+        }
+
+        select {
+            padding: 2px 1px;
+            font-size: 12px;
+            line-heigh: normal;
+            vertical-align: middle;
+        }
+
+        select+select {
+            margin-left: 0.2em;
+        }
+
+        #control p {
+            margin: 0;
+        }
+
+        #control p+p {
+            margin-top: 0.3em;
+        }
+
+        /* MSIE fix */
+        [hidden] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tiny 8-Bit Sprite Editor</h1>
+    <noscript>
+        <p><em>JavaScript required!</em></p>
+    </noscript>
+    <div id="editor"></div>
+    <div id="control">
+        <p>
+            <button id="moveLeft" class="move"><span>&larr;</span></button>
+            <button id="moveRight" class="move"><span>&rarr;</span></button>
+            <button id="moveUp" class="move"><span>&uarr;</span></button>
+            <button id="moveDown" class="move"><span>&darr;</span></button>
+            <button id="resetBtn">Clear</button>
+            <button id="addLinesBtn" class="move" title="Add rows..."><span>+</span></button>
+        </p>
+        <p>
+            <select id="pixelRatio">
+                <option value="vcs">Pixel: VCS</option>
+                <option value="1x1">Pixel: 1&times;1</option>
+                <option value="wide">Pixel: Wide</option>
+            </select>
+            <select id="format">
+                <option value="hex">Output: Hex</option>
+                <option value="bin">Output: Bin</option>
+            </select>
+        </p>
+    </div>
+    <pre id="bytes" translate="no"></pre>
+    <div><button id="flipLineOrder" title="Reverse for VCS sprites.">Reverse Line Order</button> <button
+            id="importBtn">Import Code</button></div>
+    <div id="importPane" hidden>
+        <p><small>Paste code here <em>(hex, bin, decimal, one byte per line)&hellip;</em></small></p>
+        <textarea id="importTA" translate="no" autocomplete="off" autocorrect="off" autocapitalize="off"
+            spellcheck="false"></textarea>
+        <p><button id="importCancel">Cancel</button> &nbsp; <button id="importBtmUp">Import Bottom-Up)</button> <button
+                id="importTopDown">Import Normal</button></p>
+    </div>
+    <p class="footer">&ldquo;Tiny 8-Bit Sprite Editor&rdquo; by N. Landsteiner, <a
+            href="https://www.masswerk.at/">masswerk.at</a>, 2018.</p>
+</body>
+</html>
