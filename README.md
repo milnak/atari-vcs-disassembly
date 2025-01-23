@@ -55,6 +55,7 @@ I use the [Stella](https://stella-emu.github.io/) emulator.
 
 To start disassembly of a VCS cartridge, use [distella](https://github.com/johnkharvey/distella).
 
-To compiler distella on Windows, open a Visual Studio Developer command prompt and run: `cl -DAPP_VERSION='\"3.02-SNAPSHOT\"' -DAPP_COMPILE='\"2024-12-10\"' .\distella.c /link /out:DiStella.EXE`
+To compile distella on Windows, open a Visual Studio Developer command prompt and run: `cl -DAPP_VERSION='\"3.02-SNAPSHOT\"' -DAPP_COMPILE='\"2024-12-10\"' .\distella.c /link /out:DiStella.EXE`
 
-A distella configuration file will give distella hints as how to interpret the binary.
+A distella [configuration file](https://github.com/johnkharvey/distella/blob/master/README.md) (see "Config File
+" section) can give distella hints as how to interpret the binary.
