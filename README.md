@@ -38,7 +38,7 @@ If you receive an "error: Value in 'byte byte 63971' must be <$100" error, it's 
 For example,  change:
 
 ```text
-.byte Zero,One,Two,<hree,Four,Five,Six,Seven,Eight,Nine
+.byte Zero,One,Two,<Three,Four,Five,Six,Seven,Eight,Nine
 ```
 
 to:
