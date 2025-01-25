@@ -1,8 +1,7 @@
 Collect is a simple Atari 2600 game where the objective is
 to collect randomly positioned boxes.
 
-Use dasm to compile the program.  Dasm can be found here:
-http://dasm-dillon.sourceforge.net
+Use dasm to compile the program.
 
 The command used to compile is:
 dasm collect.asm -f3 -v0 -scollect.sym -lcollect.lst -ocollect.bin
