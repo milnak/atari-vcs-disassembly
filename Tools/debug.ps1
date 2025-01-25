@@ -20,6 +20,8 @@ Get-Content (Join-Path $desktopFolder "$Filename.script") -ErrorAction SilentlyC
 
 Get-Content "$Filename.lst" -ErrorAction SilentlyContinue
 
+# .SYM file was generated from dasm when "-s" was provided.  
+# Expected to have same name as binary and in same folder.
 Get-Content "$Filename.sym" -ErrorAction SilentlyContinue
 
 # 'https://stella-emu.github.io/docs/debugger.html'
