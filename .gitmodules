@@ -19,3 +19,6 @@
 [submodule "Homebrew/Programming Games for Atari 2600 (Oscar Toledo G)"]
 	path = Homebrew/Programming Games for Atari 2600 (Oscar Toledo G)
 	url = https://github.com/nanochess/book-Atari.git
+[submodule "Homebrew/8blit episode source code"]
+	path = Homebrew/8blit episode source code
+	url = https://github.com/kreiach/8Blit.git
