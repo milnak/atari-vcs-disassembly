@@ -22,3 +22,6 @@
 [submodule "Homebrew/8blit episode source code"]
 	path = Homebrew/8blit episode source code
 	url = https://github.com/kreiach/8Blit.git
+[submodule "Homebrew/Atari 2600 demos (optixx)"]
+	path = Homebrew/Atari 2600 demos (optixx)
+	url = https://github.com/optixx/2600.git
