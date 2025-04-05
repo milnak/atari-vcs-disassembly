@@ -10,3 +10,6 @@
 [submodule "Atari/Video Checkers (1980) (Atari)"]
 	path = Atari/Video Checkers (1980) (Atari)
 	url = https://github.com/white-flame/vcs-checkers.git
+[submodule "Homebrew/2048 (2014) (ChesterBr)"]
+	path = Homebrew/2048 (2014) (ChesterBr)
+	url = https://github.com/chesterbr/2048-2600.git
