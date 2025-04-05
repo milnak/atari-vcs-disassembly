@@ -13,3 +13,6 @@
 [submodule "Homebrew/2048 (2014) (ChesterBr)"]
 	path = Homebrew/2048 (2014) (ChesterBr)
 	url = https://github.com/chesterbr/2048-2600.git
+[submodule "Homebrew/Atomchess (2017) (Oscar Toledo G)"]
+	path = Homebrew/Atomchess (2017) (Oscar Toledo G)
+	url = https://github.com/nanochess/Atomchess-6502.git
