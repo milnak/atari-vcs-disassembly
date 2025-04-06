@@ -378,13 +378,9 @@ LF027: LDA    #$BA    ;2
 
        IF COMPILE_REGION = NTSC
 
-; f040
        LDA    #$DF    ;2 NTSC
-; f042
        STA    WSYNC   ;3 NTSC
-; f044
        STA    TIM8T   ;4 NTSC
-; f047
        STA    VBLANK  ;3 NTSC
 
        ELSE
@@ -395,7 +391,6 @@ LF027: LDA    #$BA    ;2
 
        ENDIF
 
-; f049
        JSR    LF255   ;6
        JSR    WaitForTimerDone   ;6
        LDA    #$16    ;2 0001 0110
@@ -406,10 +401,12 @@ LF027: LDA    #$BA    ;2
 
        IF COMPILE_REGION = NTSC
 
+                      ; NTSC (nothing)
+
        ELSE
 
        ; Vertical blank  set/clear (bit 1: 1=start vblank; bit 6,7 also used, but 0 here)
-       STA    VBLANK  ;3 turn on VBLANK
+       STA    VBLANK  ;3 PAL turn on VBLANK
 
        ENDIF
 
@@ -1608,14 +1605,14 @@ bg_colors
 
        ELSE
 
-       .byte $B3 ; PAL |X XX  XX| $F77D
-       .byte $25 ; PAL |  X  X X| $F77E
-       .byte $31 ; PAL |  XX   X| $F77F
-       .byte $47 ; PAL | X   XXX| $F780
-       .byte $83 ; PAL |X     XX| $F781
-       .byte $D3 ; PAL |XX X  XX| $F782
-       .byte $25 ; PAL |  X  X X| $F783
-       .byte $63 ; PAL | XX   XX| $F784
+       .byte $B3 ; PAL
+       .byte $25 ; PAL
+       .byte $31 ; PAL
+       .byte $47 ; PAL
+       .byte $83 ; PAL
+       .byte $D3 ; PAL
+       .byte $25 ; PAL
+       .byte $63 ; PAL
 
        ENDIF
 
@@ -1634,14 +1631,14 @@ fg_colors
 
        ELSE
 
-       .byte $48 ; | X  X   | $F785
-       .byte $D5 ; |XX X X X| $F786
-       .byte $86 ; |X    XX | $F787
-       .byte $D2 ; |XX X  X | $F788
-       .byte $35 ; |  XX X X| $F789
-       .byte $23 ; |  X   XX| $F78A
-       .byte $B6 ; |X XX XX | $F78B
-       .byte $36 ; |  XX XX | $F78C
+       .byte $48 ; PAL
+       .byte $D5 ; PAL
+       .byte $86 ; PAL
+       .byte $D2 ; PAL
+       .byte $35 ; PAL
+       .byte $23 ; PAL
+       .byte $B6 ; PAL
+       .byte $36 ; PAL
 
        ENDIF
 
