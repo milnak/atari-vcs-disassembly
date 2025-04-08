@@ -1,8 +1,5 @@
-;       .TITLE  "VCS CHECKERS BY CAROL SHAW 15/15/80 9:41 AM"
+        .TITLE  "VCS CHECKERS BY CAROL SHAW 15/15/80 9:41 AM"
 ;        [Retyped by White Flame 2020-04-11]
-
-      processor 6502
-
 PAL     =       0               ;0 => NTSC, 1=> PAL VERSION
 PRNT    =       0               ;0 => ROM,  1=> DEBUG VERSION WHICH PRINTS ON TI TERMINAL
 STACK   =       0               ;0 => NORMAL ALPHA-BETA "STACK",
@@ -204,10 +201,7 @@ ADDTRM  =       $20             ;TERM TO ADD TO MAGNITUDE OF SCORE IF STACK IS F
 
 
 ;                       VARIABLES (RAM PAGE ZERO)
-;        *=$80
-   SEG.U variables
-   .org $80
-
+        *=$80
 ;                       THE FOLLOWING RAM LOCS ARE CLEARED DURING RESET:
 ;A-B MEANS USED BY ALPHA-BETA PRUNING ROUTINE
 ;SAVE MEANS ALPHA-BETA PRUNING ROUTINE DOES NOT ALTER
@@ -4332,6 +4326,5 @@ PRDEP
 
 
 ;----------------------------------
-
 
 
