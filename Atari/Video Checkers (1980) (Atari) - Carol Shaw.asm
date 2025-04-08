@@ -1,5 +1,26 @@
+; [Retyped by White Flame 2020-04-11]
+; Modified to build with dasm (and typos fixed) by Jeff Miller, April 2025.
+; Set "ASSEMBLER = ASM_ATARI" to use original source code, otherwise
+; dasm will be assumed.
+
+; To disassembly original cart with distella, use a distella CFG file containing:
+;      ORG F000
+;      CODE F000 FEED
+;      GFX FEEE FFD0
+;      CODE FFD1 FFF5
+;      DATA FFF6 FFFF
+
+        processor 6502
+
+
+ASM_DASM = 0
+ASM_ATARI = 1
+ASSEMBLER = ASM_DASM
+
+        IF ASSEMBLER = ASM_ATARI
         .TITLE  "VCS CHECKERS BY CAROL SHAW 15/15/80 9:41 AM"
-;        [Retyped by White Flame 2020-04-11]
+        ENDIF
+
 PAL     =       0               ;0 => NTSC, 1=> PAL VERSION
 PRNT    =       0               ;0 => ROM,  1=> DEBUG VERSION WHICH PRINTS ON TI TERMINAL
 STACK   =       0               ;0 => NORMAL ALPHA-BETA "STACK",
@@ -23,7 +44,11 @@ ROMSTR  =       $F000           ;ROM START ADDR
 VSYNC   =       $00     ;BIT        1  VERTICAL SYNC SET-CLR    1=>START
 VBLANK  =       $01     ;BIT  76    1  VERTICAL BLANK SET-CLR, PORT CONTROL (INPT0-INPT5)
 WSYNC   =       $02     ;STROBE        WAIT FOR HORIZ BLANK
+
+        IF ASSEMBLER = ASM_ATARI
 RSYNC   =       $03     ;STROBE        RESET HORIZ SYNC COUNTER
+        ENDIF
+
 NUSIZ0  =       $04     ;BITS   54 210 NUMBER-SIZE PLAYER/MISSILE 0
 NUSIZ1  =       $05     ;BITS   54 210 NUMBER-SIZE PLAYER/MISSILE 1
 COLUP0  =       $06     ;BITS 7654321  COLOR(4)-LUM(3) PLAYER 0
@@ -31,9 +56,13 @@ COLUP1  =       $07     ;BITS 7654321  COLOR(4)-LUM(3) PLAYER 1
 COLUPF  =       $08     ;BITS 7654321  COLOR(4)-LUM(3) PLAYFIELD
 COLUBK  =       $09     ;BITS 7654321  COLOR(4)-LUM(3) BACKGROUND
 CTRLPF  =       $0A     ;BITS   54 210 PLAYFIELD CONTROL & BALL
+
+        IF ASSEMBLER = ASM_ATARI
 REFP0   =       $0B     ;BIT      3    REFLECT PLAYER 0. 1=>REFLECT
 REFP1   =       $0C     ;BIT      3    REFLECT PLAYER 1
 PF0     =       $0D     ;BITS 7654     PLAYFIELD REG BYTE 0 (REVERSED)
+        ENDIF
+
 PF1     =       $0E     ;BITS ALL      PLAYFIELD REG BYTE 1
 PF2     =       $0F     ;BITS ALL      PLAYFIELD REG BYTE 2 (REVERSED)
 RESP0   =       $10     ;STROBE        RESET PLAYER 0
@@ -57,17 +86,25 @@ HMP1    =       $21     ;BITS 7654     HORIZ MOTION PLAYER 1.  F-8 => RIGHT
 HMM1    =       $22     ;BITS 7654     HORIZ MOTION MISSILE 0
 HMM2    =       $23     ;BITS 7654     HORIZ MOTION MISSILE 1
 HMBL    =       $24     ;BITS 7654     HORIZ MOTION BALL
+
+        IF ASSEMBLER = ASM_ATARI
 VDELP0  =       $25     ;BIT         0 VERTICAL DELAY PLAYER 0.  1=> VDEL ON
 VDELP1  =       $26     ;BIT         0 VERTICAL DELAY PLAYER 1
 VDELBL  =       $27     ;BIT         0 VERTICAL DELAY BALL
 RESMP0  =       $28     ;BIT        1  RESET MISSILE TO PLAYER 0.  1-> MISSILE RESET TO PLAYER
 RESMP1  =       $29     ;BIT        1  RESET MISSILE TO PLAYER 1
+        ENDIF
+
 HMOVE   =       $2A     ;STROBE        ACT ON HORIZ MOTION
 HMCLR   =       $2B     ;STROBE        CLEAR ALL HM REGISTERS
+
+        IF ASSEMBLER = ASM_ATARI
 CXCLR   =       $2C     ;STROBE        CLEAR COLLISION LATCHES
+        ENDIF
 ;
 ;       READ ADDRESSES - BITS 7 & 6 ONLY
 ;
+        IF ASSEMBLER = ASM_ATARI
 CXM0P   =       $30     ;M0*P1  M0*P0
 CXM1P   =       $31     ;M1*P0  M1*P1
 CXP0FB  =       $32     ;P0*PF  P0*BL
@@ -80,20 +117,42 @@ INPT0   =       $38     ;POT 0.  BIT7=1 => POT CAPACITOR IS COMPLETELY CHARGED?
 INPT1   =       $39     ;POT 1
 INPT2   =       $3A     ;POT 2
 INPT3   =       $3B     ;POT 3
+        ENDIF
+
 INPT4   =       $3C     ;JOYSTICK 0 BUTTON.  B7=0 => BUTTON PRESSED
-INPT5   =       $3D     ;JOUSTICK 1 BUTTON
+
+        IF ASSEMBLER = ASM_ATARI
+INPT5   =       $3D     ;JOYSTICK 1 BUTTON
+        ENDIF
 ;
 ;       PIA AND TIMER (6532) LOCATIONS
 ;
 SWCHA   =       $280    ;P0,P1 JOYSTICKS (RLDU,RLDU), POT TRIGGERS, KEYBOARD, DRIVING CONTROLLER
+
+        IF ASSEMBLER = ASM_ATARI
 CTLSWA  =       $281    ;SWCHA I/O CONTROL      1-OUTPUT
+        ENDIF
+
 SWCHB   =       $282    ;CONSOLE SWITCHES (READ ONLY) P1B,P0B,X,X,B/W,X,SELECT,RESET IF 0
+
+        IF ASSEMBLER = ASM_ATARI
 CTLSWB  =       $283    ;UNUSED
+        ENDIF
+
 INTIM   =       $284    ;INTERVAL TIMER INPUT   0=>TIMER UP
+
+        IF ASSEMBLER = ASM_ATARI
 TIM1T   =       $294    ;TIMER OUTPUT:  1 MACHINE CYCLE/TICK (.838 MICROSEC)
 TIM8T   =       $295    ;8 MACHINE CYCLES/TICK
+        ENDIF
+
 TIM64T  =       $296    ;64 MC'S/TICK
+
+        IF ASSEMBLER = ASM_ATARI
 T1024T  =       $297    ;1024 MACHINE CYCLES/TICK (858.2 MICROSECONDS)
+        ENDIF
+
+        IF ASSEMBLER = ASM_ATARI
 ;
 ;       KIM SUBROUTINES
 ;
@@ -103,7 +162,7 @@ GETCH   =       $1E5A   ;READ ASCII CHAR FROM TI INTO A
 OUTSP   =       $1E9E   ;PRINT SPACE ON TI
 OUTCH   =       $1EA0   ;PRINT ACCUMULATOR AS ASCII CHAR ON TI
 GETBYT  =       $1F9D   ;READ TWO HEX ASCII CHARS FROM TI INTO A
-
+        ENDIF
 
 ;----------------------------------
 
@@ -200,6 +259,7 @@ ADDTRM  =       $20             ;TERM TO ADD TO MAGNITUDE OF SCORE IF STACK IS F
 ;----------------------------------
 
 
+        IF ASSEMBLER = ASM_ATARI
 ;                       VARIABLES (RAM PAGE ZERO)
         *=$80
 ;                       THE FOLLOWING RAM LOCS ARE CLEARED DURING RESET:
@@ -424,14 +484,250 @@ SCP1
 
 ;                       F8-FF ARE USED FOR STACK (4 LEVELS DEEP FOR NOW)
 
+        ELSE
+
+;                       VARIABLES (RAM PAGE ZERO)
+        ORG $80
+;                       THE FOLLOWING RAM LOCS ARE CLEARED DURING RESET:
+;A-B MEANS USED BY ALPHA-BETA PRUNING ROUTINE
+;SAVE MEANS ALPHA-BETA PRUNING ROUTINE DOES NOT ALTER
+ZROBGN
+BOARD
+        ds 35          ;CHECKER BOARD (1 BYTE / SQUARE) SQUARES 8,17,26 ARE NOT USED. A-B
+PIECE
+        ds 1           ;CURRENT PIECE BEING MOVED. A-B
+
+JMPI
+        ds 1           ;INDEX INTO JMPLIST --  <0 => NO JUMPS. A-B
+MSTJMP
+        ds 1           ;0 => ACTIVE PLAYER CAN'T JUMP   4 => ACTIVE PLAYER MUST JUMP.  A-B
+MLTJMP
+        ds 1           ;8 => CONTINUING MULTIPLE JUMP. A-B & MAIN
+MSTFLG
+        ds 1           ;MSTJMP SAVED WHILE NEW MSTJMP IS COMPUTED. A-B
+MLTFLG
+        ds 1           ;MLTJMP BACKUP. A-B
+
+HPIECE
+        ds 1           ;HUMAN PIECE COUNT.  KING=3, CHECKER=2. A-B
+CPIECE
+        ds 1           ;COMPUTER PIECE COUNT. A-B
+
+CURSOR
+        ds 1           ;SQUARE # FOR BLINKING CURSOR. SAVE
+FROMB
+        ds 1           ;BINARY "FROM" SQUARE (INTERNAL NUMBERING). A-B
+TOSQRB
+        ds 1           ;BINARY "TO" SQUARE.  A-B
+
+HKING
+        ds 1           ;HUMAN KING COUNT
+CKING
+        ds 1           ;COMPUTER KING COUNT (1 FOR EACH KING)
+
+ZROEND
+;
+;                       THE FOLLOWING RAM LOCS ARE NOT CLEARED DURING RESET
+;
+; GAMNO = 1 TO GMAX2 IN DECIMAL
+;       1-9             REGULAR CHECKERS
+;       10              2-PLAYER (EITHER)
+;       11-19           GIVE-AWAY (LOSING)
+GAMNO
+        ds 1           ;GAME NUMBER
+COLHUM
+        ds 1           ;HUMAN CHECKER COLOR (NO ATTRACT ADDED IN). SAVE
+COLCMP
+        ds 1           ;COMPUTER CHECKER COLOR (NO ATTRACT ADDED IN). SAVE?
+;
+T0
+        ds 1           ;TEMP (USED IN  KERNEL, ETC.). A-B & MAIN
+T1
+        ds 1           ;TEMP (USED IN KERNEL, ETC.). A-B & MAIN
+XSAVE   =       T1      ;X REG SAVED FOR JMPCHK ROUTINE. A-B & MAIN
+T2
+        ds 1           ;A-B & MAIN
+YSAVE   =       T2      ;. A-B & MAIN
+NUM     =       T2      ;2 BYTE NUMERATOR FOR STATIC EVALUATION DIVIDE (USED FOR RATIO OF PIECE COUNTS).A-B
+T3
+        ds 1           ;A-B & MAIN
+ANYMVE  =       T3      ;>0 => ACTIVE PLAYER CAN MOVE. A-B & MAIN -- USED ONLY BY JMPCHK
+T6
+        ds 1           ;ANOTHER TEMP
+DEN
+        ds 1           ;DENOMINATOR. A-B
+T7
+        ds 1           ;TEMP
+T8
+        ds 1           ;YET ANOTHER TEMP -- USED TO SAVE BK COLOR
+
+ACTIVE
+        ds 1           ;ACTIVE OR CURRENT PLAYER (HUMAN=0, COMPUTER=$80). A-B & MAIN
+DEPTH
+        ds 1           ;CURRENT DEPTH OF TREE SEARCH. A-B & SET UP BY MAIN
+
+JMPSQR
+        ds 1           ;SQUARE # FOR PIECE BEING JUMPED. A-B
+INDEX
+        ds 1           ;CURRENT OFFSET INDEX (0-3). A-B
+FRSMOV
+        ds 1           ;$80 => FIRST MOVE (MAY BE MULTIPLE JUMP). A-B
+;       B7=1 => FIRST MOVE, B6=1 => FIRST MOVE AT THIS LEVEL, BETTER MOVE FOUND [todo - misaligned in original?]
+XMOVE
+        ds 1           ;"FROM" MOVE SQUARE FROM MOVCHK. A-B & MAIN
+TIMOUT
+        ds 1           ;TIMER
+
+OLDPBQ
+        ds 1           ;SWCHB FOR THIS FRAME.
+FRAME
+        ds 1           ;FRAME COUNTER -- COUNTS UP.
+PRNCNT
+        ds 1           ;B7=1 => PRUNE (FOR MULTIPLE JUMPS).  B6-B0 = RANDOM MOVE COUNTER
+
+JMPLST
+        ds JMPLEN      ;SQUARES FOR PIECES JUMPED BY COMPUTER, <0 => KING. A-B & MAIN
+JMPEND
+;
+;       THE FOLLOWING ALPHA-BETA "STACK" OVERLAP THE MAIN PROGRAM VARS WHICH
+;       ARE LISTED LAST.  THEY ALSO OVERLAP JMPLST WITH THE EXCEPTION OF THE FIRST 3 BYTES.
+;
+        ds JMPLST+3
+        .IF     STACK
+AX=*
+        ORG $180
+        .ENDIF          ;ALLOW FOR BIGGER STACK IF DEBUG
+FROMT
+        ds MAXMAX      ;FROM(I-1) = FROM SQUARE FOR DEPTH I. A-B
+;       B7=1 => FIRST MOVE, B6=1 => FIRST MOVE AT THIS LEVEL, BETTER MOVE FOUND
+OTHER
+        ds MAXMAX      ;OTHER(I-1) = OTHER FOR DEPTH I. A-B
+; B7-6 = CAPTURED PIECE, B5-4 = MOVED PIECE, B3 = MLTJMP, B2 = MSTJMP, B1-0 = OFFSET INDEX
+ALPHAL
+        ds MAXMAX+1+1  ;ALPHAL(I) = ALPHA(DEPTH) LSB. A-B
+ALPHAH
+        ds MAXMAX+1+1  ;ALPHAH(I) = ALPHA(DEPTH)/256. A-B
+ALPEND
+
+        .IF     STACK
+        ORG AX
+        .ENDIF
+
+;
+;                       THE FOLLOWING VARS OVERLAP THE ALPHA-BETA "STACK" AND T4-SCRRPF:
+;
+        ORG JMPLST+JMPLEN
+COLP0
+        ds 1           ;COLOR OF P0 (ATTRACT ADDED IN)
+COLP1
+        ds 1           ;COLOR OF P1
+
+COL0
+        ds 2           ;COLOR OF 1ST PIECE IN ROW (FOR KERNEL ONLY)
+COL1
+        ds 2
+COL2
+        ds 2
+COL3
+        ds 2
+
+PNTR0
+        ds 2           ;POINTERS TO SQUARE GRAPHICS
+PNTR1
+        ds 2
+PNTR2
+        ds 2
+PNTR3
+        ds 2
+
+SQUARE
+        ds 1           ;SQUARE # FOR USE IN KERNEL
+SQREND
+
+;
+;       THE FOLLOWING PARTIALLY OVERLAP BOTH THE ALPHA-BETA "STACK" AND
+;       COLP0-SQUARE.
+;
+        ORG JMPLST+JMPLEN
+T4
+        ds 1
+T5
+        ds 1
+
+SCRLP0
+        ds 5           ;P0 "SCORE" GRAPHICS
+SCRRP1
+        ds 5           ;P1
+SCRLPF
+        ds 5           ;LEFT PF1 GRAPHICS
+SCRRPF
+        ds 5           ;RIGHT PF1 GRAPHICS
+
+MOVVAL
+        ds 1           ;VALUE IN MOVE SQUARE. SET UP AT END OF A-B. DON'T SAVE
+MOVFLG
+        ds 1           ;1 => DISPLAY COMPUTER'S MOVE. DON'T SAVE
+WINSAV
+        ds 1           ;WINNING PLAYER, 0=> NO WIN. DON'T SAVE
+FROMTO
+        ds 1           ;0 => FROM, 1=> TO. DON'T SAVE
+
+CURSC
+        ds 1           ;COMPUTER CURSOR. SET UP AT END OF A-B. DON'T SAVE
+MOVE
+        ds 1           ;CURRENT MOVE. SET UP AT END OF A-B. DON'T SAVE
+OLDINP
+        ds 1           ;JOYSTICK BUTTON VALUE FOR CURRENT PLAYER FOR LAST FRAME. DON'T SAVE
+GSTIM
+        ds 1           ;GAME SELECT TIMER -- COUNTS DOWN TO 0. DON'T SAVE
+
+OLDPB6
+        ds 1           ;OLD SWCHB VALUE, 0=>NORMAL, <>0=>SETUP (BIT 6 ONLY). DON'T SAVE
+ILEGAL
+        ds 1           ;>0 => MAKE ILLEGAL MOVE SOUND. DON'T SAVE
+ATIM
+        ds 1           ;ATTRACT MODE TIMER -- COUNTS UP. DON'T SAVE
+GFLG2
+        ds 1           ;0=>ATTRACT  <> 0 => NOT ATTRACT. DON'T SAVE
+BLNKTM
+        ds 1           ;FRAME COUNTER FOR VBLANK AFTER CALCULATION(DOWN TO 0). DON'T SAVE
+SNDTIM
+        ds 1           ;TIMER FOR SOUNDS (COUNTS DOWN TO 0). DON'T SAVE
+FREEZE
+        ds 1           ;TIMER FOR FREEZE AFTER HUMAN MOVE (0=END OF FREEZE)
+COLSQ
+        ds 1           ;SQUARE COLOR FOR KERNEL
+
+
+FROM
+        ds 1           ;FROM SQUARE FOR "SCORE" . DON'T SAVE
+TOSQR
+        ds 1           ;TO SQUARE FOR "SCORE". DON'T SAVE
+SCP0
+        ds 1           ;GAME # FOR "SCORE". SAVE
+SCP1
+        ds 1           ;# OF PLAYERS FOR "SCORE". DON'T SAVE
+
+;                       F8-FF ARE USED FOR STACK (4 LEVELS DEEP FOR NOW)
+
+        ENDIF
 
 ;----------------------------------
 
 
 ;                               SCORE KERNEL (TOP LINE OF CHARS)
+        IF ASSEMBLER = ASM_ATARI
         *=ROMSTR
+        ELSE
+        ORG ROMSTR
+        ENDIF
+
         .IF     PRNT
+        IF ASSEMBLER = ASM_ATARI
         *=$E000                 ;RELOCATE IF DEBUG TO MAKE ROOM FOR MORE CODE
+        ELSE
+        ORG $E000
+        ENDIF
         JMP     PSTART
         .ENDIF
 
@@ -1318,7 +1614,7 @@ PRNJMP
 ;       NEXT LEVEL CONTNUED MULTIPLE JUMP -- MOVE BETA & NEW ALPHA BACK
 ;
 WASJ10
-        .IFPRNT
+        .IF PRNT
         LDA     PRFLG
         AND     #$80            ;FLAG SET?
         BEQ     SKIP1           ;NO.
@@ -3703,7 +3999,7 @@ KNGCK2
         CMP     #CMPCHK
         BNE     TO60
         CPX     #4              ;COMPUTER CHECKER TO KING OF ON 0-3
-        BCS     T080            ;NOT NEW KING
+        BCS     TO80            ;NOT NEW KING
         INC     CPIECE          ;INCREMENT COMPUTER PIECE COUNT
         INC     CKING           ;INC KING COUNT
         BCC     TO70            ;JMP    NEW KING
@@ -3762,33 +4058,84 @@ AD=*
 
 
 ;               DATA [todo - verify indentation]
+        IF ASSEMBLER = ASM_ATARI
         *=ROMSTR+$F00
+        ELSE
+        ORG ROMSTR+$F00
+        ENDIF
 ;                               BOARD CHARACTERS (IN UPSIDE DOWN ORDER)
 BRDCHR
-        .BYTE   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0                                 ;EMPTY 0*LINCHR [todo - indentation changes with long lines]
+        ;EMPTY 0*LINCHR
+       .byte $00 ; |        | $FF00
+       .byte $00 ; |        | $FF01
+       .byte $00 ; |        | $FF02
+       .byte $00 ; |        | $FF03
+       .byte $00 ; |        | $FF04
+       .byte $00 ; |        | $FF05
+       .byte $00 ; |        | $FF06
+       .byte $00 ; |        | $FF07
+       .byte $00 ; |        | $FF08
+       .byte $00 ; |        | $FF09
+       .byte $00 ; |        | $FF0A
+       .byte $00 ; |        | $FF0B
+       .byte $00 ; |        | $FF0C
+       .byte $00 ; |        | $FF0D
+       .byte $00 ; |        | $FF0E
+       .byte $00 ; |        | $FF0F
 
+        ;CHECKER 1
+       .byte $3C ; |  XXXX  | $FF10
+       .byte $3C ; |  XXXX  | $FF11
+       .byte $7E ; | XXXXXX | $FF12
+       .byte $7E ; | XXXXXX | $FF13
+       .byte $FF ; |XXXXXXXX| $FF14
+       .byte $FF ; |XXXXXXXX| $FF15
+       .byte $FF ; |XXXXXXXX| $FF16
+       .byte $FF ; |XXXXXXXX| $FF17
+       .byte $FF ; |XXXXXXXX| $FF18
+       .byte $FF ; |XXXXXXXX| $FF19
+       .byte $FF ; |XXXXXXXX| $FF1A
+       .byte $FF ; |XXXXXXXX| $FF1B
+       .byte $7E ; | XXXXXX | $FF1C
+       .byte $7E ; | XXXXXX | $FF1D
+       .byte $3C ; |  XXXX  | $FF1E
+       .byte $3C ; |  XXXX  | $FF1F
 
+        ;KING 2
+       .byte $3C ; |  XXXX  | $FF20
+       .byte $3C ; |  XXXX  | $FF21
+       .byte $7E ; | XXXXXX | $FF22
+       .byte $7E ; | XXXXXX | $FF23
+       .byte $C3 ; |XX    XX| $FF24
+       .byte $C3 ; |XX    XX| $FF25
+       .byte $C3 ; |XX    XX| $FF26
+       .byte $C3 ; |XX    XX| $FF27
+       .byte $A5 ; |X X  X X| $FF28
+       .byte $A5 ; |X X  X X| $FF29
+       .byte $A5 ; |X X  X X| $FF2A
+       .byte $E7 ; |XXX  XXX| $FF2B
+       .byte $7E ; | XXXXXX | $FF2C
+       .byte $7E ; | XXXXXX | $FF2D
+       .byte $3C ; |  XXXX  | $FF2E
+       .byte $3C ; |  XXXX  | $FF2F
 
-
-
-        .BYTE   $3C,$3C,$7E,$7E,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$8E,$8E,$3C,$3C ;CHECKER 1
-
-
-
-
-
-        .BYTE   $3C,$3C,$7E,$7E,$C3,$C3,$C3,$C3,$A5,$A5,$A5,$E7,$7E,$7E,$3C,$3C ;KING 2
-
-
-
-
-
-        .BYTE   0,0,0,$C6,$C6,$6C,$6C,$38,$38,$6C,$6C,$C6,$C6,0         ;CURSOR 3
-
-
-
-
+        ;CURSOR 3
+       .byte $00 ; |        | $FF30
+       .byte $00 ; |        | $FF31
+       .byte $00 ; |        | $FF32
+       .byte $C6 ; |XX   XX | $FF33
+       .byte $C6 ; |XX   XX | $FF34
+       .byte $6C ; | XX XX  | $FF35
+       .byte $6C ; | XX XX  | $FF36
+       .byte $38 ; |  XXX   | $FF37
+       .byte $38 ; |  XXX   | $FF38
+       .byte $6C ; | XX XX  | $FF39
+       .byte $6C ; | XX XX  | $FF3A
+       .byte $C6 ; |XX   XX | $FF3B
+       .byte $C6 ; |XX   XX | $FF3C
+       .byte $00 ; |        | $FF3D
 HTAB    .BYTE   0,0                     ;CHANGES FOR HPIECE (BASED ON NXTAB). 0,0 IS PART OF CURSOR
+
 CTAB    .BYTE   -3,1,2                  ;PART OF HTAB
 HKTAB   .BYTE   0,0                     ;CHANGES FOR HKING (KING COUNT). 0,0 IS PART OF CTAB
 CKTAB   .BYTE   -1,1,0,0,0              ;CHANGES FOR CKING. -1,1,0 IS PART OF HKTAB
@@ -3815,10 +4162,6 @@ NXTAB   .BYTE   CMPKNG,CMPCHK,HUMKNG,HUMCHK     ;EMPTY
 
 
 BAKTAB  .BYTE   0*2,1*2,1*2,3*2,1*2,6*2,2*2,6*2,1*2,3*2,4*2,5*2,1*2,6*2,4*2,6*2
-
-
-
-
 
 JOYTAB  .BYTE   5,9,6,$A                ;JOYSTICK READINGS FOR DIAGONAL MOVEMENT.
 
@@ -3847,29 +4190,94 @@ DIAG    .BYTE   4,5,14,15,24,25,34                      ;PART OF SYSTEM ALSO
 ;       "SCORE" TABLE -- CHARACTERS 0-9, BLANK, JP
 ;       MUST NOT CROSS PAGE BOUNDARY -- THIS INCLUDES BOTH LISTING PAGE & RAM PAGE [todo - verify in code]
 SCRTBL
-        .BYTE   $0E,$0A,$0A,$0A,$0E     ;0    HIGH ORDER 0 IS DISPLAYED AS BLANK
+        ;0    HIGH ORDER 0 IS DISPLAYED AS BLANK
+       .byte $0E ; |    XXX | $FF8C
+       .byte $0A ; |    X X | $FF8D
+       .byte $0A ; |    X X | $FF8E
+       .byte $0A ; |    X X | $FF8F
+       .byte $0E ; |    XXX | $FF90
 
-        .BYTE   $EE,$44,$44,$CC,$44     ;1
+        ;1
+       .byte $EE ; |XXX XXX | $FF91
+       .byte $44 ; | X   X  | $FF92
+       .byte $44 ; | X   X  | $FF93
+       .byte $CC ; |XX  XX  | $FF94
+       .byte $44 ; | X   X  | $FF95
 
-        .BYTE   $EE,$88,$EE,$22,$EE     ;2
+        ;2
+       .byte $EE ; |XXX XXX | $FF96
+       .byte $88 ; |X   X   | $FF97
+       .byte $EE ; |XXX XXX | $FF98
+       .byte $22 ; |  X   X | $FF99
+       .byte $EE ; |XXX XXX | $FF9A
 
-        .BYTE   $EE,$22,$66,$22,$EE     ;3
+        ;3
+       .byte $EE ; |XXX XXX | $FF9B
+       .byte $22 ; |  X   X | $FF9C
+       .byte $66 ; | XX  XX | $FF9D
+       .byte $22 ; |  X   X | $FF9E
+       .byte $EE ; |XXX XXX | $FF9F
 
-        .BYTE   $22,$22,$EE,$AA,$AA     ;4
+        ;4
+       .byte $22 ; |  X   X | $FFA0
+       .byte $22 ; |  X   X | $FFA1
+       .byte $EE ; |XXX XXX | $FFA2
+       .byte $AA ; |X X X X | $FFA3
+       .byte $AA ; |X X X X | $FFA4
 
-        .BYTE   $EE,$22,$EE,$88,$EE     ;5
+        ;5
+       .byte $EE ; |XXX XXX | $FFA5
+       .byte $22 ; |  X   X | $FFA6
+       .byte $EE ; |XXX XXX | $FFA7
+       .byte $88 ; |X   X   | $FFA8
+       .byte $EE ; |XXX XXX | $FFA9
 
-        .BYTE   $EE,$AA,$EE,$88,$EE     ;6
+        ;6
+       .byte $EE ; |XXX XXX | $FFAA
+       .byte $AA ; |X X X X | $FFAB
+       .byte $EE ; |XXX XXX | $FFAC
+       .byte $88 ; |X   X   | $FFAD
+       .byte $EE ; |XXX XXX | $FFAE
 
-        .BYTE   $22,$22,$22,$22,$EE     ;7
+        ;7
+       .byte $22 ; |  X   X | $FFAF
+       .byte $22 ; |  X   X | $FFB0
+       .byte $22 ; |  X   X | $FFB1
+       .byte $22 ; |  X   X | $FFB2
+       .byte $EE ; |XXX XXX | $FFB3
 
-        .BYTE   $EE,$AA,$EE,$AA,$EE     ;8
+        ;8
+       .byte $EE ; |XXX XXX | $FFB4
+       .byte $AA ; |X X X X | $FFB5
+       .byte $EE ; |XXX XXX | $FFB6
+       .byte $AA ; |X X X X | $FFB7
+       .byte $EE ; |XXX XXX | $FFB8
 
-        .BYTE   $EE,$22,$EE,$AA,$EE     ;9
+        ;9
+       .byte $EE ; |XXX XXX | $FFB9
+       .byte $22 ; |  X   X | $FFBA
+       .byte $EE ; |XXX XXX | $FFBB
+       .byte $AA ; |X X X X | $FFBC
+       .byte $EE ; |XXX XXX | $FFBD
 
-        .BYTE   0,0,0,0,0               ;AA     BLANK [todo - verify spacing]
+        ;AA     BLANK
+       .byte $00 ; |        | $FFBE
+       .byte $00 ; |        | $FFBF
+       .byte $00 ; |        | $FFC0
+       .byte $00 ; |        | $FFC1
+       .byte $00 ; |        | $FFC2
 
-        .BYTE   $E4,$A4,$27,$25,$27     ;BB     JP
+        ;BB     JP
+       .byte $E4 ; |XXX  X  | $FFC3
+       .byte $A4 ; |X X  X  | $FFC4
+       .byte $27 ; |  X  XXX| $FFC5
+       .byte $25 ; |  X  X X| $FFC6
+       .byte $27 ; |  X  XXX| $FFC7
+
+        .BYTE   $0E,$0A,$0A,$0A,$0E
+
+
+        .BYTE   $E4,$A4,$27,$25,$27
 
 
 
@@ -3927,7 +4335,12 @@ SOUND3
 
 
 
+        IF ASSEMBLER = ASM_ATARI
         *=ROMSTR+$FFFC
+        ELSE
+        ORG ROMSTR+$FFFC
+        ENDIF
+
         .WORD   PSTART          ;START VECTOR
         .BYTE   0,0             ;EXTRA BYTES
 

@@ -2,7 +2,7 @@
 ; Disassembled Tue Apr 08 10:30:57 2025
 ; Using DiStella v3.01b
 ;
-; Command Line: D:\temp\vcs-checkers\distella.exe -pafsccheckers.cfg .\Video Checkers (1980) (Atari).a26 
+; Command Line: D:\temp\vcs-checkers\distella.exe -pafsccheckers.cfg .\Video Checkers (1980) (Atari).a26
 ;
 ; checkers.cfg contents:
 ;
@@ -2079,6 +2079,7 @@ LFEEE: .byte $80 ; |X       | $FEEE
        .byte $33 ; |  XX  XX| $FEF1
        .byte $2B ; |  X X XX| $FEF2
        .byte $25 ; |  X  X X| $FEF3
+
        .byte $00 ; |        | $FEF4
        .byte $00 ; |        | $FEF5
        .byte $00 ; |        | $FEF6
@@ -2091,68 +2092,9 @@ LFEEE: .byte $80 ; |X       | $FEEE
        .byte $00 ; |        | $FEFD
        .byte $00 ; |        | $FEFE
        .byte $00 ; |        | $FEFF
-       .byte $00 ; |        | $FF00
-       .byte $00 ; |        | $FF01
-       .byte $00 ; |        | $FF02
-       .byte $00 ; |        | $FF03
-       .byte $00 ; |        | $FF04
-       .byte $00 ; |        | $FF05
-       .byte $00 ; |        | $FF06
-       .byte $00 ; |        | $FF07
-       .byte $00 ; |        | $FF08
-       .byte $00 ; |        | $FF09
-       .byte $00 ; |        | $FF0A
-       .byte $00 ; |        | $FF0B
-       .byte $00 ; |        | $FF0C
-       .byte $00 ; |        | $FF0D
-       .byte $00 ; |        | $FF0E
-       .byte $00 ; |        | $FF0F
-       .byte $3C ; |  XXXX  | $FF10
-       .byte $3C ; |  XXXX  | $FF11
-       .byte $7E ; | XXXXXX | $FF12
-       .byte $7E ; | XXXXXX | $FF13
-       .byte $FF ; |XXXXXXXX| $FF14
-       .byte $FF ; |XXXXXXXX| $FF15
-       .byte $FF ; |XXXXXXXX| $FF16
-       .byte $FF ; |XXXXXXXX| $FF17
-       .byte $FF ; |XXXXXXXX| $FF18
-       .byte $FF ; |XXXXXXXX| $FF19
-       .byte $FF ; |XXXXXXXX| $FF1A
-       .byte $FF ; |XXXXXXXX| $FF1B
-       .byte $7E ; | XXXXXX | $FF1C
-       .byte $7E ; | XXXXXX | $FF1D
-       .byte $3C ; |  XXXX  | $FF1E
-       .byte $3C ; |  XXXX  | $FF1F
-       .byte $3C ; |  XXXX  | $FF20
-       .byte $3C ; |  XXXX  | $FF21
-       .byte $7E ; | XXXXXX | $FF22
-       .byte $7E ; | XXXXXX | $FF23
-       .byte $C3 ; |XX    XX| $FF24
-       .byte $C3 ; |XX    XX| $FF25
-       .byte $C3 ; |XX    XX| $FF26
-       .byte $C3 ; |XX    XX| $FF27
-       .byte $A5 ; |X X  X X| $FF28
-       .byte $A5 ; |X X  X X| $FF29
-       .byte $A5 ; |X X  X X| $FF2A
-       .byte $E7 ; |XXX  XXX| $FF2B
-       .byte $7E ; | XXXXXX | $FF2C
-       .byte $7E ; | XXXXXX | $FF2D
-       .byte $3C ; |  XXXX  | $FF2E
-       .byte $3C ; |  XXXX  | $FF2F
-       .byte $00 ; |        | $FF30
-       .byte $00 ; |        | $FF31
-       .byte $00 ; |        | $FF32
-       .byte $C6 ; |XX   XX | $FF33
-       .byte $C6 ; |XX   XX | $FF34
-       .byte $6C ; | XX XX  | $FF35
-       .byte $6C ; | XX XX  | $FF36
-       .byte $38 ; |  XXX   | $FF37
-       .byte $38 ; |  XXX   | $FF38
-       .byte $6C ; | XX XX  | $FF39
-       .byte $6C ; | XX XX  | $FF3A
-       .byte $C6 ; |XX   XX | $FF3B
-       .byte $C6 ; |XX   XX | $FF3C
-       .byte $00 ; |        | $FF3D
+
+
+
 LFF3E: .byte $00 ; |        | $FF3E
        .byte $00 ; |        | $FF3F
 LFF40: .byte $FD ; |XXXXXX X| $FF40
@@ -2231,66 +2173,79 @@ LFF7E: .byte $04 ; |     X  | $FF7E
        .byte $14 ; |   X X  | $FF89
        .byte $1D ; |   XXX X| $FF8A
        .byte $1E ; |   XXXX | $FF8B
+
        .byte $0E ; |    XXX | $FF8C
        .byte $0A ; |    X X | $FF8D
        .byte $0A ; |    X X | $FF8E
        .byte $0A ; |    X X | $FF8F
        .byte $0E ; |    XXX | $FF90
+
        .byte $EE ; |XXX XXX | $FF91
        .byte $44 ; | X   X  | $FF92
        .byte $44 ; | X   X  | $FF93
        .byte $CC ; |XX  XX  | $FF94
        .byte $44 ; | X   X  | $FF95
+
        .byte $EE ; |XXX XXX | $FF96
        .byte $88 ; |X   X   | $FF97
        .byte $EE ; |XXX XXX | $FF98
        .byte $22 ; |  X   X | $FF99
        .byte $EE ; |XXX XXX | $FF9A
+
        .byte $EE ; |XXX XXX | $FF9B
        .byte $22 ; |  X   X | $FF9C
        .byte $66 ; | XX  XX | $FF9D
        .byte $22 ; |  X   X | $FF9E
        .byte $EE ; |XXX XXX | $FF9F
+
        .byte $22 ; |  X   X | $FFA0
        .byte $22 ; |  X   X | $FFA1
        .byte $EE ; |XXX XXX | $FFA2
        .byte $AA ; |X X X X | $FFA3
        .byte $AA ; |X X X X | $FFA4
+
        .byte $EE ; |XXX XXX | $FFA5
        .byte $22 ; |  X   X | $FFA6
        .byte $EE ; |XXX XXX | $FFA7
        .byte $88 ; |X   X   | $FFA8
        .byte $EE ; |XXX XXX | $FFA9
+
        .byte $EE ; |XXX XXX | $FFAA
        .byte $AA ; |X X X X | $FFAB
        .byte $EE ; |XXX XXX | $FFAC
        .byte $88 ; |X   X   | $FFAD
        .byte $EE ; |XXX XXX | $FFAE
+
        .byte $22 ; |  X   X | $FFAF
        .byte $22 ; |  X   X | $FFB0
        .byte $22 ; |  X   X | $FFB1
        .byte $22 ; |  X   X | $FFB2
        .byte $EE ; |XXX XXX | $FFB3
+
        .byte $EE ; |XXX XXX | $FFB4
        .byte $AA ; |X X X X | $FFB5
        .byte $EE ; |XXX XXX | $FFB6
        .byte $AA ; |X X X X | $FFB7
        .byte $EE ; |XXX XXX | $FFB8
+
        .byte $EE ; |XXX XXX | $FFB9
        .byte $22 ; |  X   X | $FFBA
        .byte $EE ; |XXX XXX | $FFBB
        .byte $AA ; |X X X X | $FFBC
        .byte $EE ; |XXX XXX | $FFBD
+
        .byte $00 ; |        | $FFBE
        .byte $00 ; |        | $FFBF
        .byte $00 ; |        | $FFC0
        .byte $00 ; |        | $FFC1
        .byte $00 ; |        | $FFC2
+
        .byte $E4 ; |XXX  X  | $FFC3
        .byte $A4 ; |X X  X  | $FFC4
        .byte $27 ; |  X  XXX| $FFC5
        .byte $25 ; |  X  X X| $FFC6
        .byte $27 ; |  X  XXX| $FFC7
+
 LFFC8: .byte $E0 ; |XXX     | $FFC8
 LFFC9: .byte $FF ; |XXXXXXXX| $FFC9
        .byte $20 ; |  X     | $FFCA
