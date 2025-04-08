@@ -1,5 +1,9 @@
-; [Retyped by White Flame 2020-04-11]
-; Modified to build with dasm (and typos fixed) by Jeff Miller, April 2025.
+; Original source code as found here:
+; https://archive.org/details/VCScheckersA/page/n1/mode/2up
+; Retyped by:
+; White Flame 2020-04-11
+; Modified to build with dasm (and typos fixed) by:
+; Jeff Miller, April 2025.
 ; Set "ASSEMBLER = ASM_ATARI" to use original source code, otherwise
 ; dasm will be assumed.
 
@@ -77,14 +81,14 @@ AUDF1   =       $18     ;BITS     3210 AUDIO FREQUENCY 1
 AUDV0   =       $19     ;BITS     3210 AUDIO VOLUME 0
 AUDV1   =       $1A     ;BITS     3210 AUDIO VOLUME 1
 GRP0    =       $1B     ;BITS ALL      GRAPHICS FOR PLAYER 0
-GRP1    =       $1B     ;BITS ALL      GRAPHICS FOR PLAYER 1
+GRP1    =       $1C     ;BITS ALL      GRAPHICS FOR PLAYER 1
 ENAM0   =       $1D     ;BIT        1  ENABLE MISSILE 0.  1=> ENABLE
 ENAM1   =       $1E     ;BIT        1  ENABLE MISSILE 1
 ENABL   =       $1F     ;BIT        1  ENABLE BALL
 HMP0    =       $20     ;BITS 7654     HORIZ MOTION PLAYER 0.  0-7 => LEFT
 HMP1    =       $21     ;BITS 7654     HORIZ MOTION PLAYER 1.  F-8 => RIGHT
-HMM1    =       $22     ;BITS 7654     HORIZ MOTION MISSILE 0
-HMM2    =       $23     ;BITS 7654     HORIZ MOTION MISSILE 1
+HMM0    =       $22     ;BITS 7654     HORIZ MOTION MISSILE 0
+HMM1    =       $23     ;BITS 7654     HORIZ MOTION MISSILE 1
 HMBL    =       $24     ;BITS 7654     HORIZ MOTION BALL
 
         IF ASSEMBLER = ASM_ATARI
@@ -168,7 +172,9 @@ GETBYT  =       $1F9D   ;READ TWO HEX ASCII CHARS FROM TI INTO A
 
 
 ;               CHECKERS EQUATES
+        .IF     STACK = 0
 MAXMAX  =       11              ;MAX STACK DEPTH FOR ALPHA-BETA
+        .ENDIF
         .IF     STACK
 MAXMAX  =       22
         .ENDIF
@@ -196,6 +202,7 @@ CMPCRS  =       CLP1+CURS       ;COMPUTER CURSOR
 
 HMIN    =       5               ;MIN. GAMNO FOR HARD BOARD COLORS
 
+        .IF     PAL = 0
 DARK    =       $36             ;DARK CHECKER COLOR/LUM
 LIGHT   =       $0C             ;LIGHT CHECKER COLOR/LUM
 EDARK   =       0               ;EASY DARK SQUARE COLOR.  0 IS ACTUALLY USED INSTEAD OF EDARK
@@ -211,7 +218,7 @@ OVRCON  =       $25             ;OVERSCAN TIMER INITIAL VALUE
 VBLCON  =       44              ;VBLANK TIMER INITIAL VALUE
 VBTIM   =       30              ;1/2 SEC. VBLANK AFTER CALCULATION -- CHANGE FOR PAL
 FRZTIM  =       45              ;FREEZE TIMER FOR END OF HUMAN MOVE
-
+        .ENDIF
 ;
 ;       PAL VERSIONS OF THE ABOVE
 ;
@@ -346,7 +353,7 @@ INDEX
         *=*+1           ;CURRENT OFFSET INDEX (0-3). A-B
 FRSMOV
         *=*+1           ;$80 => FIRST MOVE (MAY BE MULTIPLE JUMP). A-B
-;       B7=1 => FIRST MOVE, B6=1 => FIRST MOVE AT THIS LEVEL, BETTER MOVE FOUND [todo - misaligned in original?]
+;       B7=1 => FIRST MOVE, B6=1 => FIRST MOVE AT THIS LEVEL, BETTER MOVE FOUND
 XMOVE
         *=*+1           ;"FROM" MOVE SQUARE FROM MOVCHK. A-B & MAIN
 TIMOUT
@@ -487,6 +494,7 @@ SCP1
         ELSE
 
 ;                       VARIABLES (RAM PAGE ZERO)
+        SEG.U Variables
         ORG $80
 ;                       THE FOLLOWING RAM LOCS ARE CLEARED DURING RESET:
 ;A-B MEANS USED BY ALPHA-BETA PRUNING ROUTINE
@@ -572,7 +580,7 @@ INDEX
         ds 1           ;CURRENT OFFSET INDEX (0-3). A-B
 FRSMOV
         ds 1           ;$80 => FIRST MOVE (MAY BE MULTIPLE JUMP). A-B
-;       B7=1 => FIRST MOVE, B6=1 => FIRST MOVE AT THIS LEVEL, BETTER MOVE FOUND [todo - misaligned in original?]
+;       B7=1 => FIRST MOVE, B6=1 => FIRST MOVE AT THIS LEVEL, BETTER MOVE FOUND
 XMOVE
         ds 1           ;"FROM" MOVE SQUARE FROM MOVCHK. A-B & MAIN
 TIMOUT
@@ -586,17 +594,19 @@ PRNCNT
         ds 1           ;B7=1 => PRUNE (FOR MULTIPLE JUMPS).  B6-B0 = RANDOM MOVE COUNTER
 
 JMPLST
-        ds JMPLEN      ;SQUARES FOR PIECES JUMPED BY COMPUTER, <0 => KING. A-B & MAIN
+        ; ds JMPLEN      ;SQUARES FOR PIECES JUMPED BY COMPUTER, <0 => KING. A-B & MAIN
+        ds 3
 JMPEND
 ;
 ;       THE FOLLOWING ALPHA-BETA "STACK" OVERLAP THE MAIN PROGRAM VARS WHICH
 ;       ARE LISTED LAST.  THEY ALSO OVERLAP JMPLST WITH THE EXCEPTION OF THE FIRST 3 BYTES.
-;
-        ds JMPLST+3
+
+
         .IF     STACK
 AX=*
         ORG $180
         .ENDIF          ;ALLOW FOR BIGGER STACK IF DEBUG
+
 FROMT
         ds MAXMAX      ;FROM(I-1) = FROM SQUARE FOR DEPTH I. A-B
 ;       B7=1 => FIRST MOVE, B6=1 => FIRST MOVE AT THIS LEVEL, BETTER MOVE FOUND
@@ -613,100 +623,54 @@ ALPEND
         ORG AX
         .ENDIF
 
+ABSTACK = JMPLST+JMPLEN
+
 ;
 ;                       THE FOLLOWING VARS OVERLAP THE ALPHA-BETA "STACK" AND T4-SCRRPF:
 ;
-        ORG JMPLST+JMPLEN
-COLP0
-        ds 1           ;COLOR OF P0 (ATTRACT ADDED IN)
-COLP1
-        ds 1           ;COLOR OF P1
 
-COL0
-        ds 2           ;COLOR OF 1ST PIECE IN ROW (FOR KERNEL ONLY)
-COL1
-        ds 2
-COL2
-        ds 2
-COL3
-        ds 2
-
-PNTR0
-        ds 2           ;POINTERS TO SQUARE GRAPHICS
-PNTR1
-        ds 2
-PNTR2
-        ds 2
-PNTR3
-        ds 2
-
-SQUARE
-        ds 1           ;SQUARE # FOR USE IN KERNEL
-SQREND
-
+COLP0 = ABSTACK + 0     ;COLOR OF P0 (ATTRACT ADDED IN)
+COLP1 = ABSTACK + 1     ;COLOR OF P1
+COL0  = ABSTACK + 2     ;COLOR OF 1ST PIECE IN ROW (FOR KERNEL ONLY)
+COL1  = ABSTACK + 4
+COL2  = ABSTACK + 6
+COL3  = ABSTACK + 8
+PNTR0 = ABSTACK + 10    ;POINTERS TO SQUARE GRAPHICS
+PNTR1 = ABSTACK + 12
+PNTR2 = ABSTACK + 14
+PNTR3 = ABSTACK + 16
+SQUARE= ABSTACK + 18    ;SQUARE # FOR USE IN KERNEL
+SQREND= ABSTACK + 19
 ;
 ;       THE FOLLOWING PARTIALLY OVERLAP BOTH THE ALPHA-BETA "STACK" AND
 ;       COLP0-SQUARE.
 ;
-        ORG JMPLST+JMPLEN
-T4
-        ds 1
-T5
-        ds 1
-
-SCRLP0
-        ds 5           ;P0 "SCORE" GRAPHICS
-SCRRP1
-        ds 5           ;P1
-SCRLPF
-        ds 5           ;LEFT PF1 GRAPHICS
-SCRRPF
-        ds 5           ;RIGHT PF1 GRAPHICS
-
-MOVVAL
-        ds 1           ;VALUE IN MOVE SQUARE. SET UP AT END OF A-B. DON'T SAVE
-MOVFLG
-        ds 1           ;1 => DISPLAY COMPUTER'S MOVE. DON'T SAVE
-WINSAV
-        ds 1           ;WINNING PLAYER, 0=> NO WIN. DON'T SAVE
-FROMTO
-        ds 1           ;0 => FROM, 1=> TO. DON'T SAVE
-
-CURSC
-        ds 1           ;COMPUTER CURSOR. SET UP AT END OF A-B. DON'T SAVE
-MOVE
-        ds 1           ;CURRENT MOVE. SET UP AT END OF A-B. DON'T SAVE
-OLDINP
-        ds 1           ;JOYSTICK BUTTON VALUE FOR CURRENT PLAYER FOR LAST FRAME. DON'T SAVE
-GSTIM
-        ds 1           ;GAME SELECT TIMER -- COUNTS DOWN TO 0. DON'T SAVE
-
-OLDPB6
-        ds 1           ;OLD SWCHB VALUE, 0=>NORMAL, <>0=>SETUP (BIT 6 ONLY). DON'T SAVE
-ILEGAL
-        ds 1           ;>0 => MAKE ILLEGAL MOVE SOUND. DON'T SAVE
-ATIM
-        ds 1           ;ATTRACT MODE TIMER -- COUNTS UP. DON'T SAVE
-GFLG2
-        ds 1           ;0=>ATTRACT  <> 0 => NOT ATTRACT. DON'T SAVE
-BLNKTM
-        ds 1           ;FRAME COUNTER FOR VBLANK AFTER CALCULATION(DOWN TO 0). DON'T SAVE
-SNDTIM
-        ds 1           ;TIMER FOR SOUNDS (COUNTS DOWN TO 0). DON'T SAVE
-FREEZE
-        ds 1           ;TIMER FOR FREEZE AFTER HUMAN MOVE (0=END OF FREEZE)
-COLSQ
-        ds 1           ;SQUARE COLOR FOR KERNEL
-
-
-FROM
-        ds 1           ;FROM SQUARE FOR "SCORE" . DON'T SAVE
-TOSQR
-        ds 1           ;TO SQUARE FOR "SCORE". DON'T SAVE
-SCP0
-        ds 1           ;GAME # FOR "SCORE". SAVE
-SCP1
-        ds 1           ;# OF PLAYERS FOR "SCORE". DON'T SAVE
+T4 = ABSTACK + 0
+T5 = ABSTACK + 1
+SCRLP0 = ABSTACK + 2    ;P0 "SCORE" GRAPHICS
+SCRRP1 = ABSTACK + 7    ;P1
+SCRLPF = ABSTACK + 12   ;LEFT PF1 GRAPHICS
+SCRRPF = ABSTACK + 17   ;RIGHT PF1 GRAPHICS
+MOVVAL = ABSTACK + 22   ;VALUE IN MOVE SQUARE. SET UP AT END OF A-B. DON'T SAVE
+MOVFLG = ABSTACK + 23   ;1 => DISPLAY COMPUTER'S MOVE. DON'T SAVE
+WINSAV = ABSTACK + 24   ;WINNING PLAYER, 0=> NO WIN. DON'T SAVE
+FROMTO = ABSTACK + 25   ;0 => FROM, 1=> TO. DON'T SAVE
+CURSC = ABSTACK + 26    ;COMPUTER CURSOR. SET UP AT END OF A-B. DON'T SAVE
+MOVE = ABSTACK + 27     ;CURRENT MOVE. SET UP AT END OF A-B. DON'T SAVE
+OLDINP = ABSTACK + 28   ;JOYSTICK BUTTON VALUE FOR CURRENT PLAYER FOR LAST FRAME. DON'T SAVE
+GSTIM = ABSTACK + 29    ;GAME SELECT TIMER -- COUNTS DOWN TO 0. DON'T SAVE
+OLDPB6 = ABSTACK + 30   ;OLD SWCHB VALUE, 0=>NORMAL, <>0=>SETUP (BIT 6 ONLY). DON'T SAVE
+ILEGAL = ABSTACK + 31   ;>0 => MAKE ILLEGAL MOVE SOUND. DON'T SAVE
+ATIM = ABSTACK + 32     ;ATTRACT MODE TIMER -- COUNTS UP. DON'T SAVE
+GFLG2 = ABSTACK + 33    ;0=>ATTRACT  <> 0 => NOT ATTRACT. DON'T SAVE
+BLNKTM = ABSTACK + 34   ;FRAME COUNTER FOR VBLANK AFTER CALCULATION(DOWN TO 0). DON'T SAVE
+SNDTIM = ABSTACK + 35   ;TIMER FOR SOUNDS (COUNTS DOWN TO 0). DON'T SAVE
+FREEZE = ABSTACK + 36   ;TIMER FOR FREEZE AFTER HUMAN MOVE (0=END OF FREEZE)
+COLSQ = ABSTACK + 37    ;SQUARE COLOR FOR KERNEL
+FROM = ABSTACK + 38     ;FROM SQUARE FOR "SCORE" . DON'T SAVE
+TOSQR = ABSTACK + 39    ;TO SQUARE FOR "SCORE". DON'T SAVE
+SCP0 = ABSTACK + 40    ;GAME # FOR "SCORE". SAVE
+SCP1 = ABSTACK + 41    ;# OF PLAYERS FOR "SCORE". DON'T SAVE
 
 ;                       F8-FF ARE USED FOR STACK (4 LEVELS DEEP FOR NOW)
 
@@ -719,6 +683,7 @@ SCP1
         IF ASSEMBLER = ASM_ATARI
         *=ROMSTR
         ELSE
+        SEG Bank0
         ORG ROMSTR
         ENDIF
 
@@ -781,7 +746,7 @@ SCOR4
 ;                               SET HORIZONTAL POSITION OF PLAYERS, MISSILE AND BALL
         LDA     #$E0            ;19  2 TO RIGHT
         STA     HMBL            ;22
-        TXA                     ;24  INIT MSG'S OF CHAR POINTERS FOR KERNEL  ($FF)  [todo - hex omitted from here forward, autogen from bins]
+        TXA                     ;24  INIT MSG'S OF CHAR POINTERS FOR KERNEL  ($FF)
         STA     HMM1            ;27  $FX -- 1 TO RIGHT
         STA     PNTR0+1         ;30
         STA     RESP1           ;33     POSITION PLAYER 1 (P1)  (MUST OCCUR AT THIS TIME)
@@ -1029,7 +994,7 @@ FRAM10
         LDA     SWCHB           ;NO. SAVE NEW CONSOLE SWITCH PORT VALUE
         TAX                     ;IN OLDPBQ BUT DON'T CHANGE OLDPB6 YET.
         EOR     OLDPBQ
-        STX     OLDPBW
+        STX     OLDPBQ
         BPL     NOREV           ;NO CHANGE IN BIT 7 OF OLDPBQ
 
 
@@ -1287,10 +1252,10 @@ COMPUT
 ;       IF RESET PRESSED THEN PICK OPENING MOVE AT RANDOM
 ;
         LDA     OLDPBQ
-        ROR     A               ;RESET SWITCH PRESSED?
+        ROR                     ;RESET SWITCH PRESSED?
         BCS     COMPU2          ;NO.
         LDA     FRAME           ;YES. PICK FROM 7 OPENING MOVES
-        AND     #7              ;AT RANDOM (22-19) IS TWICE AS LIKELY AS THE OTHERS). [todo - first close paren is likely an original typo]
+        AND     #7              ;AT RANDOM (22-19) IS TWICE AS LIKELY AS THE OTHERS).
         TAX
         LDA     FRSTAB,X
         STA     JMPLST
@@ -1326,9 +1291,9 @@ ALPHBETA
 ;       CHECK RESET SWITCH (DON'T CHECK GAME SELECT)
 ;
         LDA     SWCHB
-        ROR     A               ;RESET PRESSED?
+        ROR                     ;RESET PRESSED?
         BCS     AB50            ;NO.
-        ROL     A               ;SHIFT A BACK
+        ROL                     ;SHIFT A BACK
         JSR     RSV2            ;YES.
         LDA     #VBTIM
         STA     BLNKTM
@@ -1348,7 +1313,7 @@ AB50
 ;
 ALOOP1
         LDA     BOARD,X
-        BEQ     CON3J           ;EMPTY -- TRY NEXT SQUARE
+        BEQ     CONT3J           ;EMPTY -- TRY NEXT SQUARE
         EOR     ACTIVE
         BPL     ALPH05
 CONT3J
@@ -1439,8 +1404,8 @@ AJ05
         STY     BOARD,X
         LDX     JMPSQR
         LDA     BOARD,X
-        ASL     A               ;SAVE JUMPED PIECE IN B7-6
-        ASL     A
+        ASL                     ;SAVE JUMPED PIECE IN B7-6
+        ASL
         ORA     JMPSQR          ;COMBINE WITH JMP SQUARE
         STA     JMPSQR
         STY     BOARD,X         ;CLEAR JUMP SQUARE
@@ -1509,7 +1474,7 @@ MJ15
 
         JSR     RESTR5          ;RESTORES MSTJMP, MLTJMP, ETC.
 
-FINSH3                          ;CHECK NEW STATIC VALUE
+        JMP     FINSH3          ;CHECK NEW STATIC VALUE
 
 
 ;----------------------------------
@@ -1732,10 +1697,10 @@ SKIP7
         LDA     #$62            ;SET TO NEW VALUE IF 0
         STA     FRAME
 FRAQ
-        ROL     A               ;B7-> CARRY
+        ROL                     ;B7-> CARRY
         ROL     FRAME           ;B7 -> B0
-        ROL     A               ;OLD B6 -> CARRY
-        ROL     A               ;OLD B6-> B0
+        ROL                     ;OLD B6 -> CARRY
+        ROL                     ;OLD B6-> B0
         AND     #1
         EOR     FRAME
         STA     FRAME
@@ -1783,7 +1748,7 @@ FH7
         STA     ALPHAH,X
 
         LDA     ALPHAL,X
-LC
+        CLC
         ADC     ALPHAL-1,X
         LDA     ALPHAH,X
         ADC     ALPHAH-1,X
@@ -1867,21 +1832,21 @@ CONT3
         AND     #8              ;COLOR TV?
         BNE     AB10            ;YES.
         LDA     DEPTH           ;NO. B/W -- USE DEPTH TO SET LUMINANCE
-        ASL     A
+        ASL
         AND     #6
         BPL     AB20            ;JMP
 AB10
         LDA     DEPTH           ;COLOR TV
-        ROR     A
-        ROR     A
-        ROR     A
-        ROR     A
+        ROR
+        ROR
+        ROR
+        ROR
         ORA     #2              ;SET LUMINANCE
 AB20
         STA     COLUBK
 AB30
 
-        LDA     MLTJP
+        LDA     MLTJMP
         BNE     ABDONE          ;MULTIPLE JUMP => DONE (ONLY TRY ONE SQUARE)
 
         DEX
@@ -1932,9 +1897,9 @@ ABRET1
         LDA     #0              ;JUMPS
         STA     T1              ;START WITH JMPLST+0
         ASL     JMPLST
-        ROL     A
+        ROL
         ASL     JMPLST          ;B7-6 = INDEX INTO MOVTAB
-        ROL     A
+        ROL
         TAY
         JSR     JUMP1           ;SET UP JMPLST FOR FIRST JUMP
         BCS     JTHRU           ;DONE
@@ -1953,7 +1918,7 @@ JTHRU
         LDA     #0              ;CLEAR FROM SQUARE
         STA     BOARD,X
         LDA     T0              ;TO SQUARE
-        JMP     THRU2
+        JMP     JTHRU2
 
 ;
 ;       NO JUMP -- JUST MAKE 1 MOVE   A=START SQUARE FROM JMPLST
@@ -1965,9 +1930,9 @@ NOJUMP
         LDA     #0
         STA     BOARD,X
         ASL     JMPLST
-        ROL     A
+        ROL
         ASL     JMPLST
-        ROL     A
+        ROL
         TAY                     ;OFFSET INDEX
         TXA
         CLC
@@ -2073,7 +2038,7 @@ JOY9
         LDA     CPIECE
         CLC
         ADC     CTAB,X
-        STA     SPIECE
+        STA     CPIECE
 
         LDA     HKING           ;MODIFY KING COUNT TO REFLECT CHANGE
         CLC
@@ -2103,8 +2068,8 @@ JOY10
 ;                               CHECK JOYSTICK BUTTON -- NOT SET UP MODE
 JOY11
         LDA     ACTIVE
-        ASL     A
-        ROL     A
+        ASL
+        ROL
         TAY                     ;Y=0 IF ACTIVE=0, 1 IF ACTIVE =$80
 
         LDA     INPT4,Y         ;IF BUTTON PRESSED THEN DROP PIECE IF LEGAL
@@ -2120,12 +2085,12 @@ JPM05
         LDA     ILEGAL          ;JOYSTICK MOVEMENT ERROR?
         BPL     JPM06           ;NO.
         LDA     ACTIVE          ;SET UP CARRY TO INDICATE PLAYER
-        ROL     A
+        ROL
         JMP     MOVE12          ;YES. CHECK JOYSTICK MOTION
 JPM06
         LDA     #0              ;OK
         STA     ILEGAL
-JMP10
+JPM10
         JMP     MOVE10          ;CHECK JOYSTICK
 NOCHDO
         STY     OLDINP          ;STORE NEW BUTTON READING
@@ -2211,16 +2176,16 @@ TO11
 
         LDY     #0
         STY     BOARD,X         ;REMOVE JUMPED PIECE FROM BOARD
-        ASL     A               ;SHIFT KING BIT TO MSB
-        ASL     A
+        ASL                     ;SHIFT KING BIT TO MSB
+        ASL
         JSR     CHGCNT          ;CHANGE OPPONENT'S PIECE COUNT
         JSR     TOSUB           ;DO STUFF WITH PIECE INCLUDING KING CHECK
 ;                               STORE IN NEW SQUARE, RETURN X=MOVE. NEW KING?
-        BCS     T051            ;YES.  NEW KING CAN'T DO MULTIPLE JUMP
+        BCS     TO51            ;YES.  NEW KING CAN'T DO MULTIPLE JUMP
         JSR     MOVCHK          ;RETURN X UNCHANGED.  CAN PIECE JUMP AGAIN?
         BCS     TO51            ;NO.
 ;                               YES.
-        .IF     PRNG
+        .IF     PRNT
         JSR     PRMOV2          ;PRINT MOVE IF DEBUG
         .ENDIF
 
@@ -2267,21 +2232,21 @@ JOY90
 ;                               CHECK FOR JOYSTICK MOVEMENT EVERY FEW FRAMES
 MOVE10
         LDA     ACTIVE          ;MOVE BIT 7 OF ACTIVE TO BIT 1 OF Y
-        ROL     A               ;SET CARRY IF PLAYER 1
+        ROL                     ;SET CARRY IF PLAYER 1
 ;
 ;       BRANCH HERE FROM SETUP WITH Y=0   CC => PLAYER 0
 ;
-BNE0
+BNEO
         LDA     FRAME
         AND     #$1F
         BNE     MOVE36          ;DON'T MOVE THIS FRAME
 MOVE12
         LDA     SWCHA
         BCS     MOVE20          ;CHECK CARRY BIT (SET UP PREVIOUSLY)
-        LSR     A               ;P0
-        LSR     A
-        LSR     A
-        LSR     A
+        LSR                     ;P0
+        LSR
+        LSR
+        LSR
 MOVE20
         AND     #$F
         CMP     #$F             ;IS JOYSTICK CENTERED?
@@ -2413,7 +2378,7 @@ CRSB13
         LDX     CURSOR          ;HUMAN CURSOR
         LDA     #0
         LDY     FREEZE          ;FREEZE LAST MOVE?
-        BNE     CRSB16          ;YES.  DON'T DISPLAY CURSOR OR PIECE -- PIECE WILL BLINK
+        BNE     CRSB15          ;YES.  DON'T DISPLAY CURSOR OR PIECE -- PIECE WILL BLINK
         LDA     MOVFLG          ;COMPUTER MOVE BEING DISPLAYED?
         BEQ     CRSB14          ;NO. OK
         CPX     MOVE            ;HUMAN CURSOR & COMPUTER MOVE ON SAME SQUARE?
@@ -2434,7 +2399,7 @@ CRSB17
         CPY     MOVVAL          ;DOES PIECE = MOVVVAL?
         BNE     CRSB20          ;NO. SKIP
         LDA     FRAME           ;YES.  ONLY DISPLAY PIECE ON XXX10100 - XXX11011
-        ROR     A               ;WHEN B2 & B3 ARE DIFFERENT
+        ROR                     ;WHEN B2 & B3 ARE DIFFERENT
         EOR     FRAME
         AND     #4
         BNE     CRSB20
@@ -2490,20 +2455,20 @@ LODRAM
         LDA     FROM,X          ;GET LOW ORDER DIGIT
         AND     #$0F
         STA     T2
-        ASL     A
-        ASL     A               ;SHIFT LEFT AND CLEAR CARRY
+        ASL
+        ASL                     ;SHIFT LEFT AND CLEAR CARRY
         ADC     T2              ;FIVE TIMES LOW DIGIT
-        ADC     #SCRTBL&$FF     ;ADD IN BEGINNING OF GRAPHICS TABLE [todo - indent properly]
+        ADC     #SCRTBL&$FF     ;ADD IN BEGINNING OF GRAPHICS TABLE
         STA     T0              ;STORE IN LOW BYTE OF INDIRECT POINTER
 ;
 ;
         LDA     FROM,X          ;GET HIGH ORDER DIGIT
         AND     #$F0
-        LSR     A
-        LSR     A               ;SHIFT RIGHT AND CLEAR CARRY
+        LSR
+        LSR                     ;SHIFT RIGHT AND CLEAR CARRY
         STA     T2
-        LSR     A
-        LSR     A
+        LSR
+        LSR
         ADC     T2              ;FIVE TIMES HIGH ORDER BIT
         ADC     #SCRTBL&$FF     ;ADD IN BEGINNING OF GRAPHICS TABLE
         STA     T2              ;STORE IN LOW BYTE OF INDIRECT POINTER
@@ -2524,10 +2489,10 @@ HIDIGT
         BPL     LODRAM
 ;
         LDX     #5
-DOROT   LDA     SCRRPF-1,X      ;MAKE MIRROR IMAGE [todo - original had no semicolon]
+DOROT   LDA     SCRRPF-1,X      ;MAKE MIRROR IMAGE
 ;
         LDY     #7
-ROTIT   ROL     A
+ROTIT   ROL
         ROR     SCRRPF-1,X
         DEY
         BPL     ROTIT
@@ -2554,7 +2519,7 @@ ROTIT   ROL     A
 
         STA     WSYNC
         LDY     #8              ;8*5+1 = 41 MACHINE CYCLES
-WSLP    DEY                     ;WARNING -- MUST NOT CROSS PAGE BOUNDARY [todo - check in converted code]
+WSLP    DEY                     ;WARNING -- MUST NOT CROSS PAGE BOUNDARY
         BNE     WSLP            ;DELAY
         STA     RESP0           ;44
         NOP                     ;46 DELAY
@@ -2597,7 +2562,7 @@ QQ10
         AND     T0
         STA     COLP1           ;ASSUME COMPUTER (P1) IS LIGHT
         TXA
-;       EOR #$00 ;ASSUME HUMAN (P0) IS DARK [todo - circled in printout. weird no-op?]
+;       EOR #$00 ;ASSUME HUMAN (P0) IS DARK
         AND     T0
         STA     COLP0
         LDY     COLHUM
@@ -2619,10 +2584,10 @@ QQ30
         LDY     GFLG2           ;ATTRACT?
         BNE     QQ40            ;NO. SKIP
         LDA     ATIM            ;YES. ROTATE SO COLORS SHIFT QUICKLY
-        ROL     A
-        ROL     A
-        ROL     A
-        ROL     A
+        ROL
+        ROL
+        ROL
+        ROL
         TAX
         LDA     #$F7            ;MASK OFF HI BIT OF LUM IN ATTRACT
 QQ40
@@ -2691,7 +2656,7 @@ LP10
 
         LDY     #2              ;KEEP VBLANK ON WHIL SYNCING AFTER CALCULATIONS
 
-        DEC     VLNKTM
+        DEC     BLNKTM
         BNE     VBLP
 
         LDA     GAMNO           ;BLANK TIME IS UP
@@ -2720,8 +2685,8 @@ VBLP    LDX     INTIM           ;WAIT FOR TIMER TO RUN OUT
 ;
 GSRST
         LDA     OLDPBQ          ;CHECK GAME SELECT
-        ROR     A
-        ROR     A
+        ROR
+        ROR
         BCS     GS1             ;BRANCH IF GAME SELECT NOT PRESSED
 
 
@@ -2754,7 +2719,7 @@ GRTN2
 
 ;                               SET UP GAME SELECT TIMER & CHECK GAME RESET
 GS1
-        ASL     A
+        ASL
         BCS     RES20           ;NOT PRESSED -- GSTIM<-1 & RETURN
 
         LDA     #0              ;RESET BUTTON IS PRESSED
@@ -2784,7 +2749,7 @@ RESET
         JSR     TONORM          ;NOT ATTRACT, Y<-$FF
         STY     JMPI            ;$FF
 
-        JSR     MOVCLF          ;NO CURRENT MOVE SO POINT OFF BOARD
+        JSR     MOVCLR          ;NO CURRENT MOVE SO POINT OFF BOARD
         LDA     OLDPB6
         BNE     RES10           ;IF SETUP MODE THEN LEAVE BOARD EMPTY
 ;                               SET UP BOARD
@@ -2849,7 +2814,7 @@ WAIT2
 ;
 ;       JMPSET -- SET UP OR CLEAR BOARD FOR JUMP DISPLAY
 ;
-;                       INPUT:  CC  => CLEAR EACH SQUARE [todo - check indentation against right comments]
+;                       INPUT:  CC  => CLEAR EACH SQUARE
 ;                               CS => PUT JUMPED CHECKERS IN EACH SQUARE IN JMPLST
 ;
 JMPSET
@@ -3021,7 +2986,7 @@ JMP10
 ;                               HUMAN CHECKER CAN'T GO BACK (DOWN) SKIP RB,LB
 JMP12
         SEC                     ;NO JUMP FOUND
-        LDY     YSAFE           ;LOAD MOVE COUNT
+        LDY     YSAVE           ;LOAD MOVE COUNT
         RTS
 
 
@@ -3029,7 +2994,7 @@ JMP12
 
 
 ;
-;       XIE1 --      INPUT X = INTERNAL SQUARE NUMBER (0-34) [todo - fix this wrong indentation line]
+;       XIE1 --      INPUT X = INTERNAL SQUARE NUMBER (0-34)
 ;                               OUTPUT X = EXTERNAL SQUARE #-1    (0-31)
 ;                               AFFECTS X, CARRY SET IF RESULT = 24-31
 ;                               INTERNAL #'S 8, 17 AND 26 ARE NOT USED.
@@ -3081,7 +3046,7 @@ IED07
         SBC     #32             ;31-X = -(X-31) = -((X-32)+1) = COMP (X-32)
         EOR     #$FF            ;COMPLEMENT
         TAX
-EID10
+IED10
         INX                     ;1-32
         TXA
 
@@ -3092,7 +3057,7 @@ IEDLP1
         BCC     IED20           ;0-9 => DONE
         SBC     #10
         INY
-        BNE     EIDLP1          ;JMP
+        BNE     IEDLP1          ;JMP
 
 IEDLP2
         ADC     #16             ;CONVERT BINARY TO DECIMAL
@@ -3155,7 +3120,7 @@ MV287
 
 
 ;
-;       TONORM --       GO OUT OF ATTRACT INTO NORMAL MODE [todo - verify indentation]
+;       TONORM --       GO OUT OF ATTRACT INTO NORMAL MODE
 ;
 TONORM
         LDY     #0              ;CLEAR TIMER
@@ -3234,7 +3199,7 @@ RESTR4
 ;
 RESTR5
         LDY     #2              ;SET UP TO INCREMENT OPPONENT'S PIECE COUNT
-        ROL     A               ;KING?
+        ROL                     ;KING?
         LDA     #CMPCHK
         BCC     NOK             ;NO.
         INY                     ;KING => 3
@@ -3244,8 +3209,8 @@ NOK
         STA     BOARD,X
 
         AND     #$80            ;ACTIVE EOR #$80
-        ASL     A
-        ROL     A               ;SHIFT AND CLEAR CARRY
+        ASL
+        ROL                     ;SHIFT AND CLEAR CARRY
         TAX
         TYA
         ADC     HPIECE,X
@@ -3269,8 +3234,8 @@ RESTOR
         CMP     PIECE
         BEQ     TERR            ;SAME -- NOT NEW KING
         LDA     ACTIVE          ;MOVE BIT7 TO BIT 1
-        ASL     A
-        ROL     A
+        ASL
+        ROL
         TAX
         DEC     HPIECE,X
         DEC     HKING,X         ;DECREMENT KING COUNT
@@ -3360,9 +3325,9 @@ JUMP4
 JUMPL
         LDA     #0
         ASL     T3              ;SHIFT 2 BITS OF INDEX FROM MSB'S OF T3 TO LSB'S OF A
-        ROL     A
+        ROL
         ASL     T3
-        ROL     A
+        ROL
         TAY
         JSR     JUMP1
         BCS     JUMP4           ;BRANCH IF DONE
@@ -3392,7 +3357,7 @@ TERMNODE
         ADC     #2
         STA     ALPHAL+1,X
         LDA     #$80
-        STA     ALPHAH+1,X      ;-INFINITY = $8002+DEPTH = -(7FFF - DEPTH-1) (-7FFD TO -7FFE)  ($8003 - $800 [todo - original likely truncated]
+        STA     ALPHAH+1,X      ;-INFINITY = $8002+DEPTH = -(7FFF - DEPTH-1) (-7FFD TO -7FFE)  ($8003 - $800
         JMP     SED20           ;NEGATE IF LOSING CHECKERS & RETURN CARRY SET
 ;
 ;       ALP200 -- ENTRY POINT -- CHECK DEPTH -- WE KNOW WE CAN JUMP.  CS=>TERMINAL NODE
@@ -3470,7 +3435,7 @@ SELP
         ROL     NUM+1           ;MSB
         DEX
         BEQ     SEDONE          ;BRANCH IF DONE
-        ROL     A
+        ROL
         CMP     DEN
         BCC     SELP            ;0
         SBC     DEN
@@ -3532,8 +3497,8 @@ DISLP1
 
         JSR     XIE1            ;NO. ORDINARY MAN.  COMPUTE DISTANCE OF MAN FROM BOTTOM OF BOARD
         TXA
-        LSR     A
-        LSR     A
+        LSR
+        LSR
         CLC
         ADC     T1              ;ADD T1
         STA     T1
@@ -3543,13 +3508,13 @@ DIS05
         BMI     DIS65           ;SKIP IF COMPUTER
         JSR     XIE1            ;CONVERT INTERNAL SQUARE # TO EXTERNAL
         TXA
-        LSR     A
-        LSR     A
+        LSR
+        LSR
         STA     T6              ;ROW
         EOR     #1              ;COMPLEMENT LSBIT
-        ROR     A               ;AND SHIFT TO CARRY.
+        ROR                     ;AND SHIFT TO CARRY.
         TXA
-        ROL     A               ;SHIFT CARRY INTO B0
+        ROL                     ;SHIFT CARRY INTO B0
         AND     #7              ;AND MASK TO GET COL
         STA     DEN             ;COL
 
@@ -3560,10 +3525,10 @@ DISLP2
 ;                               CHECK FOR KING?
         TXA                     ;SAVE INTERNAL SQUARE #
         PHA
-        JSR     X1E1            ;CONVERT INTERNAL SQUARE # TO EXTERNAL
+        JSR     XIE1            ;CONVERT INTERNAL SQUARE # TO EXTERNAL
         TAX
-        LSR     A               ;COMPUTE ROW
-        LSR     A
+        LSR                     ;COMPUTE ROW
+        LSR
         SEC
         SBC     T6              ;COMPUTE DIFFERENCE IN ROWS
         BPL     DIS30
@@ -3573,12 +3538,12 @@ DISLP2
 DIS30
         STA     T0
         TXA                     ;COMPUTE DIFFERENCE IN COLS
-        LSR     A
-        LSR     A
+        LSR
+        LSR
         EOR     #1
-        ROR     A               ;SHIFT TO CARRY
+        ROR                     ;SHIFT TO CARRY
         TXA
-        ROL     A
+        ROL
         AND     #7              ;COL
         SEC
         SBC     DEN
@@ -3623,7 +3588,7 @@ DIAGLP
         LDX     DIAG,Y
         LDA     BOARD,X
         BEQ     DIAG20          ;EMPTY
-        ROL     A
+        ROL
         AND     #KING*2         ;KING?
         BEQ     DIAG20          ;NO.
         BCC     DIAG10          ;YES. BRANCH IF HUMAN
@@ -3651,7 +3616,7 @@ BACK25
 ADS10
 
         LDA     HKING           ;DOES HKING * 3 = HPIECE?
-        ASL     A               ;SHIFT LEFT AND CLEAR CARRY
+        ASL                     ;SHIFT LEFT AND CLEAR CARRY
         ADC     HKING
         CMP     HPIECE
         BEQ     BACK10          ;YES.  => NO ORDINARY MEN TO CONVERT TO KINGS
@@ -3681,7 +3646,7 @@ BACK60
 
 BACK10
         LDA     CKING           ;DOES CKING*3 = CPIECE?
-        ASL     A
+        ASL
         ADC     CKING
         CMP     CPIECE
         BEQ     BACK20          ;YES.  NO CHECKERS TO CONVERT TO KINGS
@@ -3731,7 +3696,7 @@ BACK20
         LDX     #-CORN&$FF
         LDY     HPIECE
         CPY     CPIECE
-        BEQ     CORN20          ;DO IF EQUAL [todo - penciled in "NOP NOP?"]
+        BEQ     CORN20          ;DO IF EQUAL
         BCC     CORN20          ;HUMAN <= COMPUTER ==> HUMAN WANTS CORN
         LDA     #CMPKNG         ;HUMAN > COMPUTER =>COMPUTER WANTS CORN
         LDX     #CORN           ;INC ALPHA
@@ -3835,7 +3800,7 @@ QMV10
         BPL     QMVLP
 
         ROR     T0              ;ODD OR EVEN?
-        ROR     A
+        ROR
         EOR     ACTIVE          ;COMPUTER OR HUMAN ACTIVE?
         BMI     QMV100          ;HUMAN HAS MOVE -- DON'T ADD CREDIT
         INC     T1              ;HUMAN IS ACTIVE AND EVEN COUNT
@@ -3905,8 +3870,8 @@ CHGCNT
 AJ10
         LDA     ACTIVE
         EOR     #$80            ;OPPONENT
-        ASL     A
-        ROL     A               ;SHIFT CLEARS CARRY
+        ASL
+        ROL                     ;SHIFT CLEARS CARRY
         TAX
         TYA
         ADC     HPIECE,X
@@ -3927,9 +3892,9 @@ JMPSV2
         BNE     WASJ18
 
         LDA     INDEX           ;DEPTH=1
-        LSR     A
-        ROR     A
-        ROR     A
+        LSR
+        ROR
+        ROR
         ORA     FROMB
         STA     JMPLST
         RTS
@@ -3937,8 +3902,8 @@ WASJ18
         DEX                     ;DEPTH-2  (0-7)
         TXA
         PHA
-        LSR     A
-        LSR     A               ;0 OR 1
+        LSR
+        LSR                     ;0 OR 1
         TAX
         INX                     ;1 OR 2
         PLA
@@ -3950,8 +3915,8 @@ WASJ18
 WASJLP
         CPY     #3              ;DONE?
         BCS     WASJ90          ;YES.
-        ASL     A               ;NO.  SHIFT LEFT 2 MORE BITS
-        ASL     A
+        ASL                     ;NO.  SHIFT LEFT 2 MORE BITS
+        ASL
         INY
         BCC     WASJLP          ;JMP
 WASJ90
@@ -4008,7 +3973,7 @@ TO60
         BNE     TO80
         CPX     #31             ;HUMAN CHECKER TO KING IF ON 31-34
         BCC     TO80
-        INC     HPIEVE          ;INCREMENT HUMAN PIECE COUNT FOR NEW KING
+        INC     HPIECE          ;INCREMENT HUMAN PIECE COUNT FOR NEW KING
         INC     HKING           ;INC KING COUNT
 TO70
         AND     #$80
@@ -4034,7 +3999,7 @@ MOVCLR
         STY     MOVVAL
         RTS
 
-;                       RANDOM MOVE TABLE -- INDEXED BY PRNCNT [todo - verify indentation]
+;                       RANDOM MOVE TABLE -- INDEXED BY PRNCNT
 ;               1/2,1/3,1/4,1/5,1/6,1/7
 RANTAB  .BYTE   $80,$55,$40,$33,$2B,$25
 
@@ -4057,7 +4022,7 @@ AD=*
 ;----------------------------------
 
 
-;               DATA [todo - verify indentation]
+;               DATA
         IF ASSEMBLER = ASM_ATARI
         *=ROMSTR+$F00
         ELSE
@@ -4168,7 +4133,7 @@ JOYTAB  .BYTE   5,9,6,$A                ;JOYSTICK READINGS FOR DIAGONAL MOVEMENT
 ;               MOVTAB & MVTAB2 GO TOGETHER -- DO NOT SEPARATE!!!
 ;       HUMAN CHECKER CAN'T DO 0,1; COMPUTER CHECKER CAN'T DO 2,3.
 ;
-MOVTAB  .BYTE   RB,LB,RF,LF             ;OFFSETS FOR DIAGONAL MOVEMENT (RELATED TO JOYTAB) [todo - "VV" in left margin]
+MOVTAB  .BYTE   RB,LB,RF,LF             ;OFFSETS FOR DIAGONAL MOVEMENT (RELATED TO JOYTAB)
 
 MVTAB2  .BYTE   2*RB,2*LB,2*RF,2*LF     ;OFFSETS FOR JUMPS
 
@@ -4188,7 +4153,7 @@ DIAG    .BYTE   4,5,14,15,24,25,34                      ;PART OF SYSTEM ALSO
 
 
 ;       "SCORE" TABLE -- CHARACTERS 0-9, BLANK, JP
-;       MUST NOT CROSS PAGE BOUNDARY -- THIS INCLUDES BOTH LISTING PAGE & RAM PAGE [todo - verify in code]
+;       MUST NOT CROSS PAGE BOUNDARY -- THIS INCLUDES BOTH LISTING PAGE & RAM PAGE
 SCRTBL
         ;0    HIGH ORDER 0 IS DISPLAYED AS BLANK
        .byte $0E ; |    XXX | $FF8C
@@ -4274,19 +4239,12 @@ SCRTBL
        .byte $25 ; |  X  X X| $FFC6
        .byte $27 ; |  X  XXX| $FFC7
 
-        .BYTE   $0E,$0A,$0A,$0A,$0E
-
-
-        .BYTE   $E4,$A4,$27,$25,$27
-
-
-
 ;----------------------------------
 
 
 ADDTAB  .BYTE   -ADDTRM,$FF,ADDTRM      ;TERMS TO ADD IN TERMNODE IF FULL & PENDING JMP
-;               USE 0 FROM COLTB FOR END OF ADDTAB [todo - check indentation]
-COLTB   .BYTE   EDARK,ELIGHT,ELIAT,HDARK,HLIGHT,HLIAT           ;COLORS FOR DIFFERENT SQUARES & EASY OR HARD [todo - maybe truncated]
+;               USE 0 FROM COLTB FOR END OF ADDTAB
+COLTB   .BYTE   EDARK,ELIGHT,ELIAT,HDARK,HLIGHT,HLIAT           ;COLORS FOR DIFFERENT SQUARES & EASY OR HARD
 
 
 
@@ -4320,7 +4278,7 @@ TO81
 SOUND0
         LDA     #DROP           ;AUDF0
 SOUND1
-        LDY     #PURE           ;AUDC0
+        LDY     #PURE2          ;AUDC0
 SOUND2
         LDX     #$0F            ;AUDV0 -- MAX VOL
 SOUND3
@@ -4336,9 +4294,9 @@ SOUND3
 
 
         IF ASSEMBLER = ASM_ATARI
-        *=ROMSTR+$FFFC
+        *=ROMSTR+$FFC
         ELSE
-        ORG ROMSTR+$FFFC
+        ORG ROMSTR+$FFC
         ENDIF
 
         .WORD   PSTART          ;START VECTOR
@@ -4735,6 +4693,7 @@ PRFLG
 PRDEP
         *=*+1                   ;MAX DEPTH TO BE PRINTED+1
         .ENDIF
+
         .END
 
 
