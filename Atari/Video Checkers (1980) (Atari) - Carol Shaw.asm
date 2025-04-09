@@ -1258,7 +1258,7 @@ WASJ10
 NEW50
         ; BUGFIX[f43b]: The next line, LDA ram_C7,x | b5 c7" is NOT in the
         ; printout, but is in the "standard" ROM.
-        LDA     JMPLST+2,X
+        LDA     FROMT-1,X
 
         BIT     FRSMOV          ;FIRST MOVE? (NEXT LEVEL)
         BPL     SKIP2           ;NO.  BETTER MOVE?
