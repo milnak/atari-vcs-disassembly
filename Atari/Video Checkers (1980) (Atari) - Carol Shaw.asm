@@ -3573,9 +3573,12 @@ MOVCLR
         STY     MOVVAL
         RTS
 
+        ; BUGFIX: Random move table is moved in PAL build.
+        IF !(PAL = 1)
 ;                       RANDOM MOVE TABLE -- INDEXED BY PRNCNT
 ;               1/2,1/3,1/4,1/5,1/6,1/7
 RANTAB  .BYTE   $80,$55,$40,$33,$2B,$25
+        ENDIF
 
         ; Memory up to FF00 (start of DATA) will be filled with 0's.
 
@@ -3845,6 +3848,14 @@ SOUND3
         STY     AUDC0
 
         RTS
+
+        ; BUGFIX: Random move table is moved in PAL build.
+        IF (PAL = 1)
+        ORG ROMSTR+$FFF6
+;                       RANDOM MOVE TABLE -- INDEXED BY PRNCNT
+;               1/2,1/3,1/4,1/5,1/6,1/7
+RANTAB  .BYTE   $80,$55,$40,$33,$2B,$25
+        ENDIF
 
         ORG ROMSTR+$FFC,0
 
