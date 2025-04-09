@@ -1174,11 +1174,7 @@ ABRET2
         LDX     DEPTH
 
         LDA     FROMT-1,X
-
-        ; BUGFIX[f3ca]: AND #$EF -> AND #$3F
-        ; AND     #$EF
         AND     #$3F
-
         STA     FROMB
         LDA     OTHER-1,X
         AND     #MLT
@@ -1278,7 +1274,7 @@ WASJ17
 SKIP2
         ; BUGFIX[f448]: "JSR RESTR4" -> JSR RESTR6"
         ; JSR     RESTR4          ;SET UP PIECE,MSTJMP,MLTJMP,RESTORE BOARD
-        JSR     RESTR6
+        JSR     RESTR6          ;RESTORE A BUNCH OF STUFF INCLUDING FRSMOV
 
         JMP     CONT1           ;SKIP ALPHA CHECKING AND DO NEXT INDEX
 
@@ -1627,10 +1623,7 @@ JOY9
         ADC     HKTAB,X
         STA     HKING
 
-        ; BUGFIX[f5e1]: LDA HKING -> LDA RAM_AF
-        ; LDA     HKING
         LDA     CKING
-
         CLC
         ADC     CKTAB,X
         STA     CKING
@@ -2616,10 +2609,7 @@ IED10
 ;                               CONVERT BINARY IN A TO DECIMAL IN A
         LDY     #0
 IEDLP1
-        ; BUGFIX[fabe]: CMP #$10-> CMP #$0A
-        ; CMP     #$10
-        CMP     #$0A
-
+        CMP     #10
         BCC     IED20           ;0-9 => DONE
         SBC     #10
         INY
@@ -2896,11 +2886,7 @@ JUMPL
         ROL
         TAY
         JSR     JUMP1
-
-        ; BUGFIX[fbcb]: BCS JUMP4 -> BCS JUMPR
-        ; BCS     JUMP4           ;BRANCH IF DONE
-        BCS     JUMPR
-
+        BCS     JUMPR           ;BRANCH IF DONE
         DEC     T2
         BPL     JUMPL           ;CONTINUE
 JUMPR
@@ -3096,11 +3082,7 @@ DISLP2
         TXA                     ;SAVE INTERNAL SQUARE #
         PHA
         JSR     XIE1            ;CONVERT INTERNAL SQUARE # TO EXTERNAL
-
-        ; BUGFIX[fcb3] TAX -> TXA
-        ; TAX
         TXA
-
         LSR                     ;COMPUTE ROW
         LSR
         SEC
@@ -3842,11 +3824,7 @@ SOUND2
 SOUND3
         STA     AUDF0
         STX     AUDV0
-
-        ; BUGFIX[fff3]: STX AUDC0 -> STY AUDC0
-        ; STX     AUDC0
         STY     AUDC0
-
         RTS
 
         ; BUGFIX: Random move table is moved in PAL build.
