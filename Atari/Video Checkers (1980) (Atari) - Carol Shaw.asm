@@ -1,13 +1,24 @@
-; Original source code as found here:
-; https://archive.org/details/VCScheckersA/page/n1/mode/2up
+; Name: Video Checkers (1980) (Atari)
+; Manufacturer: Atari, Carol Shaw - Sears
+; Model: CX2636 - 49-75156
+; Controllers: Joystick (left), Joystick (right)
+; Type: 4K (4K Atari)
+
+; Original source code was found here:
+; https://archive.org/details/VCScheckersA
+;
 ; Retyped by:
 ; White Flame 2020-04-11
-; Modified to build with dasm (and typos fixed) by:
+;
+; Typos fixed and modified to build with dasm by:
 ; Jeff Miller, April 2025.
-; Set "ASSEMBLER = ASM_ATARI" to use original source code, otherwise
-; dasm will be assumed.
-
-; To disassembly original cart with distella, use a distella CFG file containing:
+; * Some aspects of original source were removed, e.g. unused variables,
+;   terminal printing (PRNT), larger stack (STACK), as these weren't in the
+;   released ROM. Refer to original source for complete original code.
+; * Bug fixes which were in the released ROM, but not in the printout were
+;   added. Search for "BUGFIX" in this code for differences from printout.
+;
+; To disassemble original NTSC cart with distella, use a CFG file containing:
 ;      ORG F000
 ;      CODE F000 FEED
 ;      GFX FEEE FFD0
@@ -16,18 +27,9 @@
 
         processor 6502
 
-
-ASM_DASM = 0
-ASM_ATARI = 1
-ASSEMBLER = ASM_DASM
-
-        IF ASSEMBLER = ASM_ATARI
-        .TITLE  "VCS CHECKERS BY CAROL SHAW 15/15/80 9:41 AM"
-        ENDIF
+        ; .TITLE  "VCS CHECKERS BY CAROL SHAW 15/15/80 9:41 AM"
 
 PAL     =       0               ;0 => NTSC, 1=> PAL VERSION
-PRNT    =       0               ;0 => ROM,  1=> DEBUG VERSION WHICH PRINTS ON TI TERMINAL
-STACK   =       0               ;0 => NORMAL ALPHA-BETA "STACK",
 ROMSTR  =       $F000           ;ROM START ADDR
 ;
 ;       DK1:SCHKG.SRC
@@ -49,10 +51,6 @@ VSYNC   =       $00     ;BIT        1  VERTICAL SYNC SET-CLR    1=>START
 VBLANK  =       $01     ;BIT  76    1  VERTICAL BLANK SET-CLR, PORT CONTROL (INPT0-INPT5)
 WSYNC   =       $02     ;STROBE        WAIT FOR HORIZ BLANK
 
-        IF ASSEMBLER = ASM_ATARI
-RSYNC   =       $03     ;STROBE        RESET HORIZ SYNC COUNTER
-        ENDIF
-
 NUSIZ0  =       $04     ;BITS   54 210 NUMBER-SIZE PLAYER/MISSILE 0
 NUSIZ1  =       $05     ;BITS   54 210 NUMBER-SIZE PLAYER/MISSILE 1
 COLUP0  =       $06     ;BITS 7654321  COLOR(4)-LUM(3) PLAYER 0
@@ -60,12 +58,6 @@ COLUP1  =       $07     ;BITS 7654321  COLOR(4)-LUM(3) PLAYER 1
 COLUPF  =       $08     ;BITS 7654321  COLOR(4)-LUM(3) PLAYFIELD
 COLUBK  =       $09     ;BITS 7654321  COLOR(4)-LUM(3) BACKGROUND
 CTRLPF  =       $0A     ;BITS   54 210 PLAYFIELD CONTROL & BALL
-
-        IF ASSEMBLER = ASM_ATARI
-REFP0   =       $0B     ;BIT      3    REFLECT PLAYER 0. 1=>REFLECT
-REFP1   =       $0C     ;BIT      3    REFLECT PLAYER 1
-PF0     =       $0D     ;BITS 7654     PLAYFIELD REG BYTE 0 (REVERSED)
-        ENDIF
 
 PF1     =       $0E     ;BITS ALL      PLAYFIELD REG BYTE 1
 PF2     =       $0F     ;BITS ALL      PLAYFIELD REG BYTE 2 (REVERSED)
@@ -91,93 +83,27 @@ HMM0    =       $22     ;BITS 7654     HORIZ MOTION MISSILE 0
 HMM1    =       $23     ;BITS 7654     HORIZ MOTION MISSILE 1
 HMBL    =       $24     ;BITS 7654     HORIZ MOTION BALL
 
-        IF ASSEMBLER = ASM_ATARI
-VDELP0  =       $25     ;BIT         0 VERTICAL DELAY PLAYER 0.  1=> VDEL ON
-VDELP1  =       $26     ;BIT         0 VERTICAL DELAY PLAYER 1
-VDELBL  =       $27     ;BIT         0 VERTICAL DELAY BALL
-RESMP0  =       $28     ;BIT        1  RESET MISSILE TO PLAYER 0.  1-> MISSILE RESET TO PLAYER
-RESMP1  =       $29     ;BIT        1  RESET MISSILE TO PLAYER 1
-        ENDIF
-
 HMOVE   =       $2A     ;STROBE        ACT ON HORIZ MOTION
 HMCLR   =       $2B     ;STROBE        CLEAR ALL HM REGISTERS
 
-        IF ASSEMBLER = ASM_ATARI
-CXCLR   =       $2C     ;STROBE        CLEAR COLLISION LATCHES
-        ENDIF
 ;
 ;       READ ADDRESSES - BITS 7 & 6 ONLY
 ;
-        IF ASSEMBLER = ASM_ATARI
-CXM0P   =       $30     ;M0*P1  M0*P0
-CXM1P   =       $31     ;M1*P0  M1*P1
-CXP0FB  =       $32     ;P0*PF  P0*BL
-CXP1FB  =       $33     ;P1*PF  P1*BL
-CXM0FB  =       $34     ;M0*PF  M0*BL
-CXM1FB  =       $35     ;M1*PF  M1*BL
-CXBLPF  =       $36     ;BL*PF
-CXPPMM  =       $37     ;P0*P1  M0*M1
-INPT0   =       $38     ;POT 0.  BIT7=1 => POT CAPACITOR IS COMPLETELY CHARGED?
-INPT1   =       $39     ;POT 1
-INPT2   =       $3A     ;POT 2
-INPT3   =       $3B     ;POT 3
-        ENDIF
-
 INPT4   =       $3C     ;JOYSTICK 0 BUTTON.  B7=0 => BUTTON PRESSED
 
-        IF ASSEMBLER = ASM_ATARI
-INPT5   =       $3D     ;JOYSTICK 1 BUTTON
-        ENDIF
 ;
 ;       PIA AND TIMER (6532) LOCATIONS
 ;
 SWCHA   =       $280    ;P0,P1 JOYSTICKS (RLDU,RLDU), POT TRIGGERS, KEYBOARD, DRIVING CONTROLLER
-
-        IF ASSEMBLER = ASM_ATARI
-CTLSWA  =       $281    ;SWCHA I/O CONTROL      1-OUTPUT
-        ENDIF
-
 SWCHB   =       $282    ;CONSOLE SWITCHES (READ ONLY) P1B,P0B,X,X,B/W,X,SELECT,RESET IF 0
-
-        IF ASSEMBLER = ASM_ATARI
-CTLSWB  =       $283    ;UNUSED
-        ENDIF
-
 INTIM   =       $284    ;INTERVAL TIMER INPUT   0=>TIMER UP
-
-        IF ASSEMBLER = ASM_ATARI
-TIM1T   =       $294    ;TIMER OUTPUT:  1 MACHINE CYCLE/TICK (.838 MICROSEC)
-TIM8T   =       $295    ;8 MACHINE CYCLES/TICK
-        ENDIF
-
 TIM64T  =       $296    ;64 MC'S/TICK
-
-        IF ASSEMBLER = ASM_ATARI
-T1024T  =       $297    ;1024 MACHINE CYCLES/TICK (858.2 MICROSECONDS)
-        ENDIF
-
-        IF ASSEMBLER = ASM_ATARI
-;
-;       KIM SUBROUTINES
-;
-CRLF    =       $1E2F   ;PRINT CRLF ON TI
-PRTBYT  =       $1E3B   ;PRINT ACCUMULATOR IN HEX ASCII ON TI
-GETCH   =       $1E5A   ;READ ASCII CHAR FROM TI INTO A
-OUTSP   =       $1E9E   ;PRINT SPACE ON TI
-OUTCH   =       $1EA0   ;PRINT ACCUMULATOR AS ASCII CHAR ON TI
-GETBYT  =       $1F9D   ;READ TWO HEX ASCII CHARS FROM TI INTO A
-        ENDIF
 
 ;----------------------------------
 
 
 ;               CHECKERS EQUATES
-        .IF     STACK = 0
 MAXMAX  =       11              ;MAX STACK DEPTH FOR ALPHA-BETA
-        .ENDIF
-        .IF     STACK
-MAXMAX  =       22
-        .ENDIF
 
 JMPLEN  =       9               ;LENGTH OF JMPTBL (LIST OF JUMPED PIECES)
 
@@ -265,234 +191,6 @@ ADDTRM  =       $20             ;TERM TO ADD TO MAGNITUDE OF SCORE IF STACK IS F
 
 ;----------------------------------
 
-
-        IF ASSEMBLER = ASM_ATARI
-;                       VARIABLES (RAM PAGE ZERO)
-        *=$80
-;                       THE FOLLOWING RAM LOCS ARE CLEARED DURING RESET:
-;A-B MEANS USED BY ALPHA-BETA PRUNING ROUTINE
-;SAVE MEANS ALPHA-BETA PRUNING ROUTINE DOES NOT ALTER
-ZROBGN
-BOARD
-        *=*+35          ;CHECKER BOARD (1 BYTE / SQUARE) SQUARES 8,17,26 ARE NOT USED. A-B
-PIECE
-        *=*+1           ;CURRENT PIECE BEING MOVED. A-B
-
-JMPI
-        *=*+1           ;INDEX INTO JMPLIST --  <0 => NO JUMPS. A-B
-MSTJMP
-        *=*+1           ;0 => ACTIVE PLAYER CAN'T JUMP   4 => ACTIVE PLAYER MUST JUMP.  A-B
-MLTJMP
-        *=*+1           ;8 => CONTINUING MULTIPLE JUMP. A-B & MAIN
-MSTFLG
-        *=*+1           ;MSTJMP SAVED WHILE NEW MSTJMP IS COMPUTED. A-B
-MLTFLG
-        *=*+1           ;MLTJMP BACKUP. A-B
-
-HPIECE
-        *=*+1           ;HUMAN PIECE COUNT.  KING=3, CHECKER=2. A-B
-CPIECE
-        *=*+1           ;COMPUTER PIECE COUNT. A-B
-
-CURSOR
-        *=*+1           ;SQUARE # FOR BLINKING CURSOR. SAVE
-FROMB
-        *=*+1           ;BINARY "FROM" SQUARE (INTERNAL NUMBERING). A-B
-TOSQRB
-        *=*+1           ;BINARY "TO" SQUARE.  A-B
-
-HKING
-        *=*+1           ;HUMAN KING COUNT
-CKING
-        *=*+1           ;COMPUTER KING COUNT (1 FOR EACH KING)
-
-ZROEND
-;
-;                       THE FOLLOWING RAM LOCS ARE NOT CLEARED DURING RESET
-;
-; GAMNO = 1 TO GMAX2 IN DECIMAL
-;       1-9             REGULAR CHECKERS
-;       10              2-PLAYER (EITHER)
-;       11-19           GIVE-AWAY (LOSING)
-GAMNO
-        *=*+1           ;GAME NUMBER
-COLHUM
-        *=*+1           ;HUMAN CHECKER COLOR (NO ATTRACT ADDED IN). SAVE
-COLCMP
-        *=*+1           ;COMPUTER CHECKER COLOR (NO ATTRACT ADDED IN). SAVE?
-;
-T0
-        *=*+1           ;TEMP (USED IN  KERNEL, ETC.). A-B & MAIN
-T1
-        *=*+1           ;TEMP (USED IN KERNEL, ETC.). A-B & MAIN
-XSAVE   =       T1      ;X REG SAVED FOR JMPCHK ROUTINE. A-B & MAIN
-T2
-        *=*+1           ;A-B & MAIN
-YSAVE   =       T2      ;. A-B & MAIN
-NUM     =       T2      ;2 BYTE NUMERATOR FOR STATIC EVALUATION DIVIDE (USED FOR RATIO OF PIECE COUNTS).A-B
-T3
-        *=*+1           ;A-B & MAIN
-ANYMVE  =       T3      ;>0 => ACTIVE PLAYER CAN MOVE. A-B & MAIN -- USED ONLY BY JMPCHK
-T6
-        *=*+1           ;ANOTHER TEMP
-DEN
-        *=*+1           ;DENOMINATOR. A-B
-T7
-        *=*+1           ;TEMP
-T8
-        *=*+1           ;YET ANOTHER TEMP -- USED TO SAVE BK COLOR
-
-ACTIVE
-        *=*+1           ;ACTIVE OR CURRENT PLAYER (HUMAN=0, COMPUTER=$80). A-B & MAIN
-DEPTH
-        *=*+1           ;CURRENT DEPTH OF TREE SEARCH. A-B & SET UP BY MAIN
-
-JMPSQR
-        *=*+1           ;SQUARE # FOR PIECE BEING JUMPED. A-B
-INDEX
-        *=*+1           ;CURRENT OFFSET INDEX (0-3). A-B
-FRSMOV
-        *=*+1           ;$80 => FIRST MOVE (MAY BE MULTIPLE JUMP). A-B
-;       B7=1 => FIRST MOVE, B6=1 => FIRST MOVE AT THIS LEVEL, BETTER MOVE FOUND
-XMOVE
-        *=*+1           ;"FROM" MOVE SQUARE FROM MOVCHK. A-B & MAIN
-TIMOUT
-        *=*+1           ;TIMER
-
-OLDPBQ
-        *=*+1           ;SWCHB FOR THIS FRAME.
-FRAME
-        *=*+1           ;FRAME COUNTER -- COUNTS UP.
-PRNCNT
-        *=*+1           ;B7=1 => PRUNE (FOR MULTIPLE JUMPS).  B6-B0 = RANDOM MOVE COUNTER
-
-JMPLST
-        *=*+JMPLEN      ;SQUARES FOR PIECES JUMPED BY COMPUTER, <0 => KING. A-B & MAIN
-JMPEND
-;
-;       THE FOLLOWING ALPHA-BETA "STACK" OVERLAP THE MAIN PROGRAM VARS WHICH
-;       ARE LISTED LAST.  THEY ALSO OVERLAP JMPLST WITH THE EXCEPTION OF THE FIRST 3 BYTES.
-;
-        *=JMPLST+3
-        .IF     STACK
-AX=*
-        *=$180
-        .ENDIF          ;ALLOW FOR BIGGER STACK IF DEBUG
-FROMT
-        *=*+MAXMAX      ;FROM(I-1) = FROM SQUARE FOR DEPTH I. A-B
-;       B7=1 => FIRST MOVE, B6=1 => FIRST MOVE AT THIS LEVEL, BETTER MOVE FOUND
-OTHER
-        *=*+MAXMAX      ;OTHER(I-1) = OTHER FOR DEPTH I. A-B
-; B7-6 = CAPTURED PIECE, B5-4 = MOVED PIECE, B3 = MLTJMP, B2 = MSTJMP, B1-0 = OFFSET INDEX
-ALPHAL
-        *=*+MAXMAX+1+1  ;ALPHAL(I) = ALPHA(DEPTH) LSB. A-B
-ALPHAH
-        *=*+MAXMAX+1+1  ;ALPHAH(I) = ALPHA(DEPTH)/256. A-B
-ALPEND
-
-        .IF     STACK
-        *=AX
-        .ENDIF
-
-;
-;                       THE FOLLOWING VARS OVERLAP THE ALPHA-BETA "STACK" AND T4-SCRRPF:
-;
-        *=JMPLST+JMPLEN
-COLP0
-        *=*+1           ;COLOR OF P0 (ATTRACT ADDED IN)
-COLP1
-        *=*+1           ;COLOR OF P1
-
-COL0
-        *=*+2           ;COLOR OF 1ST PIECE IN ROW (FOR KERNEL ONLY)
-COL1
-        *=*+2
-COL2
-        *=*+2
-COL3
-        *=*+2
-
-PNTR0
-        *=*+2           ;POINTERS TO SQUARE GRAPHICS
-PNTR1
-        *=*+2
-PNTR2
-        *=*+2
-PNTR3
-        *=*+2
-
-SQUARE
-        *=*+1           ;SQUARE # FOR USE IN KERNEL
-SQREND
-;
-;       THE FOLLOWING PARTIALLY OVERLAP BOTH THE ALPHA-BETA "STACK" AND
-;       COLP0-SQUARE.
-;
-        *=JMPLST+JMPLEN
-T4
-        *=*+1
-T5
-        *=*+1
-
-SCRLP0
-        *=*+5           ;P0 "SCORE" GRAPHICS
-SCRRP1
-        *=*+5           ;P1
-SCRLPF
-        *=*+5           ;LEFT PF1 GRAPHICS
-SCRRPF
-        *=*+5           ;RIGHT PF1 GRAPHICS
-
-MOVVAL
-        *=*+1           ;VALUE IN MOVE SQUARE. SET UP AT END OF A-B. DON'T SAVE
-MOVFLG
-        *=*+1           ;1 => DISPLAY COMPUTER'S MOVE. DON'T SAVE
-WINSAV
-        *=*+1           ;WINNING PLAYER, 0=> NO WIN. DON'T SAVE
-FROMTO
-        *=*+1           ;0 => FROM, 1=> TO. DON'T SAVE
-
-CURSC
-        *=*+1           ;COMPUTER CURSOR. SET UP AT END OF A-B. DON'T SAVE
-MOVE
-        *=*+1           ;CURRENT MOVE. SET UP AT END OF A-B. DON'T SAVE
-OLDINP
-        *=*+1           ;JOYSTICK BUTTON VALUE FOR CURRENT PLAYER FOR LAST FRAME. DON'T SAVE
-GSTIM
-        *=*+1           ;GAME SELECT TIMER -- COUNTS DOWN TO 0. DON'T SAVE
-
-OLDPB6
-        *=*+1           ;OLD SWCHB VALUE, 0=>NORMAL, <>0=>SETUP (BIT 6 ONLY). DON'T SAVE
-ILEGAL
-        *=*+1           ;>0 => MAKE ILLEGAL MOVE SOUND. DON'T SAVE
-ATIM
-        *=*+1           ;ATTRACT MODE TIMER -- COUNTS UP. DON'T SAVE
-GFLG2
-        *=*+1           ;0=>ATTRACT  <> 0 => NOT ATTRACT. DON'T SAVE
-BLNKTM
-        *=*+1           ;FRAME COUNTER FOR VBLANK AFTER CALCULATION(DOWN TO 0). DON'T SAVE
-SNDTIM
-        *=*+1           ;TIMER FOR SOUNDS (COUNTS DOWN TO 0). DON'T SAVE
-FREEZE
-        *=*+1           ;TIMER FOR FREEZE AFTER HUMAN MOVE (0=END OF FREEZE)
-COLSQ
-        *=*+1           ;SQUARE COLOR FOR KERNEL
-
-
-FROM
-        *=*+1           ;FROM SQUARE FOR "SCORE" . DON'T SAVE
-TOSQR
-        *=*+1           ;TO SQUARE FOR "SCORE". DON'T SAVE
-SCP0
-        *=*+1           ;GAME # FOR "SCORE". SAVE
-SCP1
-        *=*+1           ;# OF PLAYERS FOR "SCORE". DON'T SAVE
-
-
-;                       F8-FF ARE USED FOR STACK (4 LEVELS DEEP FOR NOW)
-
-        ELSE
-
 ;                       VARIABLES (RAM PAGE ZERO)
         SEG.U Variables
         ORG $80
@@ -571,14 +269,14 @@ T8
 
 ACTIVE
         ds 1           ;ACTIVE OR CURRENT PLAYER (HUMAN=0, COMPUTER=$80). A-B & MAIN
-DEPTH
+DEPTH                  ;(ram_BC)
         ds 1           ;CURRENT DEPTH OF TREE SEARCH. A-B & SET UP BY MAIN
 
 JMPSQR
         ds 1           ;SQUARE # FOR PIECE BEING JUMPED. A-B
 INDEX
         ds 1           ;CURRENT OFFSET INDEX (0-3). A-B
-FRSMOV
+FRSMOV                 ;(ram_BF)
         ds 1           ;$80 => FIRST MOVE (MAY BE MULTIPLE JUMP). A-B
 ;       B7=1 => FIRST MOVE, B6=1 => FIRST MOVE AT THIS LEVEL, BETTER MOVE FOUND
 XMOVE
@@ -597,17 +295,12 @@ JMPLST
         ; ds JMPLEN      ;SQUARES FOR PIECES JUMPED BY COMPUTER, <0 => KING. A-B & MAIN
         ds 3
 JMPEND
+
 ;
-;       THE FOLLOWING ALPHA-BETA "STACK" OVERLAP THE MAIN PROGRAM VARS WHICH
-;       ARE LISTED LAST.  THEY ALSO OVERLAP JMPLST WITH THE EXCEPTION OF THE FIRST 3 BYTES.
+; THE FOLLOWING ALPHA-BETA "STACK" OVERLAP THE MAIN PROGRAM VARS WHICH
+; ARE LISTED LAST.  THEY ALSO OVERLAP JMPLST WITH THE EXCEPTION OF THE FIRST 3 BYTES.
 
-
-        .IF     STACK
-AX=*
-        ORG $180
-        .ENDIF          ;ALLOW FOR BIGGER STACK IF DEBUG
-
-FROMT
+FROMT                  ;(ram_C8)
         ds MAXMAX      ;FROM(I-1) = FROM SQUARE FOR DEPTH I. A-B
 ;       B7=1 => FIRST MOVE, B6=1 => FIRST MOVE AT THIS LEVEL, BETTER MOVE FOUND
 OTHER
@@ -619,14 +312,10 @@ ALPHAH
         ds MAXMAX+1+1  ;ALPHAH(I) = ALPHA(DEPTH)/256. A-B
 ALPEND
 
-        .IF     STACK
-        ORG AX
-        .ENDIF
-
 ABSTACK = JMPLST+JMPLEN
 
 ;
-;                       THE FOLLOWING VARS OVERLAP THE ALPHA-BETA "STACK" AND T4-SCRRPF:
+; THE FOLLOWING VARS OVERLAP THE ALPHA-BETA "STACK" AND T4-SCRRPF:
 ;
 
 COLP0 = ABSTACK + 0     ;COLOR OF P0 (ATTRACT ADDED IN)
@@ -674,27 +363,12 @@ SCP1 = ABSTACK + 41    ;# OF PLAYERS FOR "SCORE". DON'T SAVE
 
 ;                       F8-FF ARE USED FOR STACK (4 LEVELS DEEP FOR NOW)
 
-        ENDIF
-
 ;----------------------------------
 
 
 ;                               SCORE KERNEL (TOP LINE OF CHARS)
-        IF ASSEMBLER = ASM_ATARI
-        *=ROMSTR
-        ELSE
         SEG Bank0
         ORG ROMSTR
-        ENDIF
-
-        .IF     PRNT
-        IF ASSEMBLER = ASM_ATARI
-        *=$E000                 ;RELOCATE IF DEBUG TO MAKE ROOM FOR MORE CODE
-        ELSE
-        ORG $E000
-        ENDIF
-        JMP     PSTART
-        .ENDIF
 
 JMPBAK
         LDX     #5-1            ;5 BYTES PER CHARACTER
@@ -919,12 +593,6 @@ INLP    STA     0,X             ;CLEAR HARDWARE REGISTERS AND RAM
 
         DEX                     ;$FF
         TXS                     ;INIT STACK PTR
-
-        .IF     PRNT
-        STA     PRFLG           ;0 -- CLEAR PRINT FLAGS IF DEBUG
-        STA     PRDEP
-        STA     PRCNT
-        .ENDIF
 
         INC     GAMNO           ;1
 
@@ -1206,10 +874,6 @@ STUP35
 ;
 ;       OUT OF SETUP (SETUP -> NORMAL)
 ;
-        .IF     PRNT
-        JSR     PRBRD
-        .ENDIF
-
         JSR     TONORM          ;MAKE SURE WE'RE NOT IN ATTRACT MODE
         LDX     GAMNO
         CPX     #PLAY2          ;TWO-PLAYER GAME?
@@ -1280,13 +944,6 @@ ALPHBETA
 ;
 ;       CHANGE COLORS IF TIMER UP
 ;
-        .IF     PRNT
-        LDA     INPT5           ;IS RIGHT JOYSTICK BUTTON PRESSED?
-        BMI     AB05            ;NO.
-        JSR     PAK             ;YES.  INPUT NEW PRFLG FROM TI FOR DEBUG
-
-        .ENDIF
-
 ;
 ;       CHECK RESET SWITCH (DON'T CHECK GAME SELECT)
 ;
@@ -1517,7 +1174,11 @@ ABRET2
         LDX     DEPTH
 
         LDA     FROMT-1,X
-        AND     #$EF
+
+        ; BUGFIX[f3ca]: AND #$EF -> AND #$3F
+        ; AND     #$EF
+        AND     #$3F
+
         STA     FROMB
         LDA     OTHER-1,X
         AND     #MLT
@@ -1579,19 +1240,6 @@ PRNJMP
 ;       NEXT LEVEL CONTNUED MULTIPLE JUMP -- MOVE BETA & NEW ALPHA BACK
 ;
 WASJ10
-        .IF PRNT
-        LDA     PRFLG
-        AND     #$80            ;FLAG SET?
-        BEQ     SKIP1           ;NO.
-        TXA                     ;YES.  SAVE X AND PRINT "MULTIPLE JUMP" MESSAGE
-        PHA
-        LDA     #MJ
-        JSR     BLECCH
-        PLA                     ;RESTORE X
-        TAX
-SKIP1
-        .ENDIF
-
         LDA     ALPHAL,X        ;MOVE BETA
         STA     ALPHAL-1,X
         LDA     ALPHAH,X
@@ -1608,6 +1256,9 @@ SKIP1
         JSR     RESTR4          ;YES.  LEAVE FRSMOV AS IS.  RESTORE OTHER JUNK
         JMP     ABD2            ;GOTO PRUNE
 NEW50
+        ; BUGFIX[f43b]: The next line, LDA ram_C7,x | b5 c7" is NOT in the
+        ; printout, but is in the "standard" ROM.
+        LDA     JMPLST+2,X
 
         BIT     FRSMOV          ;FIRST MOVE? (NEXT LEVEL)
         BPL     SKIP2           ;NO.  BETTER MOVE?
@@ -1620,16 +1271,15 @@ NEW50
 WASJ17
         JSR     JMPSV2
 
-        .IF     PRNT
-        LDA     PRFLG
-        AND     #$40
-        BEQ     SKIP2
-        LDA     #MJBA           ;"MULTIPLE JUMP - FIRST MOVE & BETTER ALPHA"
-        JSR     BLECCH
-        .ENDIF
+        ; BUGFIX[f446]: The next line, " LDA ram_BF | a5 bf" is NOT in the
+        ; printout, but is in the "standard" ROM.
+        LDA FRSMOV
 
 SKIP2
-        JSR     RESTR4          ;SET UP PIECE,MSTJMP,MLTJMP,RESTORE BOARD
+        ; BUGFIX[f448]: "JSR RESTR4" -> JSR RESTR6"
+        ; JSR     RESTR4          ;SET UP PIECE,MSTJMP,MLTJMP,RESTORE BOARD
+        JSR     RESTR6
+
         JMP     CONT1           ;SKIP ALPHA CHECKING AND DO NEXT INDEX
 
 
@@ -1677,20 +1327,6 @@ FH5
         LDA     T0              ;NEW VALUE = ALPHA?
         BNE     FH6             ;NO.  FORGET THIS MOVE
 
-        .IF     PRNT
-        LDA     PRFLG
-        AND     #$02
-        BEQ     SKIP7
-        LDY     DEPTH
-        CPY     PRDEP
-        BCS     SKIP7           ;DON'T PRINT IF DEPTH>=PRDEP
-
-        LDA     #RAN            ;"RANDOM"
-        JSR     OUTAL3
-        LDX     DEPTH
-SKIP7
-        .ENDIF
-
         LDA     FRAME           ;SUM IS 0  -- USE NEW VALUE AT "RANDOM"
         TAY                     ;MOVE OLD FRAME VALUE TO Y AND COMPUTE NEW VALUE
         BNE     FRAQ
@@ -1721,14 +1357,6 @@ NEW40
 ;       NEW VALUE WAS WORSE THAN THE OLD ALPHA.
 ;
 FH6
-        .IF     PRNT
-        LDA     PRFLG
-        AND     #$20
-        BEQ     SKIP3
-        LDA     #WA             ;"WORSE ALPHA"
-        JSR     BLECCH
-SKIP3
-        .ENDIF
         JMP     CONT1
 ;
 ;       IF ALPHA >= BETA THEN PRUNE TREE -- OPPONENT WOULD NEVER LET US PICK THIS MOVE
@@ -1767,16 +1395,6 @@ FHQ
         STA     FRSMOV
 
 
-        .IF     PRNT
-        BMI     FHBLEC          ;BRANCH IF FIRST MOVE
-        LDA     PRFLG
-        AND     #$10
-        BEQ     SKIP4
-        LDA     #BANFM          ;"BETTER ALPHA - NOT FIRST MOVE"
-        JSR     BLECCH
-SKIP4
-        JMP     CONT1
-        .ENDIF
         BPL     CONT1           ;IF NOT DEBUG THEN BRANCH IF NOT FIRST MOVE
 FHBLEC
         LDA     #0              ;FIRST MOVE => CLEAR PRUNE FLAG & COUNTER
@@ -1789,15 +1407,6 @@ FH21
         STA     JMPI
 
         JSR     JMPSV2          ;SAVE MOVE IN JMPLST
-
-        .IF     PRNT
-        LDA     PRFLG
-        AND     #$08
-        BEQ     SKIP5
-        LDA     #BAFM           ;"BETTER ALPHA - FIST MOVE"
-        JSR     BLECCH
-SKIP5
-        .ENDIF
 
 
 ;----------------------------------
@@ -1855,15 +1464,6 @@ AB30
 ;
 ;       DONE WITH ALL SQUARES -- RETURN
 ABD2
-        .IF     PRNT            ;WE COME HERE FOR PRUNING
-        LDA     PRFLG
-        AND     #$04
-        BEQ     SKIP6
-        LDA     #PRUNE          ;"PRUNE"
-        JSR     BLECCH
-SKIP6
-        .ENDIF
-
         ASL     PRNCNT          ;SET PRUNE FLAG (FOR MULTIPLE JUMPS)
         SEC
         ROR     PRNCNT
@@ -1981,9 +1581,6 @@ RSV2
         INY                     ;1
         STY     MOVFLG          ;DISPLAY COMPUTER'S MOVE
 
-        .IF     PRNT
-        JSR     PRMOVE          ;PRINT MOVE ON TI
-        .ENDIF
         RTS
 
 
@@ -1993,13 +1590,6 @@ RSV2
 
 NOCHCK
 ;                               CHECK JOYSTICK BUTTON -- SET UP MODE?
-        .IF     PRNT
-        LDA     INPT5           ;IS RIGHT JOYSTICK BUTTON PUSHED?
-        BMI     JOY2            ;NO.
-        JSR     PASK            ;YES.  INPUT PRFLG FROM TI
-JOY2
-        .ENDIF
-
         LDA     OLDPB6
         BEQ     JOY11
         LDA     INPT4           ;SETUP MOVE: CHECK PUSHBUTTON
@@ -2022,14 +1612,6 @@ JOYLP
         DEX                     ;NOT FOUND
         BPL     JOYLP           ;CONTINUE
 
-        .IF     PRNT
-        LDA     #$FF
-        STA     PRFLG
-        LDA     #JLERR
-        JSR     OUTMSG          ;PRINT ERROR MESSAGE ON TI
-        JMP     *               ;ERROR (SHOULD NEVER OCCUR)
-        .ENDIF
-
 JOY9
         LDA     HPIECE          ;MODIFY PIECE COUNT TO REFLECT CHANGE
         CLC
@@ -2044,7 +1626,11 @@ JOY9
         CLC
         ADC     HKTAB,X
         STA     HKING
-        LDA     HKING
+
+        ; BUGFIX[f5e1]: LDA HKING -> LDA RAM_AF
+        ; LDA     HKING
+        LDA     CKING
+
         CLC
         ADC     CKTAB,X
         STA     CKING
@@ -2185,10 +1771,6 @@ TO11
         JSR     MOVCHK          ;RETURN X UNCHANGED.  CAN PIECE JUMP AGAIN?
         BCS     TO51            ;NO.
 ;                               YES.
-        .IF     PRNT
-        JSR     PRMOV2          ;PRINT MOVE IF DEBUG
-        .ENDIF
-
         STX     CURSOR          ;MOVE TO CURSOR
 
         LDA     #JP
@@ -2200,9 +1782,6 @@ TO11
 TO50
         JSR     TOSUB           ;DO STUFF WITH MOVE & PIECE INCLUDING KING CHECK & STORE
 TO51
-        .IF     PRNT
-        JSR     PRMOV2
-        .ENDIF
 
         STX     CURSOR
         JSR     TONORM          ;RETURNS Y=$FF
@@ -2729,11 +2308,6 @@ CLRLP
         DEX
         BPL     CLRLP
 
-        .IF     PRNT
-        LDX     #0
-        STX     PRCNT
-        .ENDIF
-
         STA     AUDV1           ;OFF (0)
 
         LDX     #3              ;CLEAR MORE STUFF -- MOVVAL, MOVFLG, WINSAV, FROMTO
@@ -2850,17 +2424,6 @@ JMPWIN
         STA     MLTJMP
         JSR     JMPCHK          ;CHECK FOR JUMPS & ANY MOVES
         BNE     JMPRTN          ;CAN MOVE
-
-        .IF     PRNT            ;CAN'T MOVE -- OTHER PLAYER WINS
-        LDA     PRFLG
-        BEQ     PRSKIP
-        JSR
-CRLF
-        LDA     #GAMOVR         ;DISPLAY "GAME OVER" ON TI IF DEBUG
-        JSR     OUTMSG
-        JSR     PRBRD
-PRSKIP
-        .ENDIF
 
         INC     WINSAV
         LDA     #$80
@@ -3053,7 +2616,10 @@ IED10
 ;                               CONVERT BINARY IN A TO DECIMAL IN A
         LDY     #0
 IEDLP1
-        CMP     #$10
+        ; BUGFIX[fabe]: CMP #$10-> CMP #$0A
+        ; CMP     #$10
+        CMP     #$0A
+
         BCC     IED20           ;0-9 => DONE
         SBC     #10
         INY
@@ -3330,7 +2896,11 @@ JUMPL
         ROL
         TAY
         JSR     JUMP1
-        BCS     JUMP4           ;BRANCH IF DONE
+
+        ; BUGFIX[fbcb]: BCS JUMP4 -> BCS JUMPR
+        ; BCS     JUMP4           ;BRANCH IF DONE
+        BCS     JUMPR
+
         DEC     T2
         BPL     JUMPL           ;CONTINUE
 JUMPR
@@ -3526,7 +3096,11 @@ DISLP2
         TXA                     ;SAVE INTERNAL SQUARE #
         PHA
         JSR     XIE1            ;CONVERT INTERNAL SQUARE # TO EXTERNAL
-        TAX
+
+        ; BUGFIX[fcb3] TAX -> TXA
+        ; TAX
+        TXA
+
         LSR                     ;COMPUTE ROW
         LSR
         SEC
@@ -4003,19 +3577,8 @@ MOVCLR
 ;               1/2,1/3,1/4,1/5,1/6,1/7
 RANTAB  .BYTE   $80,$55,$40,$33,$2B,$25
 
+        ; Memory up to FF00 (start of DATA) will be filled with 0's.
 
-        .BYTE   0               ;EXTRA BYTE
-        .IF     PAL-1
-        .BYTE   0,0,0,0,0,0,0,0 ;MORE EXTRA BYTES IF NOT PAL
-
-
-        .BYTE   0,0,0,0,0,0,0
-
-
-        .ENDIF
-
-        .IF     PRNT
-AD=*
         .ENDIF
 
 
@@ -4023,11 +3586,7 @@ AD=*
 
 
 ;               DATA
-        IF ASSEMBLER = ASM_ATARI
-        *=ROMSTR+$F00
-        ELSE
-        ORG ROMSTR+$F00
-        ENDIF
+        ORG ROMSTR+$F00,0
 ;                               BOARD CHARACTERS (IN UPSIDE DOWN ORDER)
 BRDCHR
         ;EMPTY 0*LINCHR
@@ -4121,11 +3680,7 @@ NXTAB   .BYTE   CMPKNG,CMPCHK,HUMKNG,HUMCHK     ;EMPTY
 ;
 ;       FIRST 0 IS PART OF NXTAB
 ;       SELECT BY DETERMINING 32,32,33,34 OR 3,2,1,0
-
-
-;----------------------------------
-
-
+;
 BAKTAB  .BYTE   0*2,1*2,1*2,3*2,1*2,6*2,2*2,6*2,1*2,3*2,4*2,5*2,1*2,6*2,4*2,6*2
 
 JOYTAB  .BYTE   5,9,6,$A                ;JOYSTICK READINGS FOR DIAGONAL MOVEMENT.
@@ -4284,419 +3839,20 @@ SOUND2
 SOUND3
         STA     AUDF0
         STX     AUDV0
-        STX     AUDC0
+
+        ; BUGFIX[fff3]: STX AUDC0 -> STY AUDC0
+        ; STX     AUDC0
+        STY     AUDC0
+
         RTS
 
-        .BYTE   0,0             ;EXTRA BYTES
-
-        .BYTE   0,0,0,0         ;MORE EXTRA BYTES
-
-
-
-        IF ASSEMBLER = ASM_ATARI
-        *=ROMSTR+$FFC
-        ELSE
-        ORG ROMSTR+$FFC
-        ENDIF
+        ORG ROMSTR+$FFC,0
 
         .WORD   PSTART          ;START VECTOR
         .BYTE   0,0             ;EXTRA BYTES
 
-
 ;----------------------------------
-
-
-;
-;       THE FOLLOWING CODE IS FOR DEBUGGING ONLY.
-;       IT IS NOT TO BE INCLUDED IN THE FINAL CARTRIDGE.
-;       THESE SUBROUTINES USE THE KIM MONITOR ROUTINES TO PRINT VARIOUS
-;       INFORMATION ON THE TI TERMINAL CONNECTED TO THE DEVELOPMENT SYSTEM.
-;
-        .IF     PRNT
-        *=AD
-
-        *=*-1/256+1/256
-;
-;       PRMOVE -- PRINT FROMB-TOSQRB
-;
-PRMOVE
-        LDX     PRFLG           ;PRINT FLAG SET?
-        BEQ     PRRTN           ;NO. DON'T PRINT
-        DEC     PRCNT           ;PRINT 10 MOVES TO THE LINE
-        BPL     PRMV10
-        JSR     CRLF
-        LDA     #10-1
-        STA     PRCNT
-PRMV10
-        LDX     FROMB           ;YES.
-        JSR     IEDSP           ;PRINT FROM SQUARE #
-        JSR     PRTBYT
-;
-;       PRTO -- PRINT TO SQUARE
-;
-PRTO
-        LDA     PRFLG           ;PRINT FLAG SET?
-        BEQ     PRRTN           ;NO. DON'T PRINT
-        LDA     #'-             ;YES. PRINT '-'
-        JSR     OUTCH
-        LDX     TOSQRB          ;PRINT TO
-        TXA
-        BMI     PROT1           ;SKIP IF TO = BLANK (AA) OR JP (BB)
-        JSR     IEDSP           ;CONVERT FROM INTERNAL TO EXTERNAL NUMBERING
-PROT1
-        JSR     PRTBYT
-        JMP     OUTSP
-
-PRRTN
-        RTS
-;
-;       PRBRD -- PRINT ENTIRE BOARD & OTHER INFO
-;
-PRBRD
-        LDA     PRFLG           ;PRINT FLAG SET?
-        BEQ     PRRTN           ;NO. DON'T PRINT
-        LDA     #0              ;YES. TURN OFF SOUND, IF ANY
-        STA     AUDV0
-        JSR     CRLF            ;YES. PRINT CR
-
-        LDA     #GAMMSG         ;PRINT "GAME NUMBER ="
-        JSR     OUTAL3
-        LDA     GAMNO
-        JSR     PRTBYT
-        JSR     CRLF
-
-        LDA     #BLKMSG         ;"COMPUTER IS DARK"
-        LDX     COLCMP
-        CPX     #DARK
-        BEQ     AXB
-        LDA     #WHMSG          ;"COMPUTER IS WHITE"
-AXB
-        JSR     OUTMSG          ;PRINT MSG WITH CR
-        LDX     #B112           ;"DARK STARTS ON 1-12" (IF COLOR)
-        LDA     OLDPBQ
-        AND     #8
-        BNE     AXC             ;COLOR
-        LDX     #W112           ;B/W "WHITE STARTS ON 1-12"
-AXC
-        TXA
-        JSR     OUTMSG          ;PRINT MSG WITH CR
-        LDA     #TOPLFT         ;"TOP LEFT SQUARE IS"
-
-        JSR     OUTMS2          ;PRINT MSG WTIHOUT CR
-        LDX     #34
-        JSR     IEDSP           ;COMPUTE TOP LEFT SQUARE # IN EXTERNAL FORM
-        JSR     PRTBYT
-
-        JSR     CRLF            ;PRINT BOARD
-        LDX     #34
-        JSR     PR2ROW
-        JSR     PR2ROW
-        JSR     PR2ROW
-        JSR     PR2ROW
-PRBD70
-        JMP     CRLF
-
-;
-;       PR2ROW -- PRINT 2 ROWS AND DECREMENT X
-;
-PR2ROW
-        JSR     BL2             ;2 BLANK SPACES
-        JSR     PRROW
-        JSR     PRROW
-        DEX
-        RTS
-;
-;       BL2 -- PRINT TWO SPACES
-;
-BL2
-        TXA
-        PHA
-        JSR     OUTSP
-        JSR     OUTSP
-        PLA
-        TAX
-        RTS
-;
-;       PRROW -- PRINT ONE ROW (4 PIECES) & CR
-;
-PRROW   JSR     PRPIEC
-        JSR     BL2
-        JSR     PRPIEC
-        JSR     BL2
-        JSR     PRPIEC
-        JSR     BL2
-        JSR     PRPIEC
-        TXA
-        PHA
-        JSR     CRLF
-        PLA
-        TAX
-        RTS
-;
-;       PRPIEC -- PRINT ONE PIECE (OR -- IF EMPTY)
-;
-PRPIEC  TXA
-        PHA
-        LDA     BOARD,X
-        BNE     PRP10
-        LDA     #'-             ;EMPTY
-        JSR     OUTCH
-        LDA     #'-
-        JSR     OUTCH
-        JMP     PRP40
-PRP10
-        PHA                     ;NOT EMPTY
-        LDX     #'
-        TAY
-        BMI     PRP20           ;COMPUTER -- PRINT SPACE
-        LDX     #'H             ;HUMAN -- PRINT "H"
-PRP20
-        TXA
-        JSR     OUTCH
-        LDX     #'1
-        PLA
-        AND     #$7F
-        CMP     #KING           ;CHECKER = 1
-        BNE     PRP30           ;KING = 2
-        INX
-PRP30
-        TXA
-        JSR     OUTCH
-PRP40
-        PLA
-        TAX
-        DEX
-        RTS
-;
-;       OUTMS2 -- PRINT STRING AT MESSAG/256*256+A ON TI WITH NO CR
-;
-OUTMS2
-        LDY     PRFLG           ;PRINT FLAG SET?
-        BEQ     PRRTN2          ;NO. DON'T PRINT
-        TAX
-        LDA     T0              ;SAVE T0,T0+1
-        PHA
-        LDA     T0+1
-        PHA
-        STX     T0              ;MESSAGE ADR LSB
-        LDA     #MESSAG/256     ;MESSAGE ADR MSB
-        STA     T0+1
-        JSR     OUTM3
-        TAX
-        PLA                     ;RESTORE T0,T0+1
-        STA     T0+1
-        PLA
-        STA     T0
-        TXA
-PRRTN2
-        RTS
-;
-;       OUTMSG -- SAME AS OUTMS2 EXCEPT DO CR
-;
-OUTMSG
-        LDY     PRFLG
-        BEQ     PRRTN2
-        JSR     OUTMS2
-        JMP     CRLF
-;
-;       PRMB -- INPUT:  Y=LSB OF ADDR OF MESSAGE TO BE PRINTED
-;                       X=ADDR OF RAM PAGE ZERO VAR TO BE PRINTED
-;               OUTPUT: X RESTORED, A,Y MODIFIED
-;
-PRMB
-        TXA
-        PHA
-        TYA
-        JSR     OUTMS2
-        PLA
-        PHA
-        JSR     PRTBYT
-        JSR     OUTSP
-        PLA
-        TAX
-        RTS
-;
-;       BLECCH -- CALL OUTALP, THEN PRALL
-;
-BLECCH
-        LDY     DEPTH
-        CPY     PRDEP
-        BCS     PRRTN2
-        JSR     OUTALP
-;
-;       PRALL -- PRINT A BUNCH OF JUNK FOR ALPHA-BETA PRUNING DEBUG
-;
-PRALL
-        JSR     PRMOVE
-        LDX     DEPTH
-        LDY     #QDEPTH
-        JSR     PRMB
-        LDX     ACTIVE
-        LDY     #QACTIVE
-        JSR     PRMB
-        JSR     OUTSP
-
-        LDX     DEPTH
-        LDA     ALPHAH-1,X
-        JSR     PRTBYT
-        LDX     DEPTH
-        LDA     ALPHAL-1,X
-        JSR     PRTBYT
-        JSR     OUTSP
-
-        LDX     DEPTH
-        LDA     ALPHAH,X
-        JSR     PRTBYT
-        LDX     DEPTH
-        LDA     ALPHAL,X
-        JSR     PRTBYT
-        JSR     OUTSP
-
-        LDX     DEPTH
-        LDA     ALPAH+1,X
-        JSR     PRTBYT
-        LDX     DEPTH
-        LDA     ALPHAL+1,X
-        JSR     PRTBYT
-        JSR     OUTSP
-
-        JSR     CRLF
-        LDA     PRDEP
-        CMP     #4
-        BCC     PRA20
-        LDX     DEPTH
-        CPX     #2
-        BEQ     PRA10
-        CPX     #1
-        BNE     PRA20
-        JSR     CRLF            ;2 SPACES IF LEVEL 1
-PRA10
-        JSR     CRLF            ;1 SPACE IF LEVEL 2
-PRA20
-        RTS
-;
-;       OUTAL3 -- OUTPUT MSG A WITHOUT CR
-;
-OUTAL3
-        LDY     #MJ/256
-        STA     T0
-        STY     T0+1
-;
-;       OUTM3 -- MESSAGE PRINTING LOOP
-;
-OUTM3
-        LDY     #0
-        TYA
-        PHA
-OUTM10
-        LDA     (T0),Y
-        BEQ     OUTM20          ;END OF MESSAGE IS INDICATED BY A 0 BYTE
-        JSR     OUTCH
-        PLA
-        TAY
-        INY
-        TYA
-        PHA
-        BNE     OUTM10          ;JMP
-OUTM20
-        PLA
-        RTS
-;
-;       OUTALP -- OUTPUT MESSAGE A WITH CR
-;
-OUTALP
-        JSR     OUTAL3
-        JMP     CRLF
-;
-;       PASK -- INPUT NEW PRFLG AND PRDEP FROM TI
-;
-PASK
-        LDA     #1
-        STA     PRFLG
-        JSR     CRLF
-        LDA     #PRMSG
-        JSR     OUTMS2
-        JSR     GETBYT
-        PHA
-        JSR     CRLF
-        LDA     #PRDMSG
-        JSR     OUTMS2
-        JSR     GETBYT
-        STA     PRDEP
-        PLA
-        STA     PRFLG
-        JMP     CRLF
-;
-;       PRMOV2 -- SIMILAR TO PRMOVE
-;
-PRMOV2
-        LDA     CURSOR
-        STA     FROMB
-        LDA     PRFLG
-        AND     #$FE            ;DO CR'S IF PRINTING ALPHA-BETA JUNK
-        BEQ     JOY800
-        JSR     CRLF
-        JSR     CRLF
-        JSR     PRMOVE
-        JSR     CRLF
-        JSR     CRLF
-        LDX     MOVE
-        RTS
-JOY800
-        JSR     PRMOVE
-        LDX     MOVE
-        RTS
-        .PAGE
-
-        *=*-1/256+1*256         ;GO ON TO NEXT PAGE BOUNDARY
-MESSAG
-PRMSG   .BYTE "ENTER PRFLG?",0
-PRDMSG  .BYTE "ENTER PRDEP?",0
-GAMOVR  .BYTE "GAME OVER",0
-BLKMSG  .BYTE "COMPUTER IS DARK",0
-WHMSG   .BYTE "COMPUTER IS WHITE",0
-B112    .BYTE "DARK STARTS ON 1-12",0
-W112    .BYTE "WHITE STARTS ON 1-12",0
-TOPLFT  .BYTE "TOP LEFT SQUARE IS ",0
-        .PAGE
-JLERR   .BYTE "JOYLP ERROR",0
-QDEPTH  .BYTE "DEPTH=",0
-QINDEX  .BYTE "INDEX=",0
-QALPHA  .BYTE "ALPHA(DEPTH)=",0
-QBETA   .BYTE "ALPHA(DEPTH-1)=",0
-QALP1   .BYTE "ALPHA(DEPTH+1)=",0
-QHPIECE .BYTE "HPIECE=",0
-QCPIECE .BYTE "CPIECE=",0
-QACTIVE .BYTE "ACTIVE=",0
-        .PAGE
-
-        *=*-1/256+1*256
-MJ      .BYTE "MULTIPLE JUMP ",0
-MJBA    .BYTE "FRSMOV & BETTER ALPHA",0
-WA      .BYTE "WORSE ALPHA",0
-PRUNE   .BYTE "PRUNE",0
-BANFM   .BYTE "BETTER ALPHA NOT FRSMOV",0
-        .PAGE
-GAMMSG  .BYTE "GAME NUMBER=",0
-RAN     .BYTE "RANDOM ",0
-
-
-
-        *=*-1/256+1/256
-;
-;       PRINTING VARS FOR DEBUG
-;
-PRCNT
-        *=*+1                   ;COUNT OF NUMBER OF MOVES PRINTED ON A LINE
-PRFLG
-        *=*+1                   ;PRINTING FLAG
-PRDEP
-        *=*+1                   ;MAX DEPTH TO BE PRINTED+1
-        .ENDIF
-
         .END
-
-
 ;----------------------------------
 
 
