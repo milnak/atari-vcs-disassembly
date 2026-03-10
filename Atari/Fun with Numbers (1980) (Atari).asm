@@ -36,15 +36,944 @@
 ; dasm '.\Basic Math.asm' -f3 -o'Basic Math.a26' -l'Basic Math.lst' -s'Basic Math.sym' -v1 -S -R
       processor 6502
 
-; NOTES:
-; Pointers to "Graphics" ORG:
-; $(D4)
-; $(D6)
-; $(D8)
-; $(DA)
-; $(DC)
-; $(DE)
-; $(E0)
+
+; ----------------------------------------------------------------------------
+; Quick Reference
+
+; ## One-Page Cheat Sheet
+;
+; ### RAM Variables (Most Important)
+; $84       Current score (BCD: $00-$99)
+; $89       Current digit being selected (0-9, wraps to 0)
+; $8C       Game running flag (0=not playing, non-zero=active)
+; $B0-$B1   First problem operand
+; $B3       Second problem operand
+; $B4       Expected answer
+; $BE-$C5   Player-entered answer (6 bytes)
+; $C4,X     Current digit at index X
+; $CA       Graphics lookup index
+; $CC       Reset debounce counter
+; $CD       Game mode (0-7)
+; $D4-$E0   Graphics pointers (high bytes, low filled dynamically)
+;
+; ### Hardware Registers (Video/Audio)
+; $00       VSYNC     (Vertical sync control)
+; $01       VBLANK    (Vertical blank control)
+; $02       WSYNC     (Wait for scanline sync)
+; $08       COLUPF    (Playfield color)
+; $09       COLUBK    (Background color)
+; $0D-$0F   PF0,PF1,PF2 (Playfield graphics)
+; $15-$16   AUDC0,AUDC1 (Audio waveform)
+; $17-$18   AUDF0,AUDF1 (Audio frequency)
+; $19-$1A   AUDV0,AUDV1 (Audio volume)
+; $0280     SWCHA     (Read joystick)
+; $0282     SWCHB     (Read console switches)
+; $0284     INTIM     (Read timer value)
+; $0295     TIM8T     (Set timer /8)
+;
+; ### Joystick Bit Pattern (SWCHA)
+; Player 0 (left controller):
+; Bit 4: UP     (1=not pressed, 0=pressed)
+; Bit 5: DOWN   (1=not pressed, 0=pressed)
+; Bit 6: LEFT   (1=not pressed, 0=pressed)
+; Bit 7: RIGHT  (1=not pressed, 0=pressed)
+;
+; ### Console Switches (SWCHB)
+; Bit 0: RESET  (1=not pressed, 0=pressed)
+; Bit 1: SELECT (1=not pressed, 0=pressed)
+; Bit 6: P0 DIFFICULTY (1=Pro/A, 0=Beginner/B)
+; Bit 7: P1 DIFFICULTY (1=Pro/A, 0=Beginner/B)
+;
+; ### Key Instruction Patterns
+; ; Clear zero page ($00-$FF)
+; LDX #$00
+; TXA
+; ClrLoop: STA $0,X
+;         INX
+;         BNE ClrLoop
+;
+; ; Wait for timer
+; WaitTimer: LDA INTIM
+;           BNE WaitTimer
+;
+; ; Add 1 using BCD
+; SED
+; SEC
+; LDA $84
+; ADC #$01
+; STA $84
+; CLD
+;
+; ; Test joystick for RIGHT movement
+; LDA #%00100000
+; BIT SWCHA
+; BPL RightPressed    ; Branch if bit 7 clear (right)
+;
+; ### Main Code Sections
+; START (LF000)      → Initialize CPU, clear zero page
+; LF021              → Main loop: frame sync, graphics load, render
+; LF09A              → Graphics rendering loop
+; LF1B9              → Input processing and game state
+; LF255              → Game select handling
+; LF332              → Game logic and scoring
+; LF478              → Reset audio/clear variables
+; LF4A1              → BCD arithmetic operations
+; Graphics (LF6E8)   → Bitmap data for digits
+;
+; ### Game Flow
+; 1. Initialize (START)
+;    ↓
+; 2. Main Loop (LF021)
+;    ├─ Frame sync (VSYNC/VBLANK)
+;    ├─ Load graphics into pointers
+;    ├─ Render 192 scanlines
+;    ├─ Process input (joystick)
+;    ├─ Check for game reset
+;    └─ Repeat
+;
+; If reset pressed: → GAMERESET
+;    ├─ Clear scores
+;    ├─ Clear sounds
+;    └─ Restart game
+;
+; ### Input Processing Flow
+; Read SWCHA (joystick register)
+;     ↓
+; Mask for Player 0 bits (4-7)
+;     ↓
+; Compare to all-released state ($F0)
+;     ├─ If bits show movement:
+;     │  ├─ LEFT (bit 6 clear)  → $89 decremented
+;     │  └─ RIGHT (bit 7 clear) → $89 incremented
+;     │
+;     └─ If no movement:
+;        └─ Wait for next input
+;
+; Wrap: $89 counts 0→1→2...9→0→1...
+;
+; ### Score Tracking
+; Stored as BCD in $84-$85:
+;   $85 = $00 (always zero, hundreds placeholder)
+;   $84 = $00-$99 (actual score in decimal)
+;
+; Examples:
+;   Score 0:  $84=$00
+;   Score 5:  $84=$05
+;   Score 10: $84=$10 (1 in tens, 0 in ones)
+;   Score 42: $84=$42
+;
+; To increment by 1:
+;   SED; SEC; LDA $84; ADC #$01; STA $84; CLD
+;
+; ### Graphics System
+; Graphics ROM at $F7xx contains bitmaps for digits 0-9
+;
+; 1. Read from Graphics table
+; 2. Value is index into graphics ROM
+; 3. Multiply by 8 (shift left 3 bits)
+; 4. Store in graphics pointer ($D6-$E0)
+; 5. During rendering: LDA ($D6),Y → read bitmap byte
+; 6. Write to PF0/PF1/PF2 registers
+; 7. Repeat for each scanline
+;
+; ### Video Timing (NTSC)
+; 262 scanlines per frame @ 60 Hz = 16.67 ms per frame
+;
+; 0-2:     VSYNC (vertical sync)
+; 3-36:    VBLANK (setup, CPU works, TIA doesn't draw)
+; 37-228:  VISIBLE (CPU draws playfield during this 192 scanlines)
+; 229-261: VBLANK (cleanup)
+;
+; Each scanline: 64 CPU cycles @ 3.58 MHz
+; Use WSYNC to sync CPU with scanline boundaries
+;
+; ### Common 6502 Patterns
+; ; Countdown loop (X=N to 0)
+; LDX #$05
+; LoopLabel: (operation)
+;           DEX
+;           BPL LoopLabel      ; Loop while X≥0
+;
+; ; Rotate right to test bit 0 (RESET in SWCHB)
+; ROR SWCHB
+; BCC ResetPressed            ; Branch if bit 0 was 1 (Carry clear)
+;
+; ; Indirect address
+; LDA ($D4),Y                 ; Load from address in $D4-$D5, offset by Y
+;
+; ; Decimal arithmetic
+; SED                         ; Enable BCD mode
+; LDA #$05                    ; $05 (decimal 5)
+; ADC #$01                    ; Add 1 (BCD)
+; STA $84                     ; Result: $06 (decimal 6)
+; CLD                         ; Back to binary mode
+;
+; ### Debugging Tips
+; ; Find where a variable changes
+; 1. Set breakpoint on write in Stella debugger
+;    → Watch $84 (score) changes
+; 2. Step through code to trace execution
+; 3. Monitor RAM display to see state updates
+; 4. Use list file (game.lst) to find addresses
+;
+; ; Understand screen display
+; 1. Set breakpoint at LF09A (rendering loop start)
+; 2. Watch $89 as user moves joystick
+; 3. See how $D6-$E0 change during frame
+; 4. Trace PF0/PF1/PF2 writes during scanlines
+;
+; ; Audio debugging
+; 1. Breakpoint when AUDF0 written
+; 2. Monitor AUDV0 volume changes
+; 3. Count cycles between audio updates
+;
+; ### Assembly Testing
+; ; Assemble the file
+; dasm '.\Fun with Numbers (1980) (Atari).asm' -f3 \
+;      -o'output.a26' -l'output.lst' -s'output.sym'
+;
+; Options:
+;   -f3      : Output format (raw binary for 2600)
+;   -o'file' : Output file
+;   -l'file' : List file (for debugging)
+;   -s'file' : Symbol file (for emulator)
+;   -v1      : Verbose mode
+;   -S       : Address display
+;
+; ; Test in emulator
+; 1. Open output.a26 in Stella
+; 2. Run with debugger enabled
+; 3. Compare to reference ROM
+;
+; ### Video Display Layout
+; Left Side          Center              Right Side
+; (Player Score)     (= Sign)           (Problem #)
+;
+; Playfield (40 pixels):
+;
+; PF0 (4px)  PF1 (8px)  PF2 (8px)  [mirror pattern]
+; ┌───┬──────────┬──────────┬──────────┬──────────┐
+; │   │          │          │          │          │
+; │   │ Digits   │ Symbols  │ Digits   │ Mirror   │
+; │   │          │          │          │          │
+; └───┴──────────┴──────────┴──────────┴──────────┘
+;
+; ### Game Modes
+; Modes 1-4: Player selects first number
+;            Computer selects second number
+;            Player solves for answer
+;
+; Modes 5-8: Computer selects both numbers
+;            Player solves for answer
+;
+; Difficulty controls timer (enable/disable) and time limit (12s/24s)
+;
+; ---
+;
+; ## Reverse Engineering Checklist
+;
+; Before modifying code:
+; - [ ] Understand what the section does (Architecture doc)
+; - [ ] Identify which RAM variables it uses (Memory Map)
+; - [ ] Trace where those variables come from and go to
+; - [ ] Check what other functions depend on those variables
+; - [ ] Assemble with `dasm` to verify syntax
+; - [ ] Test in Stella emulator
+; - [ ] Compare binary output to ensure unchanged
+;
+; ---
+;
+; ## Emergency Reference
+;
+; **I need to find where the score is updated:**
+; → Search for `$84` writes in editor
+; → Usually: `LDA $84` + `ADC #$01` + `STA $84` with SED/CLD
+;
+; **I need to find input handling:**
+; → Look for `SWCHA` reads
+; → Usually: `LDA SWCHA` + `AND` + `BIT` or `CMP`
+; → Check around line 776-820
+;
+; **I need to understand a specific address:**
+; → Check Memory Map in Analysis doc
+; → $80-$8F: Game state
+; → $B0-$C5: Problem data
+; → $D4-$E0: Graphics pointers
+;
+; **The game isn't displaying correctly:**
+; → Check WSYNC / TIM8T usage
+; → Verify VBLANK setup at frame start
+; → Check PF0/PF1/PF2 writes timing
+; → Use Stella debugger to trace rendering
+;
+; **Audio not playing:**
+; → Check AUDV0 isn't zeroed out
+; → Verify AUDC0 waveform set
+; → Check AUDF0 frequency value set
+; → Look for muting at end (AUDV0=#$00)
+
+; -----------------------------------------------------------------------------
+; Disassembly Analysis
+
+; ## Overview
+; Fun with Numbers is an educational Atari 2600 game where players cycle through digits (0-9) using the joystick to fill in math problems. The game features 8 modes with varying difficulty levels controlled by the console's difficulty switches.
+;
+; ## Key Game Mechanics
+;
+; ### Game Modes
+; - **Modes 1-4**: Player selects first number, computer chooses second number
+; - **Modes 5-8**: Both numbers chosen by computer
+;
+; ### Difficulty Switches
+; - **RIGHT DIFFICULTY switch** (A/B): Enables/disables timer
+; - **LEFT DIFFICULTY switch** (A/B):
+;   - Modes 1-4: Chooses 12 or 24 second time limit
+;   - Modes 5-8: Single digit (12s) vs two-digit (24s) problems
+;
+; ### Scoring
+; - 1 point per correct answer
+; - 10 rounds per game
+; - Score display after game ends
+;
+; ## Memory Map & Variables
+;
+; ### Graphics Pointers ($D4-$E1)
+; These RAM addresses hold high bytes for graphics data addresses. The low byte is filled dynamically during rendering:
+; - `$D4`, `$D6`: Graphics pointer 1
+; - `$D8`: Graphics pointer 2
+; - `$DA`: Graphics pointer 3 (also labels as GRAPHICS)
+; - `$DC`: Graphics pointer 4
+; - `$DE`: Graphics pointer 5
+; - `$E0`: Graphics pointer 6
+;
+; ### Game State Variables ($80-$AB)
+; | Address | Purpose |
+; |---------|---------|
+; | `$80` | Player input flag (0=no input, non-zero=input active) |
+; | `$81` | Game state flag |
+; | `$82` | Debounce counter |
+; | `$83` | Difficulty/mode setup flag |
+; | `$84` | Score (BCD, ones/tens place) |
+; | `$85` | Score (BCD, hundreds place) |
+; | `$86` | Round counter (BCD format using SED/CLD) |
+; | `$87` | Answer validation timer |
+; | `$88` | Input processing state |
+; | `$89` | Current selected digit (0-10) - cycles through displayed numbers |
+; | `$8A` | Player index or mode counter |
+; | `$8B` | Screen rendering control |
+; | `$8C` | Game active flag (0=not started/ended, non-zero=game running) |
+; | `$8D` | Screen drawing loop counter |
+; | `$8E` | Operation type counter (addition/subtraction/etc) |
+; | `$8F` | Carry/borrow flag for BCD arithmetic |
+; | `$90` | Animation/rendering frame counter |
+;
+; ### Operand & Answer Storage ($B0-$C9)
+; | Address | Purpose |
+; |---------|---------|
+; | `$B0` | First operand (left number) |
+; | `$B1` | First operand high byte |
+; | `$B2-$B7` | Generated problem data |
+; | `$C0-$C5` | Player-entered answer (6 digits stored as bytes) |
+;
+; ### Rendering Variables ($CA-$E0)
+; | Address | Purpose |
+; |---------|---------|
+; | `$CA` | Graphics table index |
+; | `$CB` | Input debounce timer |
+; | `$CC` | Reset debounce counter |
+; | `$CD` | Current game mode (0-7) |
+; | `$CE` | Score display buffer |
+; | `$CF` | Problem number display |
+;
+; ### Audio/Animation Variables ($A0-$A9)
+; | Address | Purpose |
+; |---------|---------|
+; | `$A0` | Answer display timer |
+; | `$A1` | Answer validation state |
+; | `$A2` | Sound duration counter |
+; | `$A3` | Sound effect state |
+; | `$A4` | Sound frequency table pointer |
+; | `$A5` | Flash/animation counter |
+; | `$A6` | Sound busy flag |
+; | `$A7` | Sound frequency/control |
+; | `$A8` | Sound note counter |
+; | `$A9` | Sound volume/duration |
+;
+; ## Code Sections
+;
+; ### Section 1: Initialization (LF000-LF027)
+; **Purpose**: CPU setup, zero page clearing, basic initialization
+;
+; START:
+;   SEI                 ; Disable interrupts
+;   LDX #$FF            ; Set stack pointer to top of stack
+;   TXS
+;   CLD                 ; Disable BCD mode (enabled selectively later)
+;
+;   ; Zero out entire zero page ($00-$FF)
+;   ; This clears TIA registers, RAM, and graphics pointers
+; ZeroZP:
+;   LDA #$00
+;   STA $00,X
+;   INX
+;   BNE ZeroZP
+;
+;   JSR LF478           ; Initialize sound (zero audio variables)
+;
+; **Key Points**:
+; - All zero page is cleared, including TIA hardware registers
+; - This resets all graphics, colors, audio to neutral state
+; - Graphics pointers in $D4-$E1 are set to base address
+;
+; ### Section 2: Frame Timing & Synchronization (LF021-LF093)
+; **Purpose**: Establishes video frame timing for proper screen drawing
+;
+; LF021: LDA #$04
+;        SBC $8D
+;        STA $8D          ; Counter for frame drawing iterations
+;
+; LF027: LDA #$BA         ; Timer value (186 in decimal)
+;        STA WSYNC        ; Wait for horizontal blank
+;        STA TIM8T        ; Set timer for /8 clock interval (6.7 µs per cycle)
+;        JSR LF4A1        ; BCD arithmetic operation
+;        JSR WaitForTimerDone
+;
+; **Video Timing**:
+; - NTSC: 262 scanlines/frame @ 60 Hz
+; - PAL: 312 scanlines/frame @ 50 Hz
+; - Timer values chosen to maintain synchronization with video output
+;
+; ### Section 3: Main Game Loop (LF09A-LF589)
+; **Purpose**: Core rendering loop that draws screen and processes game state
+;
+; LF09A: STA PF0         ; Clear playfield registers
+;        STA PF1
+;        STA PF2
+;
+;        LDY $8D         ; Load loop counter
+;        LDA ($D4),Y     ; Read from graphics table pointer
+;        CMP #$CA        ; Check if end of graphics data
+;        BCC LF0AB       ; If not at end, process graphics
+;        JMP LF021       ; Loop back to frame sync
+;
+; **Graphics Loading** (LF0AB-LF498):
+; - Loads graphics table entries (6 bytes per digit)
+; - Each byte is shifted left 3 bits (×8) to create memory offsets
+; - Stores offsets in $D6-$E0 for use during scanline rendering
+; - This allows rapid graphics lookups during real-time screen drawing
+;
+; ### Section 4: Input Processing (LF1B9-LF327)
+; **Purpose**: Read joystick, handle game reset, manage number cycling
+;
+; LF1B9: LDY #$00
+;        ROR SWCHB        ; Rotate to test bit 0 (RESET switch)
+;        BCC GAMERESET    ; Branch if RESET pressed (bit was 0)
+;
+;        LDA $CC          ; Check reset debounce
+;        BEQ LF1EE        ; If zero, check other inputs
+;
+; GAMERESET:
+;        ; Reset game state and reinitialize
+;        INC $CC          ; Set debounce flag
+;        JSR LF478        ; Clear sounds
+;        JSR LF658        ; Clear scores
+;
+; **Joystick Number Cycling** (LF2CB-LF312):
+; - Reads SWCHA register for joystick position
+; - Bit patterns indicate left/right/up/down
+; - Current digit in $89 is incremented/decremented (0-9 wrapping)
+; - $C4,X stores the current player's digit selection
+;
+; ### Section 5: Game Logic & Scoring (LF332-LF3E0)
+; **Purpose**: Check answers, update scores, manage game progression
+;
+; LF332: LDA $90          ; Load animation counter
+;        BEQ LF38C        ; If zero, skip logic
+;        DEC $90          ; Decrement counter
+;
+;        ; Compare player answer ($BE-$C5) with expected answer ($C4,X)
+; LF36C: LDA $BE,X
+;        CMP $C4,X        ; Player digit matches expected digit?
+;        BNE LF380        ; If not, answer is wrong
+;
+;        ; All digits match - answer correct!
+;        STY $A1          ; Set answer-valid flag
+;        SED              ; Enable BCD mode for decimal arithmetic
+;        SEC              ; Set carry for addition
+;        LDA $84          ; Load score ones/tens
+;        ADC #$01         ; Add 1 point (BCD math)
+;        STA $84
+;        BNE LF382
+;
+; LF380: INC $A1          ; Mark answer incorrect
+;
+; **BCD Arithmetic Note**: The code uses SED/CLD to enable Decimal mode:
+; - In Decimal mode, ADC/SBC treat operands as binary-coded decimal
+; - Allows scoring in human-readable decimal without conversion
+; - Score stored as: $85 = hundreds, $84 = ones/tens
+;
+; ### Section 6: Sound Generation (LF42E-LF466)
+; **Purpose**: Generate beep sounds for input feedback or scoring
+;
+; LF42E: LDA $A8          ; Check if note sequence started
+;        BEQ LF43D        ; If not, initialize
+;        STA $A9          ; Set volume/duration
+;
+; LF434: LDA #%00000100
+;        STA AUDC0        ; Set audio control (noise type)
+;        LDX #$A6
+;        JSR LF47A        ; Clear audio variables
+;
+; LF43D: INC $A8          ; Increment note counter
+;        LDA $A7          ; Check frequency value
+;        BNE LF466        ; If set, use it
+;
+; **Audio Registers Used**:
+; - `AUDC0/AUDC1`: Noise/waveform type selector
+; - `AUDF0/AUDF1`: Frequency divider (lower = higher pitch)
+; - `AUDV0/AUDV1`: Volume level (0=off, 15=max)
+;
+; ### Section 7: Graphics Data (Starts ~LF6E8)
+; **Purpose**: Stores bitmap data for digits 0-9 and symbols
+;
+; **Format**:
+; - Multiple bytes per digit, each byte is one row of the bitmap
+; - Digits are typically 8 pixels tall, 5-6 pixels wide
+; - Each byte represents a column or row of pixel data
+;
+; ## Rendering Pipeline
+;
+; ### 1. Frame Initialization
+; 1. Set VSYNC to signal vertical sync
+; 2. Wait for timer (allows TIA to stabilize)
+; 3. Set VBLANK to prevent drawing during blanking interval
+; 4. Clear TIA registers
+;
+; ### 2. Scanline Drawing Loop
+; For each scanline during the visible area (192 lines for NTSC):
+; 1. Write WSYNC to align to scanline start
+; 2. Update playfield registers (PF0, PF1, PF2) with graphics data
+; 3. Read joystick input (minimal CPU overhead per line)
+;
+; ### 3. Playfield Graphics
+; The three 8-bit playfield registers create a 40-pixel-wide playfield:
+; - **PF0** (bits 4-7): Leftmost 4 pixels
+; - **PF1** (bits 0-7): Middle 8 pixels
+; - **PF2** (bits 0-7): Rightmost 8 pixels
+; - Repeated twice per scanline for full resolution
+;
+; ## Data Flow: Number Display Example
+;
+; 1. **User presses joystick right**
+;    - SWCHA bit 7 read (Player 0 right)
+;    - $89 incremented (current digit 3→4)
+;
+; 2. **Render frame begins**
+;    - Load graphics for digit "4" from graphics ROM
+;    - Copy bitmap bytes into $D6-$E0 pointers
+;
+; 3. **During scanline rendering**
+;    - Each scanline reads from ($D6), ($D8), ($DA)
+;    - Bytes written to PF0, PF1, PF2
+;    - Creates visible digit on screen
+;
+; 4. **When digit matches problem**
+;    - Player pressing button triggers answer check
+;    - BCD arithmetic adds 1 to score in $84
+;    - Sound plays (if enabled)
+;
+; ## Common Patterns
+;
+; ### BCD Arithmetic with SED/CLD
+ssembly
+; SED                 ; Enable decimal mode
+; SEC                 ; Set carry
+; LDA $84             ; Score
+; ADC #$01            ; Add 1 (in decimal)
+; STA $84
+; CLD                 ; Disable decimal mode
+;
+; ### WSYNC/Timer Synchronization
+ssembly
+; LDA #value
+; STA WSYNC           ; Halt CPU until next scanline
+; STA TIM8T           ; Set timer for later sync point
+; JSR SomeFunction    ; Time-dependent code
+; JSR WaitForTimerDone; Wait for timer to expire
+;
+; ### Joystick Input Reading
+ssembly
+; LDA SWCHA           ; Read joystick
+; AND #%11110000      ; Mask for Player 0
+; CMP #%11110000      ; All bits set = no movement
+; BNE ProcessInput    ; Branch if movement detected
+;
+; ## References for Further Study
+;
+; ### Stella Emulator Debugging
+; - **Stella Debugger Commands**: Tools/Stella Debugger Commands.md
+; - Break on address, step through code, monitor RAM/registers
+; - Useful for tracing execution during gameplay
+;
+; ### VCS Hardware
+; - **vcs.h**: Hardware register definitions ($00-$1A TIA, $280-$284 RIOT)
+; - **Playfield Graphics**: PF0/PF1/PF2 create 40-pixel playfield
+; - **Cycle Counting**: Tools/Guide to Cycle Counting.md
+;
+; ### BCD and Audio
+; - **BCD Mode**: 6502 SED/CLD enables decimal arithmetic automatically
+; - **Audio**: Tools/Music And Sound Programming Guide.md
+
+
+; -----------------------------------------------------------------------------
+; Architecture & Data Structures
+
+; ## High-Level Game Flow
+;
+; ┌─────────────────────────────────────────────────────────────┐
+; │                      GAME START (START:)                    │
+; │  - Disable interrupts (SEI)                                 │
+; │  - Initialize stack ($FF)                                   │
+; │  - Clear zero page ($00-$FF) → clears TIA + RAM             │
+; │  - Setup graphics pointers ($D4-$E1)                        │
+; └─────────────────────────────────────────────────────────────┘
+;                             ↓
+; ┌─────────────────────────────────────────────────────────────┐
+; │                  MAIN LOOP (LF021)                          │
+; │  1. Frame Sync: VSYNC, wait, VBLANK setup                   │
+; │  2. Graphics Load: Read graphics table, setup pointers      │
+; │  3. Render: Draw 192 scanlines (NTSC) / 312 (PAL)          │
+; │  4. Input: Read joystick, process number cycling           │
+; └─────────────────────────────────────────────────────────────┘
+;                             ↓
+;                     ┌───────┴────────┐
+;                     ↓                ↓
+;         ┌──────────────────┐  ┌──────────────────┐
+;         │  GAME RUNNING    │  │  RESET PRESSED   │
+;         │  (LF1B9)         │  │  (GAMERESET)     │
+;         │                  │  │                  │
+;         │ - Check input    │  │ - Clear scores   │
+;         │ - Validate ans.  │  │ - Clear sounds   │
+;         │ - Update score   │  │ - Restart        │
+;         └──────────────────┘  └──────────────────┘
+;                     ↓                ↓
+;         ┌──────────────────────────────────────┐
+;         │ CONTINUE MAIN LOOP                   │
+;         └──────────────────────────────────────┘
+;
+; ## Data Structure: Problem Generation
+;
+; ### Problem Storage
+; The game generates math problems dynamically. Two approaches:
+; 1. **User chooses first number** (Modes 1-4)
+; 2. **Computer chooses both** (Modes 5-8)
+;
+; **RAM Layout for Single Problem**:
+; $B0-$B1: First operand (16-bit, BCD format)
+; $B2:     Operation type (0=add, 1=subtract, etc.)
+; $B3:     Second operand
+; $B4:     Expected answer (calculated or provided)
+; $BE-$C5: Player's entered answer (6 bytes, one digit each)
+; $C4:     Current digit being selected (0-9)
+; $C9:     End of answer buffer
+;
+; ### Problem Lifecycle
+; 1. GENERATE phase:
+;    - Compute or provide first operand → $B0
+;    - Compute or provide second operand → $B3
+;    - Compute expected answer → $B4
+;
+; 2. DISPLAY phase:
+;    - Render first operand on screen
+;    - Render operation symbol (+, -, ×, ÷)
+;    - Render second operand
+;
+; 3. INPUT phase:
+;    - Read $89 (current digit) from joystick cycling
+;    - Player cycles digit 0-9 using left/right
+;    - Player presses button to select digit
+;
+; 4. VALIDATE phase:
+;    - Compare player's digits ($BE-$C5) with expected ($B4)
+;    - If match: increment score ($84/$85), play sound
+;    - If wrong: show indication, no points
+;
+; 5. NEXT phase:
+;    - Load next problem
+;    - Repeat (10 rounds per game)
+;
+; ## Data Structure: Screen Display
+;
+; ### Three-Digit Display Example
+; Left Side (Score):        Middle (=):      Right Side (Problem):
+; ┌─────────┐              ┌───────┐        ┌──────────────┐
+; │  Score  │              │   =   │        │ Problem #    │
+; │  (BCD)  │              │       │        │ (0-based)    │
+; │  $84:   │              │       │        │ $CF (BCD)    │
+; │  0-99   │              │       │        │              │
+; └─────────┘              └───────┘        └──────────────┘
+;
+; ### Playfield Graphics Structure
+; 40-pixel playfield divided into 3 registers:
+;
+; ┌───┬──────────────┬──────────────┐
+; │PF0│     PF1      │     PF2      │
+; ├───┼──────────────┼──────────────┤
+; │   │              │              │
+; │4px│    8 pixels  │    8 pixels  │
+; │   │              │              │
+; └───┴──────────────┴──────────────┘
+;
+; Each pixel row requires updating PF0, PF1, PF2 registers.
+; Graphics pointers ($D6-$E0) provide base addresses.
+;
+; ## State Machine: Input Processing
+;
+; ┌─────────────────────────────────────────┐
+; │       SWCHA Joystick Register          │
+; │                                         │
+; │  Player 0 (Left controller):            │
+; │  Bit 4: UP     (0=pressed)              │
+; │  Bit 5: DOWN   (0=pressed)              │
+; │  Bit 6: LEFT   (0=pressed)              │
+; │  Bit 7: RIGHT  (0=pressed)              │
+; └─────────────────────────────────────────┘
+;               ↓ Read $09
+;     ┌─────────┴─────────────┐
+;     ↓                       ↓
+;  PRESSED              NO MOVEMENT
+;     ↓                       ↓
+;  ┌──┴──┬──┬──┐          Continue
+;  ↓     ↓  ↓  ↓          (wait for input)
+; LEFT  RIGHT UP DOWN     ↓
+;  ↓     ↓               [Repeat]
+; DECR  INCR    ↓
+;  $89   $89   [Other]
+;  ↓     ↓
+; WRAP: $89=10→0
+;
+; ## State Machine: Answer Validation
+;
+;                   Player presses fire button
+;                          ↓
+;             Compare 6 digits: $BE[i] vs $C4[i]
+;                   (loop i=0 to 5)
+;                     ↙        ↖
+;               ALL MATCH    MISMATCH
+;                   ↓           ↓
+;             ┌──────────┐  ┌─────────────────┐
+;             │CORRECT!  │  │INCORRECT!       │
+;             └──────────┘  └─────────────────┘
+;                   ↓           ↓
+;             ┌──────────┐  ┌─────────────────┐
+;             │ SED      │  │ SED             │
+;             │ SEC      │  │ SEC             │
+;             │ LDA $84  │  │ LDA $84         │
+;             │ ADC #$01 │  │ ADC #$00        │
+;             │ STA $84  │  │ STA $84         │
+;             │ CLD      │  │ CLD             │
+;             │ PlaySnd  │  │ (no sound)      │
+;             └──────────┘  └─────────────────┘
+;                   ↓           ↓
+;                 Load Next Problem
+;                      ↓
+;                 Rounds < 10? → YES: Repeat
+;                               NO: Game Over
+;
+; ## Video Timing Reference
+;
+; ### Frame Structure (NTSC: 262 scanlines @ 60Hz)
+;
+; Scanline #    Activity              Duration
+; ─────────────────────────────────────────────
+; 0-2          VSYNC                 3 scanlines
+; 3-36         VBLANK (setup)        34 scanlines
+; 37-228       VISIBLE SCREEN        192 scanlines
+; 229-261      VBLANK (cleanup)      33 scanlines
+; ─────────────────────────────────────────────
+; Total Frame                         262 scanlines
+; Frame Duration: 262/60 Hz ≈ 16.67 ms per frame
+;
+; ### CPU-to-Video Synchronization
+;
+; Instruction       Clock Cycles    Scanline Duration
+; ────────────────────────────────────────────────
+; 6502 CPU          3.58 MHz
+; One scanline      1/60 Hz
+; 64 CPU cycles     per scanline
+;
+; WSYNC             Waits until next horizontal blank
+;                   Ensures code starts at scanline boundary
+;                   Allows predictable cycle timing
+;
+; TIM8T             Divides clock by 8
+;                   $BA × 8 cycles ≈ 416 μs
+;                   Allows waiting without WSYNC
+;
+; ## Graphics Table Format
+;
+; The Graphics table (at $F7xx in ROM) is structured as a sequence of 8-byte graphics definitions:
+;
+; Graphics Table Structure:
+; ┌─────────────────────────────────────┐
+; │ Byte 0: Character 0 metadata        │
+; │ Byte 1: Character 0 metadata        │
+; │ ...                                 │
+; │ Byte 47: Character 15 metadata      │
+; │                                     │
+; │ (Continue with graphics data)       │
+; │                                     │
+; │ (...): Bitmap data for each digit   │
+; │ (...): One byte per scanline row    │
+; └─────────────────────────────────────┘
+;
+; Each byte loaded from Graphics table is shifted left 3 bits (×8):
+; - Creates an offset into graphics ROM
+; - Combined with graphics pointer high byte to form full address
+; - Low byte used as index into bitmap data
+;
+; ### Graphics Lookup in Rendering
+;
+; 1. Read from Graphics table: LDA ($D4),Y
+;    → Gets metadata byte for current frame segment
+;
+; 2. Multiply by 8: ASL, ASL, ASL
+;    → Creates ROM offset
+;
+; 3. Store in graphics pointer: STA $E0
+;    → High byte already set; low byte now contains index
+;
+; 4. During rendering:
+;    LDA ($E0),Y    ; Load graphics byte at offset Y
+;    STA PF2        ; Display on playfield register
+;
+; ## Audio System Overview
+;
+; ### Audio Registers
+; AUDC0/AUDC1  $15-$16   Audio waveform/noise type
+; AUDF0/AUDF1  $17-$18   Frequency divider
+; AUDV0/AUDV1  $19-$1A   Volume (0=off, 15=max)
+;
+; ### Sound Generation Pattern
+; 1. SELECT TONE (AUDC):
+;    LDA #%00000100     ; Waveform bits
+;    STA AUDC0
+;
+; 2. SET FREQUENCY (AUDF):
+;    LDA frequency_table,X
+;    STA AUDF0
+;
+; 3. SET VOLUME (AUDV):
+;    LDA #$08           ; Medium volume
+;    STA AUDV0
+;
+; 4. HOLD (timer or loop):
+;    (wait N frames)
+;
+; 5. TURN OFF:
+;    LDA #$00
+;    STA AUDV0          ; Mute by zeroing volume
+;
+; ### Frequency Table Example
+; The code contains sound frequency values that produce different pitches:
+; - Correct answer: high frequency (happy beep)
+; - Incorrect answer: low frequency (sad beep)
+; - Game over: descending sequence
+;
+; ## Score Tracking (BCD Format)
+;
+; ### Why BCD?
+; Binary-Coded Decimal allows easy human-readable display without conversion:
+; - Each byte = two decimal digits
+; - Ones place in low nibble (0-9)
+; - Tens place in high nibble (0-9)
+;
+; ### Score Storage
+; $84-$85: Score in BCD
+;          $85 = $00 (hundreds placeholder, usually unused)
+;          $84 = $00-$99 (score 00-99 in decimal)
+;
+; Examples:
+;  Score 0:   $84 = $00
+;  Score 5:   $84 = $05
+;  Score 10:  $84 = $10 (1 in tens place, 0 in ones)
+;  Score 42:  $84 = $42 (4 in tens place, 2 in ones)
+;  Score 99:  $84 = $99 (maximum)
+;
+; ### BCD Arithmetic Example
+; ; Enable decimal mode, add 1 to score:
+; SED            ; Set Decimal flag
+; SEC            ; Set Carry (required for +1)
+; LDA $84        ; Load score
+; ADC #$01       ; Add 1 (automatic BCD adjustment)
+; STA $84        ; Store updated score
+; CLD            ; Return to binary mode
+;
+; Execution:
+;   $84 = $05 → ADD 1 → $84 = $06  ✓
+;   $84 = $09 → ADD 1 → $84 = $10  ✓ (automatic tens carry)
+;   $84 = $99 → ADD 1 → $84 = $00 + Carry
+;
+; ## Difficulty Switch Configuration
+;
+; ### Two Hardware Switches
+; Each switch has two positions (A and B) on the Atari VCS console:
+;
+; RIGHT DIFFICULTY switch (bit 6 of SWCHB):
+;   A position (bit 6 = 1): Timer ENABLED
+;   B position (bit 6 = 0): Timer DISABLED
+;
+; LEFT DIFFICULTY switch (bit 7 of SWCHB):
+;   A position (bit 7 = 1): ?
+;   B position (bit 7 = 0): ?
+;
+; The code reads SWCHB at specific points to adjust:
+; - Time limit (12 seconds vs 24 seconds)
+; - Problem difficulty (single vs multi-digit)
+; - Game mode speed
+;
+; Example from code:
+ssembly
+; LDA SWCHB
+; AND #%01000000     ; Mask bit 6 (RIGHT difficulty)
+; BNE handle_pro     ; If 1 (A position), expert mode
+; ; Otherwise, beginner mode
+;
+; ---
+;
+; ## Performance Considerations
+;
+; ### Cycle-Critical Sections
+; These parts must complete within specific cycle budgets:
+; 1. **Scanline rendering** (64 cycles/scanline)
+; 2. **Input processing** (done during VBLANK to avoid display glitches)
+; 3. **Graphics lookup** (must complete before next PF update)
+;
+; ### Non-Critical Sections
+; These can take variable time (done in VBLANK or during VBLANK-safe operations):
+; 1. Score calculations
+; 2. Problem generation
+; 3. State management
+; 4. Audio setup
+;
+; ### Memory Considerations
+; - 128 bytes of zero-page RAM is shared with hardware registers
+; - TIA registers ($00-$1F) must be managed carefully
+; - Graphics pointers use most of zero page ($80-$E0+)
+; - Limited room for data structures; efficient use is critical
+;
+; ---
+;
+; ## Common VCS Programming Patterns Used
+;
+; 1. **Zero-page accumulator addressing**: `STA $0,X` for efficient loops
+; 2. **Indirect addressing for graphics**: `LDA ($D6),Y` for bitmap lookup
+; 3. **BIT instruction**: Tests bits without modifying accumulator
+; 4. **BCD mode for scores**: `SED`/`CLD` for decimal display
+; 5. **WSYNC for timing**: Every scanline starts synchronized
+; 6. **Self-modifying code**: Optional (not heavily used here)
+; 7. **Lookup tables**: Graphics, sounds, game logic
+
 
 ; ----------------------------------------------------------------------------
 ; ASSEMBLER SWITCHES
