@@ -59,3 +59,7 @@ To compile distella on Windows, open a Visual Studio Developer command prompt an
 
 A distella [configuration file](https://github.com/johnkharvey/distella/blob/master/README.md) (see "Config File
 " section) can give distella hints as how to interpret the binary.
+
+## References
+
+[Stella Programmer's Guide (9/14/2001 version)](https://alienbill.com/2600/101/docs/stella.html)
