@@ -87,6 +87,23 @@ Stella includes debugging tools (debugger commands in `Tools/Stella Debugger Com
 
 Files in `Not Matched/` assemble successfully but their output binary does not match any entry in the Stella emulator ROM database.
 
+### Byte-Preserving Disassembly Work
+
+Before annotating an existing disassembly, assemble the current working copy with `-f3` and keep its ROM as a baseline outside the repository. Preserve existing contributor edits. After changing labels, comments or data representation, assemble again and compare every output byte, not just file size or successful assembly.
+
+- Preserve instruction order, addressing modes (`.w`, `.wy`), branch placement, delay instructions and indexed zero-page wraparound. Equivalent-looking code can change graphics timing.
+- Classify data by how the code consumes it: sound scripts and lookup tables are not pixel graphics. Tables may deliberately share bytes.
+- Distinguish a match against the pre-edit source from an independently verified cartridge/database hash. Do not claim emulator testing unless performed.
+- Document inferred meanings and unresolved behavior explicitly rather than presenting guesses as completed analysis.
+
+`Atari\Space Invaders (1980) (Atari).asm` is an annotated, self-contained example with companion `.md` and `.cfg` files. It needs no include path:
+
+```powershell
+dasm "Atari\Space Invaders (1980) (Atari).asm" -f3 -ospaceinv.a26 -lspaceinv.lst -sspaceinv.sym
+```
+
+Its 4096-byte output has SHA-256 `7224b17462b992d67f4e06a3c85f269c9822b06df6015bf038b55f384ced0301`. See its companion documentation for the baseline provenance, RAM overlays, frame scheduling, graphics and sound.
+
 ## Architecture & Key Concepts
 
 ### Hardware Registers (vcs.h)
@@ -111,7 +128,7 @@ The VCS hardware interface is defined in `include/vcs.h`. Key registers include:
 - **INTIM** ($0284): Interval timer read
 - **TIM64T** ($0296): Set 64-cycle interval timer
 
-Read-side TIA registers start at offset $30 (e.g., CXM0P = $30). Set `TIA_BASE_READ_ADDRESS = $30` before including `vcs.h` when reassembling a DiStella disassembly so the binary matches the original ROM exactly.
+TIA read and write registers share addresses but have different meanings. Name reads as collision/input registers rather than their write aliases (for example, `LDA CXP0FB`, not `LDA WSYNC`). Preserve the exact read-address mirror encoded by the original ROM. Some disassemblies require `TIA_BASE_READ_ADDRESS = $30`; Space Invaders instead uses the low mirrors (`CXP0FB=$02`, `CXP1FB=$03`, `INPT4=$0C`, `INPT5=$0D`). Changing to a hardware-equivalent mirror changes the ROM bytes.
 
 ### Memory Model
 
@@ -122,12 +139,14 @@ The Atari 2600 has extreme hardware constraints:
 
 ### Frame Structure
 
-Every frame consists of three phases, each timed with `TIM64T`/`INTIM`:
+A conventional NTSC frame has four phases; actual cartridges may use different timer budgets, visible heights and scheduling:
 
 1. **VSYNC** (3 scanlines): Assert `VSYNC` bit, then clear
 2. **VBLANK** (37 scanlines): Game logic runs here while the screen is blank
 3. **Kernel** (192 scanlines NTSC / 228 PAL50): Write TIA registers per-line to draw the screen
 4. **Overscan** (30 scanlines): Additional game logic time
+
+Trace the cartridge's actual timer loads and `WSYNC` placement instead of replacing them with this template. Space Invaders also uses `TIM8T` for a short post-display logic budget.
 
 ### Game Structure
 
@@ -139,11 +158,13 @@ The `Tools/Game Standards and Procedures.md` document defines industry standards
 - **Controller Input**: Joystick, fire button, Select, and Reset switches
 - **Pause Mode**: Triggered by Color/B&W switch; freezes video and audio
 
+These are standards to consult, not features guaranteed in every original cartridge. For example, Space Invaders uses Color/B&W to select its palette, not to pause.
+
 ## Key Conventions
 
 ### Assembly File Organization
 
-Every file begins with:
+Many manually labeled files use this organization (preserve self-contained or differently structured originals):
 1. `processor 6502`
 2. Compile switches (NTSC/PAL, feature flags)
 3. `include vcs.h` and `include macro.h`
@@ -201,13 +222,13 @@ COMPILE_REGION          = NTSC      ; 0=NTSC, 1=PAL50, 2=PAL60
 Additional common switches:
 - `NO_ILLEGAL_OPCODES = 1` — disable illegal 6502 opcodes in macros
 - `COPYRIGHT_ROM = TRUE/FALSE` — include/exclude the copyright screen
-- `TIA_BASE_READ_ADDRESS = $30` — offset for TIA read registers (required for exact ROM reproduction)
+- `TIA_BASE_READ_ADDRESS = $30` — TIA read mirror used by some ROMs; retain the original encoded addresses
 
 ### Disassembly Styles
 
 There are two distinct styles in this repo:
 
-**DiStella-generated** (e.g., `Space Invaders`, older `Defender II` parts):
+**DiStella-generated** (e.g., older `Defender II` parts):
 - Wide column spacing, minimal comments, inlined register equates at the top
 - Header comment with metadata: date, DiStella version, command line, `.cfg` contents
 - Graphics regions appear as raw `.byte` dumps with ASCII art pixel comments
@@ -218,17 +239,19 @@ There are two distinct styles in this repo:
 - `TIA_BASE_READ_ADDRESS = $30` set before `vcs.h` include
 - vcs.h/macro.h version checks with `err` to abort on incompatible versions
 
+Space Invaders retains its DiStella provenance and address-based local labels, but now has descriptive routine/table labels, declared RAM, inline analysis and companion documentation.
+
 ### DiStella `.cfg` Files
 
 Each DiStella disassembly has a companion `.cfg` file that classifies memory regions. Format:
 
 ```
-GFX  $FB FE  $FD66    ; graphics data
-CODE $F000   $FBFD    ; executable code
-DATA $FFFA   $FFFF    ; data (e.g., vectors)
+GFX  FC00 FCD5
+CODE F000 FBFD
+DATA FFFA FFFF
 ```
 
-Directives: `GFX` (pixel data shown with ASCII art), `CODE` (disassembled as instructions), `DATA` (disassembled as `.byte`).
+Directives: `GFX` (pixel data shown with ASCII art), `CODE` (disassembled as instructions), `DATA` (disassembled as `.byte`). The example uses unprefixed hexadecimal, inclusive addresses. Classify sound and lookup tables as `DATA`; see the Space Invaders `.cfg` for a complete ROM partition.
 
 DiStella can be compiled from source with MSVC:
 ```
@@ -242,11 +265,12 @@ cl -DAPP_VERSION="3.02-SNAPSHOT" -DAPP_COMPILE="2024-12-10" distella.c /link /ou
 - Inline cycle counts as comments (e.g., `STA WSYNC ;0`, `LDA #$82 ;2`)
 - `ALIGN 256` used before lookup tables that must not cross a page boundary (a page crossing costs an extra cycle)
 - Cycle counting is critical for timing; see `Tools/Guide to Cycle Counting.md`
+- Distinguish base instruction cycles from cumulative scanline timing. Space Invaders' score loop deliberately takes a branch page-crossing cycle; do not relocate or align existing kernels casually.
 - Sound/music programming uses AUDC0/AUDC1, AUDF0/AUDF1, AUDV0/AUDV1 registers; see `Tools/Music And Sound Programming Guide.md`
 
 ### Include Files
 
-- **vcs.h**: Hardware register address definitions (version 1.05+). Required by all projects.
+- **vcs.h**: Hardware register address definitions (version 1.05+). Many projects use this; self-contained disassemblies may retain inline equates.
 - **macro.h**: Common assembly macros (version 1.06+). Provides `CLEAN_START`, `VERTICAL_SYNC`, `SLEEP`, `SET_POINTER`.
 - **tia_constants.h**: Named color constants and region constants (`NTSC=0`, `PAL50=1`, `PAL60=2`). Used in newer-style disassemblies.
 - **multisprite3.a**: Pre-written multi-sprite kernel routines (optional).
@@ -298,8 +322,8 @@ When creating or modifying assembly files:
 1. Match the coding style and organization of existing files in the same category
 2. Include proper header comments (game name, author, date, public domain notice for disassemblies)
 3. Set `processor 6502` and compile switches before any includes
-4. Use `TIA_BASE_READ_ADDRESS = $30` when reassembling DiStella output for exact ROM reproduction
+4. Preserve the original TIA read mirrors; use `TIA_BASE_READ_ADDRESS = $30` only when those are the original encoded addresses
 5. Add a `.cfg` file for new DiStella disassembly projects to document code/GFX/data regions
 6. Test assembly output in Stella emulator; confirm the binary matches the known ROM hash
 7. Follow `Game Standards and Procedures.md` for new game implementations
-8. Support both NTSC and PAL compilation via `COMPILE_REGION` or `COMPILE_VERSION` switches
+8. Preserve existing region switches. For new implementations, support NTSC/PAL via `COMPILE_REGION` or `COMPILE_VERSION`; do not invent an unverified PAL conversion during annotation
